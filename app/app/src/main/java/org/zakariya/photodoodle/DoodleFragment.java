@@ -1,11 +1,16 @@
 package org.zakariya.photodoodle;
 
+import android.graphics.Canvas;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import org.zakariya.photodoodle.model.Doodle;
+import org.zakariya.photodoodle.model.LineDoodle;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -19,6 +24,8 @@ public class DoodleFragment extends Fragment {
 	@Bind(R.id.doodleView)
 	DoodleView doodleView;
 
+	LineDoodle doodle;
+
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -30,6 +37,34 @@ public class DoodleFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_doodle, container, false);
 		ButterKnife.bind(this, v);
+
+		doodle = new LineDoodle();
+
+		// this makes doodle consume touch input from doodleView
+		doodleView.setInputDelegate(doodle.inputDelegate());
+
+		// this forwards doodleView's draw() calls to doodle
+		doodleView.setDrawDelegate(new DoodleView.DrawDelegate() {
+			@Override
+			public void draw(Canvas canvas) {
+				doodle.draw(canvas);
+			}
+		});
+
+		// this allows doodle to invalidate doodleView, queueing a draw
+		doodle.setInvalidationDelegate(new Doodle.InvalidationDelegate() {
+
+			@Override
+			public void invalidate() {
+				doodleView.invalidate();
+			}
+
+			@Override
+			public void invalidate(RectF rect) {
+				doodleView.invalidate((int) rect.left, (int) rect.top, (int) rect.right, (int) rect.bottom);
+			}
+		});
+
 		return v;
 	}
 

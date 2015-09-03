@@ -1,19 +1,33 @@
 package org.zakariya.photodoodle;
 
 import android.content.Context;
-import android.graphics.PointF;
+import android.graphics.Canvas;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+
+import org.zakariya.photodoodle.model.Doodle;
 
 /**
  * Created by shamyl on 8/9/15.
  */
 public class DoodleView extends View {
 
+	/**
+	 * DoodleView forwards touch events to a delegate which translates them into appropriate drawing commands for the current drawing operation.
+	 */
+	public interface InputDelegate {
+		boolean onTouchEvent(@NonNull MotionEvent event);
+	}
+
+	public interface DrawDelegate {
+		void draw(Canvas canvas);
+	}
+
 	private static final String TAG = "DoodleView";
+	private InputDelegate inputDelegate;
+	private DrawDelegate drawDelegate;
 
 	public DoodleView(Context context) {
 		super(context);
@@ -24,23 +38,35 @@ public class DoodleView extends View {
 	}
 
 	@Override
+	public void draw(Canvas canvas) {
+		super.draw(canvas);
+		if (drawDelegate != null) {
+			drawDelegate.draw(canvas);
+		}
+	}
+
+	@Override
 	public boolean onTouchEvent(@NonNull MotionEvent event) {
-		PointF point = new PointF(event.getX(),event.getY());
-		switch (event.getAction()) {
-			case MotionEvent.ACTION_DOWN:
-				Log.i(TAG, "ACTION_DOWN @ " + point);
-				break;
-			case MotionEvent.ACTION_MOVE:
-				Log.i(TAG, "ACTION_MOVE @ " + point);
-				break;
-			case MotionEvent.ACTION_UP:
-				Log.i(TAG, "ACTION_UP @ " + point);
-				break;
-			case MotionEvent.ACTION_CANCEL:
-				Log.i(TAG, "ACTION_CANCEL @ " + point);
-				break;
+		if (inputDelegate != null) {
+			return inputDelegate.onTouchEvent(event);
 		}
 
-		return true;
+		return false;
+	}
+
+	public InputDelegate getInputDelegate() {
+		return inputDelegate;
+	}
+
+	public void setInputDelegate(InputDelegate inputDelegate) {
+		this.inputDelegate = inputDelegate;
+	}
+
+	public DrawDelegate getDrawDelegate() {
+		return drawDelegate;
+	}
+
+	public void setDrawDelegate(DrawDelegate drawDelegate) {
+		this.drawDelegate = drawDelegate;
 	}
 }

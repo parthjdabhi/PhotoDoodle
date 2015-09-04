@@ -9,6 +9,6 @@ We don't want to draw the whole set of lines 60 times per second as user moves f
 - on touch up, add final location to stroke (per touch move), perform render of the whole stroke, add it to rendered strokes array, null out the current stroke.
 	- no need to perform another render, since rendering is up
 
-# Development
+# Currently
 
-Currently just want to see if I can effectively compute stroke widths by using timestamps on touch events to compute a "velocity"
+The computed halfSize of each control point varies wildly. It should either get a max value, and/or have a smoothing applied to it

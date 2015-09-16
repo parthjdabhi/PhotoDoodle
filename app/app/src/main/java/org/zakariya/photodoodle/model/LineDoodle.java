@@ -26,6 +26,65 @@ public class LineDoodle extends Doodle {
 
 	private static final float VelocityScaling = 0.05f;
 
+	class Accumulator {
+		float[] values;
+		float current;
+		float accumulator;
+		int size = 0;
+		int index = 0;
+
+		Accumulator(int size, float current) {
+			values = new float[size];
+			this.size = size;
+			this.index = 0;
+			this.accumulator = 0;
+			this.current = current;
+		}
+
+		float add(float v) {
+
+			if (size == 0) {
+
+				//
+				// for zero-size, just pass through
+				//
+
+				current = v;
+				return v;
+			} else if (index < size) {
+
+				//
+				//  We're still filling the buffer
+				//
+
+				values[index++] = v;
+				accumulator += v;
+			} else {
+
+				//
+				//  Buffer is full - round-robin and average
+				//  Subtract oldest value from accumulator
+				//  Replace oldest with newest
+				//  add newest to accumulator
+				//
+
+				accumulator -= values[index % size];
+				values[index++ % size] = v;
+				accumulator += v;
+			}
+			current = accumulator / (float) index;
+			return current;
+		}
+
+		float getCurrent() {
+			return current;
+		}
+
+		boolean isPrimed() {
+			return size <= 0 || index >= size;
+		}
+	}
+
 	/**
 	 * Represents user input. As user drags across screen, each location is recorded along with its timestamp.
 	 * The timestamps can be compared across an array of ControlPoint to determine the velocity of the touch,
@@ -76,6 +135,7 @@ public class LineDoodle extends Doodle {
 				return;
 			}
 
+			Accumulator accumulator = new Accumulator(16,0);
 			ArrayList<InputPoint> points = inputLine.inputPoints;
 
 			// a is the previous point, b is current point, c is next point
@@ -112,6 +172,9 @@ public class LineDoodle extends Doodle {
 						float dpPerSecond = abDir.second / (millis / 1000f);
 						float size = dpPerSecond * VelocityScaling;
 
+						// smooth the size
+						size = accumulator.add(size);
+
 						cp = new ControlPoint(b.position, tangent, size / 2);
 					}
 				}
@@ -126,7 +189,7 @@ public class LineDoodle extends Doodle {
 
 				a = b;
 				b = c;
-				c = (i+2 < N) ? points.get(i+2) : null;
+				c = (i + 2 < N) ? points.get(i + 2) : null;
 			}
 		}
 

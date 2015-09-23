@@ -11,8 +11,11 @@ import android.util.Pair;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
+import org.zakariya.photodoodle.geom.ControlPoint;
+import org.zakariya.photodoodle.geom.InputPoint;
 import org.zakariya.photodoodle.geom.PointFUtil;
 import org.zakariya.photodoodle.geom.RectFUtil;
+import org.zakariya.photodoodle.util.Accumulator;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -25,98 +28,6 @@ public class LineDoodle extends Doodle {
 	private static final String TAG = "LineDoodle";
 
 	private static final float VelocityScaling = 0.05f;
-
-	class Accumulator {
-		float[] values;
-		float current;
-		float accumulator;
-		int size = 0;
-		int index = 0;
-
-		Accumulator(int size, float current) {
-			values = new float[size];
-			this.size = size;
-			this.index = 0;
-			this.accumulator = 0;
-			this.current = current;
-		}
-
-		float add(float v) {
-
-			if (size == 0) {
-
-				//
-				// for zero-size, just pass through
-				//
-
-				current = v;
-				return v;
-			} else if (index < size) {
-
-				//
-				//  We're still filling the buffer
-				//
-
-				values[index++] = v;
-				accumulator += v;
-			} else {
-
-				//
-				//  Buffer is full - round-robin and average
-				//  Subtract oldest value from accumulator
-				//  Replace oldest with newest
-				//  add newest to accumulator
-				//
-
-				accumulator -= values[index % size];
-				values[index++ % size] = v;
-				accumulator += v;
-			}
-			current = accumulator / (float) index;
-			return current;
-		}
-
-		float getCurrent() {
-			return current;
-		}
-
-		boolean isPrimed() {
-			return size <= 0 || index >= size;
-		}
-	}
-
-	/**
-	 * Represents user input. As user drags across screen, each location is recorded along with its timestamp.
-	 * The timestamps can be compared across an array of ControlPoint to determine the velocity of the touch,
-	 * which will be used to determine line thickness.
-	 */
-	class InputPoint {
-		PointF position;
-		long timestamp;
-
-		InputPoint() {
-		}
-
-		InputPoint(float x, float y) {
-			position = new PointF(x, y);
-			timestamp = System.currentTimeMillis();
-		}
-	}
-
-	class ControlPoint {
-		PointF position; // the position of the point
-		PointF tangent; // the normalized tangent vector of the line at this point - points "forward"
-		float halfSize; // the half thickness of the line at this point
-
-		ControlPoint() {
-		}
-
-		ControlPoint(PointF position, PointF tangent, float halfSize) {
-			this.position = position;
-			this.tangent = tangent;
-			this.halfSize = halfSize;
-		}
-	}
 
 	class InputLine {
 		ArrayList<InputPoint> inputPoints = new ArrayList<>();
@@ -135,7 +46,7 @@ public class LineDoodle extends Doodle {
 				return;
 			}
 
-			Accumulator accumulator = new Accumulator(16,0);
+			Accumulator accumulator = new Accumulator(16, 0);
 			ArrayList<InputPoint> points = inputLine.inputPoints;
 
 			// a is the previous point, b is current point, c is next point

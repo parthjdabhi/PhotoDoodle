@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import org.zakariya.photodoodle.model.Doodle;
 import org.zakariya.photodoodle.model.LineDoodle;
+import org.zakariya.photodoodle.model.LineTessellationDoodle;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -24,7 +25,7 @@ public class DoodleFragment extends Fragment {
 	@Bind(R.id.doodleView)
 	DoodleView doodleView;
 
-	LineDoodle doodle;
+	Doodle doodle;
 
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -38,7 +39,7 @@ public class DoodleFragment extends Fragment {
 		View v = inflater.inflate(R.layout.fragment_doodle, container, false);
 		ButterKnife.bind(this, v);
 
-		doodle = new LineDoodle();
+		doodle = new LineTessellationDoodle();
 
 		// this makes doodle consume touch input from doodleView
 		doodleView.setInputDelegate(doodle.inputDelegate());

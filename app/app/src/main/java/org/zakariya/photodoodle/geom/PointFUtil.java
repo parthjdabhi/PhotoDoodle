@@ -14,6 +14,12 @@ public class PointFUtil {
 		return (float) Math.sqrt((dx * dx) + (dy * dy));
 	}
 
+	public static float distance2(PointF a, PointF b) {
+		float dx = b.x - a.x;
+		float dy = b.y - a.y;
+		return (dx * dx) + (dy * dy);
+	}
+
 	public static PointF scale(PointF p, float scale) {
 		return new PointF(p.x * scale, p.y * scale);
 	}

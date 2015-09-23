@@ -30,4 +30,5 @@ public abstract class Doodle {
 	public abstract void setInvalidationDelegate(InvalidationDelegate invalidationDelegate);
 	public abstract InvalidationDelegate getInvalidationDelegate();
 
+
 }

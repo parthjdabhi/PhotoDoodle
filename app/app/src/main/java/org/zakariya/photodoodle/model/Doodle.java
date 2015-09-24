@@ -2,6 +2,7 @@ package org.zakariya.photodoodle.model;
 
 import android.graphics.Canvas;
 import android.graphics.RectF;
+import android.os.Bundle;
 
 import org.zakariya.photodoodle.DoodleView;
 
@@ -30,5 +31,7 @@ public abstract class Doodle {
 	public abstract void setInvalidationDelegate(InvalidationDelegate invalidationDelegate);
 	public abstract InvalidationDelegate getInvalidationDelegate();
 
+	public abstract void onSaveInstanceState(Bundle outState);
+	public abstract void onCreate(Bundle savedInstanceState);
 
 }

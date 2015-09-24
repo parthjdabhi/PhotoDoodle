@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.zakariya.photodoodle.model.Doodle;
-import org.zakariya.photodoodle.model.LineDoodle;
 import org.zakariya.photodoodle.model.LineTessellationDoodle;
 
 import butterknife.Bind;
@@ -31,6 +30,11 @@ public class DoodleFragment extends Fragment {
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
+
+		doodle = new LineTessellationDoodle(getActivity());
+		if (savedInstanceState != null) {
+			doodle.onCreate(savedInstanceState);
+		}
 	}
 
 	@Nullable
@@ -38,8 +42,6 @@ public class DoodleFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_doodle, container, false);
 		ButterKnife.bind(this, v);
-
-		doodle = new LineTessellationDoodle();
 
 		// this makes doodle consume touch input from doodleView
 		doodleView.setInputDelegate(doodle.inputDelegate());
@@ -72,6 +74,7 @@ public class DoodleFragment extends Fragment {
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
+		doodle.onSaveInstanceState(outState);
 		Icepick.saveInstanceState(this, outState);
 	}
 

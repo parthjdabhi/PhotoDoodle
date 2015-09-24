@@ -5,6 +5,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.Pair;
@@ -19,6 +20,8 @@ import org.zakariya.photodoodle.util.Accumulator;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+
+import icepick.Icepick;
 
 /**
  * Created by shamyl on 8/9/15.
@@ -115,6 +118,16 @@ public class LineDoodle extends Doodle {
 	private InvalidationDelegate invalidationDelegate;
 
 	public LineDoodle() {
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		Icepick.saveInstanceState(this, outState);
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		Icepick.restoreInstanceState(this,savedInstanceState);
 	}
 
 	@Override

@@ -14,7 +14,7 @@ import android.view.MotionEvent;
 import org.zakariya.photodoodle.DoodleView;
 import org.zakariya.photodoodle.geom.Circle;
 import org.zakariya.photodoodle.geom.CircleLine;
-import org.zakariya.photodoodle.geom.LineTessellator;
+import org.zakariya.photodoodle.geom.CircleLineTessellator;
 import org.zakariya.photodoodle.geom.PointFUtil;
 
 import java.io.BufferedInputStream;
@@ -24,8 +24,6 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by shamyl on 9/22/15.
@@ -40,11 +38,11 @@ public class LineTessellationDoodle extends Doodle {
 	private Paint linePaint, handlePaint, vectorPaint;
 	private Circle draggingPoint = null;
 	private Context context;
-	private LineTessellator tessellator;
+	private CircleLineTessellator tessellator;
 
 	public LineTessellationDoodle(Context context) {
 		this.context = context;
-		this.tessellator = new LineTessellator();
+		this.tessellator = new CircleLineTessellator();
 
 		linePaint = new Paint();
 		linePaint.setAntiAlias(true);
@@ -74,12 +72,12 @@ public class LineTessellationDoodle extends Doodle {
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		outState.putParcelable("circleLine", circleLine);
+		//outState.putParcelable("circleLine", circleLine);
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		circleLine = savedInstanceState.getParcelable("circleLine");
+		//circleLine = savedInstanceState.getParcelable("circleLine");
 	}
 
 	@Override

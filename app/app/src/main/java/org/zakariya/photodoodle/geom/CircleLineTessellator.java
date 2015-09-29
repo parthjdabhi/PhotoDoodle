@@ -4,53 +4,17 @@ import android.graphics.Canvas;
 import android.graphics.Path;
 import android.support.annotation.Nullable;
 
-import java.util.Arrays;
-import java.util.List;
+import org.zakariya.photodoodle.util.FloatBuffer;
 
 /**
  * Created by shamyl on 9/24/15.
  */
-public class LineTessellator {
-
-	class FloatBuffer {
-		private float buffer[] = null;
-		private int size = 0;
-
-		FloatBuffer() {
-			buffer = new float[256];
-			this.size = 0;
-		}
-
-		FloatBuffer(int initialBufferSize) {
-			buffer = new float[initialBufferSize];
-			this.size = 0;
-		}
-
-		void add(float v) {
-			if (size == buffer.length) {
-				buffer = Arrays.copyOf(buffer, buffer.length * 2);
-			}
-
-			buffer[size++] = v;
-		}
-
-		float get(int i) {
-			return buffer[i];
-		}
-
-		int size() {
-			return size;
-		}
-
-		void clear() {
-			size = 0;
-		}
-	}
+public class CircleLineTessellator {
 
 	private FloatBuffer leftCoordinates;
 	private FloatBuffer rightCoordinates;
 
-	public LineTessellator(){}
+	public CircleLineTessellator(){}
 
 	/**
 	 * Tessellate circles into a Path object suitable for rendering

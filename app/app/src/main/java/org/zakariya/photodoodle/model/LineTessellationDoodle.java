@@ -69,7 +69,6 @@ public class LineTessellationDoodle extends Doodle {
 			points.add(new LinePoint(new PointF(350, 300), 30));
 			points.add(new LinePoint(new PointF(50, 300), 20));
 			points.add(new LinePoint(new PointF(50, 400), 10));
-			computeTangents();
 		}
 	}
 
@@ -139,15 +138,6 @@ public class LineTessellationDoodle extends Doodle {
 			}
 
 			canvas.drawPath(path, handlePaint);
-
-			path = new Path();
-			for (int i = 0; i < points.size(); i++ ) {
-				p = points.get(i);
-				path.moveTo(p.position.x, p.position.y);
-				path.lineTo(p.position.x + p.tangent.x * p.halfSize,p.position.y + p.tangent.y * p.halfSize);
-			}
-
-			canvas.drawPath(path, vectorPaint);
 		}
 
 		tessellator.tessellate(points, null, canvas);
@@ -185,7 +175,6 @@ public class LineTessellationDoodle extends Doodle {
 		if (draggingPoint != null) {
 			draggingPoint.position.x = event.getX();
 			draggingPoint.position.y = event.getY();
-			computeTangents();
 		}
 		getInvalidationDelegate().invalidate(getBoundingRect());
 	}
@@ -194,45 +183,6 @@ public class LineTessellationDoodle extends Doodle {
 		draggingPoint = null;
 		getInvalidationDelegate().invalidate(getBoundingRect());
 		save();
-	}
-
-	private void computeTangents() {
-		if (points.size() < 3) {
-			return;
-		}
-
-		for (int i = 0, N = points.size(); i < N; i++) {
-			if (i == 0) {
-				LinePoint a = points.get(i);
-				LinePoint b = points.get(i + 1);
-				Pair<PointF, Float> dir = PointFUtil.dir(a.position, b.position);
-
-				a.tangent = dir.first;
-			} else if (i == N - 1) {
-				LinePoint b = points.get(i);
-				LinePoint a = points.get(i - 1);
-				Pair<PointF, Float> dir = PointFUtil.dir(a.position, b.position);
-
-				b.tangent = dir.first;
-			} else {
-				LinePoint a = points.get(i - 1);
-				LinePoint b = points.get(i);
-				LinePoint c = points.get(i + 1);
-
-				Pair<PointF, Float> abDir = PointFUtil.dir(a.position, b.position);
-				PointF abPrime = PointFUtil.rotateCCW(abDir.first);
-
-				Pair<PointF, Float> bcDir = PointFUtil.dir(b.position, c.position);
-				PointF bcPrime = PointFUtil.rotateCCW(bcDir.first);
-
-				PointF half = new PointF(abPrime.x + bcPrime.x, abPrime.y + bcPrime.y);
-				if (PointFUtil.length2(half) > 1e-4) {
-					b.tangent = PointFUtil.normalize(PointFUtil.rotateCW(half)).first;;
-				} else {
-					b.tangent = bcPrime;
-				}
-			}
-		}
 	}
 
 	private void save() {

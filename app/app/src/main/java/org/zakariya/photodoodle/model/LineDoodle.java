@@ -33,7 +33,97 @@ public class LineDoodle extends Doodle {
 	private static final float VelocityScaling = 0.05f;
 
 	class InputLine {
-		ArrayList<InputPoint> inputPoints = new ArrayList<>();
+		private ArrayList<InputPoint> points = new ArrayList<>();
+
+		public ArrayList<InputPoint> getPoints() {
+			return points;
+		}
+
+		public int size() {
+			return points.size();
+		}
+
+		public void add(float x, float y) {
+			InputPoint p = new InputPoint(x,y);
+			points.add(p);
+
+			int count = points.size();
+			if (count == 2) {
+				InputPoint a = points.get(0);
+				InputPoint b = points.get(1);
+				a.tangent = PointFUtil.dir(a.position,b.position).first;
+			}
+
+			if (count > 2) {
+				InputPoint a = points.get(count-3);
+				InputPoint b = points.get(count-2);
+				InputPoint c = points.get(count-1);
+
+				Pair<PointF, Float> abDir = PointFUtil.dir(a.position, b.position);
+				PointF abPrime = PointFUtil.rotateCCW(abDir.first);
+
+				Pair<PointF, Float> bcDir = PointFUtil.dir(b.position, c.position);
+				PointF bcPrime = PointFUtil.rotateCCW(bcDir.first);
+
+				PointF half = new PointF(abPrime.x + bcPrime.x, abPrime.y + bcPrime.y);
+				if (PointFUtil.length2(half) > 1e-4) {
+					b.tangent = PointFUtil.normalize(PointFUtil.rotateCW(half)).first;;
+				} else {
+					b.tangent = bcPrime;
+				}
+			}
+		}
+
+		public void finish() {
+			int count = points.size();
+			if (count > 1) {
+				InputPoint a = points.get(count-2);
+				InputPoint b = points.get(count-1);
+				a.tangent = PointFUtil.dir(a.position,b.position).first;
+			}
+		}
+
+		/**
+		 * Analyze the line and compute tangent vectors for each vertex
+		 */
+		public void computeTangents() {
+			if (points.size() < 3) {
+				return;
+			}
+
+			for (int i = 0, N = points.size(); i < N; i++) {
+				if (i == 0) {
+					InputPoint a = points.get(i);
+					InputPoint b = points.get(i + 1);
+					Pair<PointF, Float> dir = PointFUtil.dir(a.position, b.position);
+
+					a.tangent = dir.first;
+				} else if (i == N - 1) {
+					InputPoint b = points.get(i);
+					InputPoint a = points.get(i - 1);
+					Pair<PointF, Float> dir = PointFUtil.dir(a.position, b.position);
+
+					b.tangent = dir.first;
+				} else {
+					InputPoint a = points.get(i - 1);
+					InputPoint b = points.get(i);
+					InputPoint c = points.get(i + 1);
+
+					Pair<PointF, Float> abDir = PointFUtil.dir(a.position, b.position);
+					PointF abPrime = PointFUtil.rotateCCW(abDir.first);
+
+					Pair<PointF, Float> bcDir = PointFUtil.dir(b.position, c.position);
+					PointF bcPrime = PointFUtil.rotateCCW(bcDir.first);
+
+					PointF half = new PointF(abPrime.x + bcPrime.x, abPrime.y + bcPrime.y);
+					if (PointFUtil.length2(half) > 1e-4) {
+						b.tangent = PointFUtil.normalize(PointFUtil.rotateCW(half)).first;;
+					} else {
+						b.tangent = bcPrime;
+					}
+				}
+			}
+		}
 	}
 
 	class ControlPointLine {
@@ -45,12 +135,12 @@ public class LineDoodle extends Doodle {
 
 		// compute a ControlPointLine for an InputLine
 		ControlPointLine(InputLine inputLine) {
-			if (inputLine.inputPoints.size() < 2) {
+			if (inputLine.size() < 2) {
 				return;
 			}
 
 			Accumulator accumulator = new Accumulator(16, 0);
-			ArrayList<InputPoint> points = inputLine.inputPoints;
+			ArrayList<InputPoint> points = inputLine.getPoints();
 
 			// a is the previous point, b is current point, c is next point
 			InputPoint a = null, b = points.get(0), c = points.get(1);
@@ -62,41 +152,26 @@ public class LineDoodle extends Doodle {
 				LinePoint cp = null;
 				if (a == null) {
 					if (b != null && c != null) { // b & c should always be nonnull, just silencing compiler warnings
-						// this is first point in sequence
-						Pair<PointF, Float> dir = PointFUtil.dir(b.position, c.position);
-						cp = new LinePoint(b.position, dir.first, 0);
+						cp = new LinePoint(b.position, 0);
 					}
 				} else if (c == null) {
 					if (b != null) { // b should always be nonnull, just silencing compiler warnings
 						// this is last point in sequence
-						Pair<PointF, Float> dir = PointFUtil.dir(a.position, b.position);
-						cp = new LinePoint(b.position, dir.first, 0);
+						cp = new LinePoint(b.position, 0);
 					}
 				} else {
 					if (b != null) { // b should always be nonnull, just silencing compiler warnings
 						// this is a point in the sequence middle
-						Pair<PointF, Float> abDir = PointFUtil.dir(a.position, b.position);
-						PointF abPrime = PointFUtil.rotateCCW(abDir.first);
-						Pair<PointF, Float> bcDir = PointFUtil.dir(b.position, c.position);
-						PointF bcPrime = PointFUtil.rotateCCW(bcDir.first);
-
-						PointF half = new PointF(abPrime.x + bcPrime.x, abPrime.y + bcPrime.y);
-
-						PointF tangent = null;
-						if (PointFUtil.length2(half) > 1e-3) {
-							tangent = PointFUtil.normalize(PointFUtil.rotateCW(half)).first;;
-						} else {
-							tangent = new PointF(0,0);
-						}
+						float dist = PointFUtil.distance(a.position,b.position);
 
 						long millis = b.timestamp - a.timestamp;
-						float dpPerSecond = abDir.second / (millis / 1000f);
+						float dpPerSecond = dist / (millis / 1000f);
 						float size = dpPerSecond * VelocityScaling;
 
 						// smooth the size
 						size = accumulator.add(size);
 
-						cp = new LinePoint(b.position, tangent, size / 2);
+						cp = new LinePoint(b.position, size / 2);
 					}
 				}
 
@@ -159,13 +234,14 @@ public class LineDoodle extends Doodle {
 		linePaint.setStyle(Paint.Style.STROKE);
 
 		if (currentInputLine != null) {
-			Log.d(TAG, "draw - Will draw currentInputLine with " + currentInputLine.inputPoints.size() + " points");
+			Log.d(TAG, "draw - Will draw currentInputLine with " + currentInputLine.points.size() + " points");
 			Path p = new Path();
-			InputPoint firstPoint = currentInputLine.inputPoints.get(0);
+			ArrayList<InputPoint> points = currentInputLine.getPoints();
+			InputPoint firstPoint = points.get(0);
 			p.moveTo(firstPoint.position.x, firstPoint.position.y);
 
-			for (int i = 1, N = currentInputLine.inputPoints.size(); i < N; i++) {
-				PointF point = currentInputLine.inputPoints.get(i).position;
+			for (int i = 1, N = points.size(); i < N; i++) {
+				PointF point = points.get(i).position;
 				p.lineTo(point.x, point.y);
 			}
 
@@ -194,8 +270,6 @@ public class LineDoodle extends Doodle {
 			linePaint.setColor(0xFFFF0000);
 			p = new Path();
 			for (LinePoint point : line.linePoints) {
-				p.moveTo(point.position.x, point.position.y);
-				p.lineTo(point.position.x + point.tangent.x * point.halfSize, point.position.y + point.tangent.y * point.halfSize);
 				p.addCircle(point.position.x, point.position.y, point.halfSize, Path.Direction.CW);
 			}
 
@@ -225,7 +299,7 @@ public class LineDoodle extends Doodle {
 		boundingRect = new RectF();
 
 		if (currentInputLine != null) {
-			for (InputPoint inputPoint : currentInputLine.inputPoints) {
+			for (InputPoint inputPoint : currentInputLine.points) {
 				if (boundingRect.isEmpty()) {
 					boundingRect.left = inputPoint.position.x;
 					boundingRect.right = inputPoint.position.x;
@@ -269,13 +343,13 @@ public class LineDoodle extends Doodle {
 
 	void onTouchEventBegin(@NonNull MotionEvent event) {
 		currentInputLine = new InputLine();
-		currentInputLine.inputPoints.add(new InputPoint(event.getX(), event.getY()));
+		currentInputLine.add(event.getX(), event.getY());
 	}
 
 	void onTouchEventMove(@NonNull MotionEvent event) {
-		InputPoint lastPoint = currentInputLine.inputPoints.get(currentInputLine.inputPoints.size() - 1);
-		currentInputLine.inputPoints.add(new InputPoint(event.getX(), event.getY()));
-		InputPoint currentPoint = currentInputLine.inputPoints.get(currentInputLine.inputPoints.size() - 1);
+		InputPoint lastPoint = currentInputLine.points.get(currentInputLine.points.size() - 1);
+		currentInputLine.add(event.getX(),event.getY());
+		InputPoint currentPoint = currentInputLine.points.get(currentInputLine.points.size() - 1);
 
 		// invalidate the region containing the last point plotted and the current one
 		RectF dirtyRect = RectFUtil.containing(lastPoint.position, currentPoint.position);
@@ -283,6 +357,7 @@ public class LineDoodle extends Doodle {
 	}
 
 	void onTouchEventEnd(@NonNull MotionEvent event) {
+		currentInputLine.finish();
 		ControlPointLine line = new ControlPointLine(currentInputLine);
 		controlPointLines.add(line);
 		currentInputLine = null;

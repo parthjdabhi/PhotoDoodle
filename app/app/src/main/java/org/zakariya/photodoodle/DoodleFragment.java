@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.zakariya.photodoodle.model.Doodle;
+import org.zakariya.photodoodle.model.LineDoodle;
 import org.zakariya.photodoodle.model.LineTessellationDoodle;
 
 import butterknife.Bind;
@@ -31,7 +32,7 @@ public class DoodleFragment extends Fragment {
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
-		doodle = new LineTessellationDoodle(getActivity());
+		doodle = new LineDoodle();
 		if (savedInstanceState != null) {
 			doodle.onCreate(savedInstanceState);
 		}

@@ -8,14 +8,16 @@ import android.graphics.PointF;
  * which will be used to determine line thickness.
  */
 public class InputPoint {
-	public PointF position;
+	public PointF position = new PointF();
+	public PointF tangent = new PointF();
 	public long timestamp;
 
 	InputPoint() {
 	}
 
 	public InputPoint(float x, float y) {
-		position = new PointF(x, y);
+		position.x = x;
+		position.y = y;
 		timestamp = System.currentTimeMillis();
 	}
 }

@@ -53,22 +53,22 @@ public class LineTessellator {
 	public LineTessellator(){}
 
 	/**
-	 * Tessellate linePoints into a Path object suitable for rendering
-	 * @param linePoints list of LinePoint instances, in order
+	 * Tessellate circles into a Path object suitable for rendering
+	 * @param circles list of Circle instances, in order
 	 * @param path destination Path into which tessellated closed path will be added, if non-null
 	 * @param debugDrawCanvas if non-null, tessellation debug line rendering will be drawn immediately
 	 */
-	public void tessellate(List<LinePoint> linePoints, @Nullable Path path, @Nullable Canvas debugDrawCanvas) {
+	public void tessellate(List<Circle> circles, @Nullable Path path, @Nullable Canvas debugDrawCanvas) {
 
 		// set up our buffers
 		if (leftCoordinates == null) {
-			leftCoordinates = new FloatBuffer((int)(linePoints.size() * 1.5));
+			leftCoordinates = new FloatBuffer((int)(circles.size() * 1.5));
 		} else {
 			leftCoordinates.clear();
 		}
 
 		if (rightCoordinates == null) {
-			rightCoordinates = new FloatBuffer((int)(linePoints.size() * 1.5));
+			rightCoordinates = new FloatBuffer((int)(circles.size() * 1.5));
 		} else {
 			rightCoordinates.clear();
 		}

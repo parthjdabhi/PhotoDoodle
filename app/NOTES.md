@@ -11,4 +11,4 @@ We don't want to draw the whole set of lines 60 times per second as user moves f
 
 # Currently
 
-The computed halfSize of each control point varies wildly. It should either get a max value, and/or have a smoothing applied to it
+The computed radius of each control point varies wildly. It should either get a max value, and/or have a smoothing applied to it

@@ -9,11 +9,10 @@ import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.util.Pair;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
-import org.zakariya.photodoodle.geom.LinePoint;
+import org.zakariya.photodoodle.geom.Circle;
 import org.zakariya.photodoodle.geom.LineTessellator;
 import org.zakariya.photodoodle.geom.PointFUtil;
 
@@ -36,9 +35,9 @@ public class LineTessellationDoodle extends Doodle {
 	private static final String FILE = "LineTessellationDoodle.dat";
 
 	private InvalidationDelegate invalidationDelegate;
-	private ArrayList<LinePoint> points = new ArrayList<>();
+	private ArrayList<Circle> points = new ArrayList<>();
 	private Paint linePaint, handlePaint, vectorPaint;
-	private LinePoint draggingPoint = null;
+	private Circle draggingPoint = null;
 	private Context context;
 	private LineTessellator tessellator;
 
@@ -64,23 +63,23 @@ public class LineTessellationDoodle extends Doodle {
 		handlePaint.setStyle(Paint.Style.FILL);
 
 		if (!loadPoints()) {
-			points.add(new LinePoint(new PointF(50, 100), 10));
-			points.add(new LinePoint(new PointF(350, 100), 20));
-			points.add(new LinePoint(new PointF(350, 300), 30));
-			points.add(new LinePoint(new PointF(50, 300), 20));
-			points.add(new LinePoint(new PointF(50, 400), 10));
+			points.add(new Circle(new PointF(50, 100), 10));
+			points.add(new Circle(new PointF(350, 100), 20));
+			points.add(new Circle(new PointF(350, 300), 30));
+			points.add(new Circle(new PointF(50, 300), 20));
+			points.add(new Circle(new PointF(50, 400), 10));
 		}
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		LinePoint[] linePoints = new LinePoint[points.size()];
-		outState.putParcelableArray("points", (LinePoint[]) points.toArray(linePoints));
+		Circle[] circles = new Circle[points.size()];
+		outState.putParcelableArray("points", (Circle[]) points.toArray(circles));
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		LinePoint[] ps = (LinePoint[]) savedInstanceState.getParcelableArray("points");
+		Circle[] ps = (Circle[]) savedInstanceState.getParcelableArray("points");
 		if (ps != null) {
 			points.clear();
 			points.addAll(Arrays.asList(ps));
@@ -95,7 +94,7 @@ public class LineTessellationDoodle extends Doodle {
 	@Override
 	public RectF getBoundingRect() {
 		if (!points.isEmpty()) {
-			LinePoint p = points.get(0);
+			Circle p = points.get(0);
 			RectF boundingRect = p.getBoundingRect();
 
 			for (int i = 1; i < points.size(); i++) {
@@ -121,7 +120,7 @@ public class LineTessellationDoodle extends Doodle {
 
 		// draw lines connecting control points
 		if (!points.isEmpty()) {
-			LinePoint p = points.get(0);
+			Circle p = points.get(0);
 			Path path = new Path();
 			path.moveTo(p.position.x, p.position.y);
 			for (int i = 1; i < points.size(); i++) {
@@ -157,7 +156,7 @@ public class LineTessellationDoodle extends Doodle {
 		PointF point = new PointF(event.getX(), event.getY());
 		float minDist2 = Float.MAX_VALUE;
 		for (int i = 0; i < points.size(); i++) {
-			LinePoint cp = points.get(i);
+			Circle cp = points.get(i);
 			float d2 = PointFUtil.distance2(point, cp.position);
 			if (d2 < minDist2) {
 				minDist2 = d2;
@@ -166,7 +165,7 @@ public class LineTessellationDoodle extends Doodle {
 		}
 
 		// now, confirm closest match was inside handle
-		if (PointFUtil.distance2(point, draggingPoint.position) > draggingPoint.halfSize * draggingPoint.halfSize) {
+		if (PointFUtil.distance2(point, draggingPoint.position) > draggingPoint.radius * draggingPoint.radius) {
 			draggingPoint = null;
 		}
 	}
@@ -216,7 +215,7 @@ public class LineTessellationDoodle extends Doodle {
 				points.clear();
 
 				for (int i = 0; i < count; i++) {
-					LinePoint cp = (LinePoint) ois.readObject();
+					Circle cp = (Circle) ois.readObject();
 					points.add(cp);
 				}
 

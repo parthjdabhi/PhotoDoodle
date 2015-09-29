@@ -11,36 +11,36 @@ import java.io.Serializable;
 /**
  * Created by shamyl on 9/22/15.
  */
-public class LinePoint implements Serializable, Parcelable {
+public class Circle implements Serializable, Parcelable {
 
 	private static final long serialVersionUID = 0L;
 
 	public PointF position = new PointF(); // the position of the point
-	public float halfSize; // the half thickness of the line at this point
+	public float radius; // the half thickness of the line at this point
 
-	LinePoint() {
+	Circle() {
 	}
 
-	public LinePoint(PointF position, float halfSize) {
+	public Circle(PointF position, float radius) {
 		this.position.x = position.x;
 		this.position.y = position.y;
-		this.halfSize = halfSize;
+		this.radius = radius;
 	}
 
 	public RectF getBoundingRect() {
-		return new RectF(position.x - halfSize, position.y - halfSize, position.x + halfSize, position.y + halfSize);
+		return new RectF(position.x - radius, position.y - radius, position.x + radius, position.y + radius);
 	}
 
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 		out.writeFloat(position.x);
 		out.writeFloat(position.y);
-		out.writeFloat(halfSize);
+		out.writeFloat(radius);
 	}
 
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		position.x = in.readFloat();
 		position.y = in.readFloat();
-		halfSize = in.readFloat();
+		radius = in.readFloat();
 	}
 
 	@Override
@@ -52,21 +52,21 @@ public class LinePoint implements Serializable, Parcelable {
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeFloat(position.x);
 		dest.writeFloat(position.y);
-		dest.writeFloat(halfSize);
+		dest.writeFloat(radius);
 	}
 
-	public static final Parcelable.Creator<LinePoint> CREATOR = new Parcelable.Creator<LinePoint>() {
-		public LinePoint createFromParcel(Parcel in) {
-			return new LinePoint(in);
+	public static final Parcelable.Creator<Circle> CREATOR = new Parcelable.Creator<Circle>() {
+		public Circle createFromParcel(Parcel in) {
+			return new Circle(in);
 		}
-		public LinePoint[] newArray(int size) {
-			return new LinePoint[size];
+		public Circle[] newArray(int size) {
+			return new Circle[size];
 		}
 	};
 
-	private LinePoint(Parcel in) {
+	private Circle(Parcel in) {
 		position.x = in.readFloat();
 		position.y = in.readFloat();
-		halfSize = in.readFloat();
+		radius = in.readFloat();
 	}
 }

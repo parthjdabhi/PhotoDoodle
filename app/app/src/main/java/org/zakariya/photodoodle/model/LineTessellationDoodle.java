@@ -7,14 +7,14 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
-import org.zakariya.photodoodle.geom.ControlPoint;
+import org.zakariya.photodoodle.geom.LinePoint;
+import org.zakariya.photodoodle.geom.LineTessellator;
 import org.zakariya.photodoodle.geom.PointFUtil;
 
 import java.io.BufferedInputStream;
@@ -36,16 +36,15 @@ public class LineTessellationDoodle extends Doodle {
 	private static final String FILE = "LineTessellationDoodle.dat";
 
 	private InvalidationDelegate invalidationDelegate;
-	private ArrayList<ControlPoint> points = new ArrayList<>();
-	private Paint linePaint;
-	private Paint handlePaint;
-	private ControlPoint draggingPoint = null;
+	private ArrayList<LinePoint> points = new ArrayList<>();
+	private Paint linePaint, handlePaint, vectorPaint;
+	private LinePoint draggingPoint = null;
 	private Context context;
-	private Handler debouncedSaveHandler;
-	private Runnable debouncedSaveRunnable;
+	private LineTessellator tessellator;
 
 	public LineTessellationDoodle(Context context) {
 		this.context = context;
+		this.tessellator = new LineTessellator();
 
 		linePaint = new Paint();
 		linePaint.setAntiAlias(true);
@@ -53,42 +52,36 @@ public class LineTessellationDoodle extends Doodle {
 		linePaint.setStrokeWidth(1);
 		linePaint.setStyle(Paint.Style.STROKE);
 
+		vectorPaint= new Paint();
+		vectorPaint.setAntiAlias(true);
+		vectorPaint.setColor(0xFFFF0000);
+		vectorPaint.setStrokeWidth(2);
+		vectorPaint.setStyle(Paint.Style.STROKE);
+
 		handlePaint = new Paint();
 		handlePaint.setAntiAlias(true);
 		handlePaint.setColor(0x5533ffff);
 		handlePaint.setStyle(Paint.Style.FILL);
 
 		if (!loadPoints()) {
-			points.add(new ControlPoint(new PointF(50, 100), 10));
-			points.add(new ControlPoint(new PointF(350, 100), 20));
-			points.add(new ControlPoint(new PointF(350, 300), 30));
-			points.add(new ControlPoint(new PointF(50, 300), 20));
-			points.add(new ControlPoint(new PointF(50, 400), 10));
+			points.add(new LinePoint(new PointF(50, 100), 10));
+			points.add(new LinePoint(new PointF(350, 100), 20));
+			points.add(new LinePoint(new PointF(350, 300), 30));
+			points.add(new LinePoint(new PointF(50, 300), 20));
+			points.add(new LinePoint(new PointF(50, 400), 10));
+			computeTangents();
 		}
-
-		debouncedSaveHandler = new Handler(Looper.getMainLooper());
-
-		final WeakReference<LineTessellationDoodle> weakThis = new WeakReference<>(this);
-		debouncedSaveRunnable = new Runnable() {
-			@Override
-			public void run() {
-				LineTessellationDoodle strongThis = weakThis.get();
-				if (strongThis != null) {
-					strongThis.savePoints();
-				}
-			}
-		};
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		ControlPoint[] controlPoints = new ControlPoint[points.size()];
-		outState.putParcelableArray("points", (ControlPoint[]) points.toArray(controlPoints));
+		LinePoint[] linePoints = new LinePoint[points.size()];
+		outState.putParcelableArray("points", (LinePoint[]) points.toArray(linePoints));
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		ControlPoint[] ps = (ControlPoint[]) savedInstanceState.getParcelableArray("points");
+		LinePoint[] ps = (LinePoint[]) savedInstanceState.getParcelableArray("points");
 		if (ps != null) {
 			points.clear();
 			points.addAll(Arrays.asList(ps));
@@ -103,7 +96,7 @@ public class LineTessellationDoodle extends Doodle {
 	@Override
 	public RectF getBoundingRect() {
 		if (!points.isEmpty()) {
-			ControlPoint p = points.get(0);
+			LinePoint p = points.get(0);
 			RectF boundingRect = p.getBoundingRect();
 
 			for (int i = 1; i < points.size(); i++) {
@@ -129,7 +122,7 @@ public class LineTessellationDoodle extends Doodle {
 
 		// draw lines connecting control points
 		if (!points.isEmpty()) {
-			ControlPoint p = points.get(0);
+			LinePoint p = points.get(0);
 			Path path = new Path();
 			path.moveTo(p.position.x, p.position.y);
 			for (int i = 1; i < points.size(); i++) {
@@ -146,7 +139,18 @@ public class LineTessellationDoodle extends Doodle {
 			}
 
 			canvas.drawPath(path, handlePaint);
+
+			path = new Path();
+			for (int i = 0; i < points.size(); i++ ) {
+				p = points.get(i);
+				path.moveTo(p.position.x, p.position.y);
+				path.lineTo(p.position.x + p.tangent.x * p.halfSize,p.position.y + p.tangent.y * p.halfSize);
+			}
+
+			canvas.drawPath(path, vectorPaint);
 		}
+
+		tessellator.tessellate(points, null, canvas);
 	}
 
 	@Override
@@ -163,7 +167,7 @@ public class LineTessellationDoodle extends Doodle {
 		PointF point = new PointF(event.getX(), event.getY());
 		float minDist2 = Float.MAX_VALUE;
 		for (int i = 0; i < points.size(); i++) {
-			ControlPoint cp = points.get(i);
+			LinePoint cp = points.get(i);
 			float d2 = PointFUtil.distance2(point, cp.position);
 			if (d2 < minDist2) {
 				minDist2 = d2;
@@ -181,6 +185,7 @@ public class LineTessellationDoodle extends Doodle {
 		if (draggingPoint != null) {
 			draggingPoint.position.x = event.getX();
 			draggingPoint.position.y = event.getY();
+			computeTangents();
 		}
 		getInvalidationDelegate().invalidate(getBoundingRect());
 	}
@@ -191,12 +196,46 @@ public class LineTessellationDoodle extends Doodle {
 		save();
 	}
 
-	private void save() {
-		debouncedSaveHandler.removeCallbacks(debouncedSaveRunnable);
-		debouncedSaveHandler.postDelayed(debouncedSaveRunnable, 500);
+	private void computeTangents() {
+		if (points.size() < 3) {
+			return;
+		}
+
+		for (int i = 0, N = points.size(); i < N; i++) {
+			if (i == 0) {
+				LinePoint a = points.get(i);
+				LinePoint b = points.get(i + 1);
+				Pair<PointF, Float> dir = PointFUtil.dir(a.position, b.position);
+
+				a.tangent = dir.first;
+			} else if (i == N - 1) {
+				LinePoint b = points.get(i);
+				LinePoint a = points.get(i - 1);
+				Pair<PointF, Float> dir = PointFUtil.dir(a.position, b.position);
+
+				b.tangent = dir.first;
+			} else {
+				LinePoint a = points.get(i - 1);
+				LinePoint b = points.get(i);
+				LinePoint c = points.get(i + 1);
+
+				Pair<PointF, Float> abDir = PointFUtil.dir(a.position, b.position);
+				PointF abPrime = PointFUtil.rotateCCW(abDir.first);
+
+				Pair<PointF, Float> bcDir = PointFUtil.dir(b.position, c.position);
+				PointF bcPrime = PointFUtil.rotateCCW(bcDir.first);
+
+				PointF half = new PointF(abPrime.x + bcPrime.x, abPrime.y + bcPrime.y);
+				if (PointFUtil.length2(half) > 1e-4) {
+					b.tangent = PointFUtil.normalize(PointFUtil.rotateCW(half)).first;;
+				} else {
+					b.tangent = bcPrime;
+				}
+			}
+		}
 	}
 
-	private void savePoints() {
+	private void save() {
 		try {
 			context.deleteFile(FILE);
 			FileOutputStream fos = context.openFileOutput(FILE, Context.MODE_PRIVATE);
@@ -227,7 +266,7 @@ public class LineTessellationDoodle extends Doodle {
 				points.clear();
 
 				for (int i = 0; i < count; i++) {
-					ControlPoint cp = (ControlPoint) ois.readObject();
+					LinePoint cp = (LinePoint) ois.readObject();
 					points.add(cp);
 				}
 

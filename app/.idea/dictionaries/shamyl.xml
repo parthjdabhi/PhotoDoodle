@@ -2,6 +2,8 @@
   <dictionary name="shamyl">
     <words>
       <w>debounced</w>
+      <w>denom</w>
+      <w>tessellator</w>
     </words>
   </dictionary>
 </component>

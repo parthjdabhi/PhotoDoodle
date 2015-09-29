@@ -20,6 +20,10 @@ public class PointFUtil {
 		return (dx * dx) + (dy * dy);
 	}
 
+	public static float length2(PointF a) {
+		return (a.x*a.x) + (a.y*a.y);
+	}
+
 	public static PointF scale(PointF p, float scale) {
 		return new PointF(p.x * scale, p.y * scale);
 	}

@@ -11,7 +11,7 @@ import java.io.Serializable;
 /**
  * Created by shamyl on 9/22/15.
  */
-public class ControlPoint implements Serializable, Parcelable {
+public class LinePoint implements Serializable, Parcelable {
 
 	private static final long serialVersionUID = 0L;
 
@@ -19,16 +19,16 @@ public class ControlPoint implements Serializable, Parcelable {
 	public PointF tangent; // the normalized tangent vector of the line at this point - points "forward"
 	public float halfSize; // the half thickness of the line at this point
 
-	ControlPoint() {
+	LinePoint() {
 	}
 
-	public ControlPoint(PointF position, float halfSize) {
+	public LinePoint(PointF position, float halfSize) {
 		this.position = position;
 		this.halfSize = halfSize;
 		this.tangent = new PointF(0, 0);
 	}
 
-	public ControlPoint(PointF position, PointF tangent, float halfSize) {
+	public LinePoint(PointF position, PointF tangent, float halfSize) {
 		this.position = position;
 		this.tangent = tangent;
 		this.halfSize = halfSize;
@@ -66,17 +66,17 @@ public class ControlPoint implements Serializable, Parcelable {
 		dest.writeFloat(halfSize);
 	}
 
-	public static final Parcelable.Creator<ControlPoint> CREATOR = new Parcelable.Creator<ControlPoint>() {
-		public ControlPoint createFromParcel(Parcel in) {
-			return new ControlPoint(in);
+	public static final Parcelable.Creator<LinePoint> CREATOR = new Parcelable.Creator<LinePoint>() {
+		public LinePoint createFromParcel(Parcel in) {
+			return new LinePoint(in);
 		}
 
-		public ControlPoint[] newArray(int size) {
-			return new ControlPoint[size];
+		public LinePoint[] newArray(int size) {
+			return new LinePoint[size];
 		}
 	};
 
-	private ControlPoint(Parcel in) {
+	private LinePoint(Parcel in) {
 		position = new PointF(in.readFloat(),in.readFloat());
 		tangent = new PointF(in.readFloat(),in.readFloat());
 		halfSize = in.readFloat();

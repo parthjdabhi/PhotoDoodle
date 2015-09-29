@@ -12,7 +12,7 @@ import android.util.Pair;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
-import org.zakariya.photodoodle.geom.ControlPoint;
+import org.zakariya.photodoodle.geom.LinePoint;
 import org.zakariya.photodoodle.geom.InputPoint;
 import org.zakariya.photodoodle.geom.PointFUtil;
 import org.zakariya.photodoodle.geom.RectFUtil;
@@ -37,7 +37,7 @@ public class LineDoodle extends Doodle {
 	}
 
 	class ControlPointLine {
-		ArrayList<ControlPoint> controlPoints = new ArrayList<>();
+		ArrayList<LinePoint> linePoints = new ArrayList<>();
 		RectF boundingRect;
 
 		ControlPointLine() {
@@ -59,28 +59,35 @@ public class LineDoodle extends Doodle {
 			boundingRect = new RectF(b.position.x - 1, b.position.y - 1, b.position.x + 1, b.position.y + 1);
 
 			for (int i = 0, N = points.size(); i < N; i++) {
-				ControlPoint cp = null;
+				LinePoint cp = null;
 				if (a == null) {
 					if (b != null && c != null) { // b & c should always be nonnull, just silencing compiler warnings
 						// this is first point in sequence
 						Pair<PointF, Float> dir = PointFUtil.dir(b.position, c.position);
-						cp = new ControlPoint(b.position, dir.first, 0);
+						cp = new LinePoint(b.position, dir.first, 0);
 					}
 				} else if (c == null) {
 					if (b != null) { // b should always be nonnull, just silencing compiler warnings
 						// this is last point in sequence
-						Pair<PointF, Float> dir = PointFUtil.dir(b.position, a.position);
-						cp = new ControlPoint(b.position, dir.first, 0);
+						Pair<PointF, Float> dir = PointFUtil.dir(a.position, b.position);
+						cp = new LinePoint(b.position, dir.first, 0);
 					}
 				} else {
 					if (b != null) { // b should always be nonnull, just silencing compiler warnings
 						// this is a point in the sequence middle
 						Pair<PointF, Float> abDir = PointFUtil.dir(a.position, b.position);
-						Pair<PointF, Float> cbDir = PointFUtil.dir(c.position, b.position);
-						PointF half = new PointF(abDir.first.x + cbDir.first.x, abDir.first.y + cbDir.first.y);
+						PointF abPrime = PointFUtil.rotateCCW(abDir.first);
+						Pair<PointF, Float> bcDir = PointFUtil.dir(b.position, c.position);
+						PointF bcPrime = PointFUtil.rotateCCW(bcDir.first);
 
-						// rotate half and normalize, that's our tangent
-						PointF tangent = PointFUtil.normalize(PointFUtil.rotateCW(half)).first;
+						PointF half = new PointF(abPrime.x + bcPrime.x, abPrime.y + bcPrime.y);
+
+						PointF tangent = null;
+						if (PointFUtil.length2(half) > 1e-3) {
+							tangent = PointFUtil.normalize(PointFUtil.rotateCW(half)).first;;
+						} else {
+							tangent = new PointF(0,0);
+						}
 
 						long millis = b.timestamp - a.timestamp;
 						float dpPerSecond = abDir.second / (millis / 1000f);
@@ -89,12 +96,12 @@ public class LineDoodle extends Doodle {
 						// smooth the size
 						size = accumulator.add(size);
 
-						cp = new ControlPoint(b.position, tangent, size / 2);
+						cp = new LinePoint(b.position, tangent, size / 2);
 					}
 				}
 
 				if (cp != null) {
-					controlPoints.add(cp);
+					linePoints.add(cp);
 					boundingRect.union(cp.position.x - cp.halfSize,
 							cp.position.y - cp.halfSize,
 							cp.position.x + cp.halfSize,
@@ -172,11 +179,11 @@ public class LineDoodle extends Doodle {
 		// now draw our control points
 		for (ControlPointLine line : controlPointLines) {
 			Path p = new Path();
-			ControlPoint firstPoint = line.controlPoints.get(0);
+			LinePoint firstPoint = line.linePoints.get(0);
 			p.moveTo(firstPoint.position.x, firstPoint.position.y);
 
-			for (int i = 1, N = line.controlPoints.size(); i < N; i++) {
-				PointF point = line.controlPoints.get(i).position;
+			for (int i = 1, N = line.linePoints.size(); i < N; i++) {
+				PointF point = line.linePoints.get(i).position;
 				p.lineTo(point.x, point.y);
 			}
 
@@ -186,7 +193,7 @@ public class LineDoodle extends Doodle {
 			// now draw tangents and sizes
 			linePaint.setColor(0xFFFF0000);
 			p = new Path();
-			for (ControlPoint point : line.controlPoints) {
+			for (LinePoint point : line.linePoints) {
 				p.moveTo(point.position.x, point.position.y);
 				p.lineTo(point.position.x + point.tangent.x * point.halfSize, point.position.y + point.tangent.y * point.halfSize);
 				p.addCircle(point.position.x, point.position.y, point.halfSize, Path.Direction.CW);
@@ -231,17 +238,17 @@ public class LineDoodle extends Doodle {
 		}
 
 		for (ControlPointLine controlPointLine : controlPointLines) {
-			for (ControlPoint controlPoint : controlPointLine.controlPoints) {
+			for (LinePoint linePoint : controlPointLine.linePoints) {
 				if (boundingRect.isEmpty()) {
-					boundingRect.set(controlPoint.position.x - controlPoint.halfSize,
-							controlPoint.position.y - controlPoint.halfSize,
-							controlPoint.position.x + controlPoint.halfSize,
-							controlPoint.position.y + controlPoint.halfSize);
+					boundingRect.set(linePoint.position.x - linePoint.halfSize,
+							linePoint.position.y - linePoint.halfSize,
+							linePoint.position.x + linePoint.halfSize,
+							linePoint.position.y + linePoint.halfSize);
 				} else {
-					boundingRect.union(controlPoint.position.x - controlPoint.halfSize,
-							controlPoint.position.y - controlPoint.halfSize,
-							controlPoint.position.x + controlPoint.halfSize,
-							controlPoint.position.y + controlPoint.halfSize);
+					boundingRect.union(linePoint.position.x - linePoint.halfSize,
+							linePoint.position.y - linePoint.halfSize,
+							linePoint.position.x + linePoint.halfSize,
+							linePoint.position.y + linePoint.halfSize);
 				}
 			}
 		}
@@ -280,7 +287,7 @@ public class LineDoodle extends Doodle {
 		controlPointLines.add(line);
 		currentInputLine = null;
 
-		Log.d(TAG, "onTouchEventEnd added control point line with " + line.controlPoints.size() + " points, invalidating: " + line.getBoundingRect());
+		Log.d(TAG, "onTouchEventEnd added control point line with " + line.linePoints.size() + " points, invalidating: " + line.getBoundingRect());
 
 		// invalidate region containing the line we just generated
 		getInvalidationDelegate().invalidate(line.getBoundingRect());

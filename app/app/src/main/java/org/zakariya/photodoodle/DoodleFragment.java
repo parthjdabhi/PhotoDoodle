@@ -32,7 +32,7 @@ public class DoodleFragment extends Fragment {
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
-		doodle = new LineDoodle();
+		doodle = new LineTessellationDoodle(getActivity());
 		if (savedInstanceState != null) {
 			doodle.onCreate(savedInstanceState);
 		}

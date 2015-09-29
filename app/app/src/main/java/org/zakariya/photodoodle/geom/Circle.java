@@ -15,15 +15,15 @@ public class Circle implements Serializable, Parcelable {
 
 	private static final long serialVersionUID = 0L;
 
-	public PointF position = new PointF(); // the position of the point
+	public PointF position; // the position of the point
 	public float radius; // the half thickness of the line at this point
 
 	Circle() {
+		position = new PointF(0,0);
 	}
 
 	public Circle(PointF position, float radius) {
-		this.position.x = position.x;
-		this.position.y = position.y;
+		this.position = new PointF(position.x, position.y);
 		this.radius = radius;
 	}
 
@@ -38,8 +38,7 @@ public class Circle implements Serializable, Parcelable {
 	}
 
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		position.x = in.readFloat();
-		position.y = in.readFloat();
+		position = new PointF(in.readFloat(),in.readFloat());
 		radius = in.readFloat();
 	}
 
@@ -65,8 +64,7 @@ public class Circle implements Serializable, Parcelable {
 	};
 
 	private Circle(Parcel in) {
-		position.x = in.readFloat();
-		position.y = in.readFloat();
+		position = new PointF(in.readFloat(),in.readFloat());
 		radius = in.readFloat();
 	}
 }

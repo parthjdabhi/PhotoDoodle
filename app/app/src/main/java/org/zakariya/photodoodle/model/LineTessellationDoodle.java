@@ -13,6 +13,7 @@ import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
 import org.zakariya.photodoodle.geom.Circle;
+import org.zakariya.photodoodle.geom.CircleLine;
 import org.zakariya.photodoodle.geom.LineTessellator;
 import org.zakariya.photodoodle.geom.PointFUtil;
 
@@ -35,7 +36,7 @@ public class LineTessellationDoodle extends Doodle {
 	private static final String FILE = "LineTessellationDoodle.dat";
 
 	private InvalidationDelegate invalidationDelegate;
-	private ArrayList<Circle> points = new ArrayList<>();
+	private CircleLine circleLine = new CircleLine();
 	private Paint linePaint, handlePaint, vectorPaint;
 	private Circle draggingPoint = null;
 	private Context context;
@@ -63,27 +64,22 @@ public class LineTessellationDoodle extends Doodle {
 		handlePaint.setStyle(Paint.Style.FILL);
 
 		if (!loadPoints()) {
-			points.add(new Circle(new PointF(50, 100), 10));
-			points.add(new Circle(new PointF(350, 100), 20));
-			points.add(new Circle(new PointF(350, 300), 30));
-			points.add(new Circle(new PointF(50, 300), 20));
-			points.add(new Circle(new PointF(50, 400), 10));
+			circleLine.add(new Circle(new PointF(50, 100), 10));
+			circleLine.add(new Circle(new PointF(350, 100), 20));
+			circleLine.add(new Circle(new PointF(350, 300), 30));
+			circleLine.add(new Circle(new PointF(50, 300), 20));
+			circleLine.add(new Circle(new PointF(50, 400), 10));
 		}
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		Circle[] circles = new Circle[points.size()];
-		outState.putParcelableArray("points", (Circle[]) points.toArray(circles));
+		outState.putParcelable("circleLine", circleLine);
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Circle[] ps = (Circle[]) savedInstanceState.getParcelableArray("points");
-		if (ps != null) {
-			points.clear();
-			points.addAll(Arrays.asList(ps));
-		}
+		circleLine = savedInstanceState.getParcelable("circleLine");
 	}
 
 	@Override
@@ -93,18 +89,7 @@ public class LineTessellationDoodle extends Doodle {
 
 	@Override
 	public RectF getBoundingRect() {
-		if (!points.isEmpty()) {
-			Circle p = points.get(0);
-			RectF boundingRect = p.getBoundingRect();
-
-			for (int i = 1; i < points.size(); i++) {
-				boundingRect.union(points.get(i).getBoundingRect());
-			}
-
-			return boundingRect;
-		} else {
-			return new RectF();
-		}
+		return circleLine.getBoundingRect();
 	}
 
 	@Override
@@ -118,28 +103,28 @@ public class LineTessellationDoodle extends Doodle {
 		canvas.drawColor(0xFFFFFFFF);
 
 
-		// draw lines connecting control points
-		if (!points.isEmpty()) {
-			Circle p = points.get(0);
+		// draw lines connecting circles
+		if (!circleLine.isEmpty()) {
+			Circle circle = circleLine.get(0);
 			Path path = new Path();
-			path.moveTo(p.position.x, p.position.y);
-			for (int i = 1; i < points.size(); i++) {
-				p = points.get(i);
-				path.lineTo(p.position.x, p.position.y);
+			path.moveTo(circle.position.x, circle.position.y);
+			for (int i = 1; i < circleLine.size(); i++) {
+				circle = circleLine.get(i);
+				path.lineTo(circle.position.x, circle.position.y);
 			}
 
 			canvas.drawPath(path, linePaint);
 
 			path = new Path();
-			for (int i = 0; i < points.size(); i++) {
-				p = points.get(i);
-				path.addOval(p.getBoundingRect(), Path.Direction.CW);
+			for (int i = 0; i < circleLine.size(); i++) {
+				circle = circleLine.get(i);
+				path.addOval(circle.getBoundingRect(), Path.Direction.CW);
 			}
 
 			canvas.drawPath(path, handlePaint);
 		}
 
-		tessellator.tessellate(points, null, canvas);
+		tessellator.tessellate(circleLine, null, canvas);
 	}
 
 	@Override
@@ -155,12 +140,12 @@ public class LineTessellationDoodle extends Doodle {
 	void onTouchEventBegin(@NonNull MotionEvent event) {
 		PointF point = new PointF(event.getX(), event.getY());
 		float minDist2 = Float.MAX_VALUE;
-		for (int i = 0; i < points.size(); i++) {
-			Circle cp = points.get(i);
-			float d2 = PointFUtil.distance2(point, cp.position);
+		for (int i = 0; i < circleLine.size(); i++) {
+			Circle circle = circleLine.get(i);
+			float d2 = PointFUtil.distance2(point, circle.position);
 			if (d2 < minDist2) {
 				minDist2 = d2;
-				draggingPoint = cp;
+				draggingPoint = circle;
 			}
 		}
 
@@ -191,11 +176,7 @@ public class LineTessellationDoodle extends Doodle {
 			BufferedOutputStream bos = new BufferedOutputStream(fos);
 			ObjectOutputStream oos = new ObjectOutputStream(bos);
 
-			int count = points.size();
-			oos.writeInt(count);
-			for (int i = 0; i < count; i++) {
-				oos.writeObject(points.get(i));
-			}
+			oos.writeObject(circleLine);
 			oos.close();
 
 			Log.i(TAG, "Saved to " + FILE);
@@ -210,24 +191,9 @@ public class LineTessellationDoodle extends Doodle {
 			BufferedInputStream bis = new BufferedInputStream(fis);
 			ObjectInputStream ois = new ObjectInputStream(bis);
 
-			int count = ois.readInt();
-			if (count > 0) {
-				points.clear();
-
-				for (int i = 0; i < count; i++) {
-					Circle cp = (Circle) ois.readObject();
-					points.add(cp);
-				}
-
-				if (getInvalidationDelegate() != null) {
-					getInvalidationDelegate().invalidate(getBoundingRect());
-				}
-
-				Log.i(TAG, "Loaded " + count + " points from " + FILE);
-				return true;
-			} else {
-				return false;
-			}
+			circleLine = (CircleLine) ois.readObject();
+			Log.i(TAG, "Loaded " + circleLine.size() + " points from " + FILE);
+			return circleLine.size() > 0;
 		} catch (Exception e) {
 			Log.e(TAG, "Error opening file: " + FILE + " e: " + e);
 			return false;

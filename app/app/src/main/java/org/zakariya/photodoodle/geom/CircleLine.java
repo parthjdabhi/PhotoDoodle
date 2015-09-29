@@ -1,45 +1,26 @@
 package org.zakariya.photodoodle.geom;
 
 import android.graphics.RectF;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
 import org.zakariya.photodoodle.util.Accumulator;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by shamyl on 9/28/15.
  */
-public class CircleLine {
+public class CircleLine implements Serializable, Parcelable {
 	private ArrayList<Circle> circles = new ArrayList<>();
 	private RectF boundingRect;
 
 	public CircleLine() {
 	}
 
-	public ArrayList<Circle> getCircles() {
-		return circles;
-	}
-
-	public Circle get(int i) {
-		return circles.get(i);
-	}
-
-	public int size() {
-		return circles.size();
-	}
-
-	@Nullable
-	public Circle firstCircle() {
-		return circles.isEmpty() ? null : circles.get(0);
-	}
-
-	@Nullable
-	public Circle lastCircle() {
-		return circles.isEmpty() ? null : circles.get(circles.size()-1);
-	}
-
-	// compute a CircleLine for an InputPointLine
 	public CircleLine(InputPointLine inputPointLine, float velocityScaling) {
 		if (inputPointLine.size() < 2) {
 			return;
@@ -95,7 +76,105 @@ public class CircleLine {
 		}
 	}
 
+	public ArrayList<Circle> getCircles() {
+		return circles;
+	}
+
+	public Circle get(int i) {
+		return circles.get(i);
+	}
+
+	public int size() {
+		return circles.size();
+	}
+
+	public boolean isEmpty() {
+		return circles.isEmpty();
+	}
+
+	public void add(Circle circle) {
+		circles.add(circle);
+		boundingRect = null;
+	}
+
+	@Nullable
+	public Circle firstCircle() {
+		return circles.isEmpty() ? null : circles.get(0);
+	}
+
+	@Nullable
+	public Circle lastCircle() {
+		return circles.isEmpty() ? null : circles.get(circles.size() - 1);
+	}
+
 	public RectF getBoundingRect() {
+		if (boundingRect == null) {
+			if (isEmpty()) {
+				// empty
+				boundingRect = new RectF();
+			} else {
+				Circle c = get(0);
+				boundingRect = new RectF(c.position.x - c.radius, c.position.y - c.radius, c.position.x + c.radius, c.position.y + c.radius);
+				for (int i = 1, N = size(); i < N; i++) {
+					c = get(i);
+					boundingRect.union(c.position.x - c.radius, c.position.y - c.radius, c.position.x + c.radius, c.position.y + c.radius);
+				}
+			}
+		}
+
 		return boundingRect;
+	}
+
+	// Serializable
+
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		int count = size();
+		out.writeInt(count);
+		for (int i = 0; i < count; i++) {
+			out.writeObject(circles.get(i));
+		}
+	}
+
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		circles = new ArrayList<>();
+		int count = in.readInt();
+		for (int i = 0; i < count; i++) {
+			Circle cp = (Circle) in.readObject();
+			circles.add(cp);
+		}
+	}
+
+	// Parcelable
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(size());
+		for (Circle circle : circles) {
+			dest.writeParcelable(circle, 0);
+		}
+	}
+
+	public static final Parcelable.Creator<CircleLine> CREATOR = new Parcelable.Creator<CircleLine>() {
+		public CircleLine createFromParcel(Parcel in) {
+			return new CircleLine(in);
+		}
+
+		public CircleLine[] newArray(int size) {
+			return new CircleLine[size];
+		}
+	};
+
+	private CircleLine(Parcel in) {
+		int size = in.readInt();
+		circles = new ArrayList<>();
+		for (int i = 0; i < size; i++) {
+			Circle circle = in.readParcelable(null);
+			circles.add(circle);
+		}
 	}
 }

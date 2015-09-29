@@ -58,7 +58,7 @@ public class LineTessellator {
 	 * @param path destination Path into which tessellated closed path will be added, if non-null
 	 * @param debugDrawCanvas if non-null, tessellation debug line rendering will be drawn immediately
 	 */
-	public void tessellate(List<Circle> circles, @Nullable Path path, @Nullable Canvas debugDrawCanvas) {
+	public void tessellate(CircleLine circles, @Nullable Path path, @Nullable Canvas debugDrawCanvas) {
 
 		// set up our buffers
 		if (leftCoordinates == null) {

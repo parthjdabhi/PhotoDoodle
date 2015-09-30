@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.zakariya.photodoodle.model.Doodle;
-import org.zakariya.photodoodle.model.LineDoodle;
 import org.zakariya.photodoodle.model.LineTessellationDoodle;
 
 import butterknife.Bind;

@@ -19,7 +19,7 @@ public class Circle implements Serializable, Parcelable {
 	public float radius; // the half thickness of the line at this point
 
 	Circle() {
-		position = new PointF(0,0);
+		position = new PointF(0, 0);
 	}
 
 	public Circle(PointF position, float radius) {
@@ -31,6 +31,38 @@ public class Circle implements Serializable, Parcelable {
 		return new RectF(position.x - radius, position.y - radius, position.x + radius, position.y + radius);
 	}
 
+	/**
+	 * Check if this circle is bigger than another circle, and completely contains it.
+	 * Note that a.contains(b) != b.contains(a)
+	 *
+	 * @param other the circle to check if its inside this circle
+	 * @return true if other is completely inside this circle
+	 */
+	public boolean contains(Circle other) {
+		if (other.radius < radius) {
+			float minDist = radius - other.radius;
+			float minDist2 = minDist * minDist;
+			float dist2 = PointFUtil.distance2(position, other.position);
+			return dist2 < minDist2;
+		} else if (other.radius == radius) {
+			return PointFUtil.distance2(position, other.position) < 1e-3;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Check if this circle intersects another circle
+	 *
+	 * @param other the circle to test if it intersects with this circle
+	 * @return true if the two circles intersect
+	 */
+	public boolean intersects(Circle other) {
+		float minDist2 = radius * radius;
+		float dist2 = PointFUtil.distance2(position, other.position);
+		return dist2 < minDist2;
+	}
+
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 		out.writeFloat(position.x);
 		out.writeFloat(position.y);
@@ -38,7 +70,7 @@ public class Circle implements Serializable, Parcelable {
 	}
 
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		position = new PointF(in.readFloat(),in.readFloat());
+		position = new PointF(in.readFloat(), in.readFloat());
 		radius = in.readFloat();
 	}
 
@@ -58,13 +90,14 @@ public class Circle implements Serializable, Parcelable {
 		public Circle createFromParcel(Parcel in) {
 			return new Circle(in);
 		}
+
 		public Circle[] newArray(int size) {
 			return new Circle[size];
 		}
 	};
 
 	private Circle(Parcel in) {
-		position = new PointF(in.readFloat(),in.readFloat());
+		position = new PointF(in.readFloat(), in.readFloat());
 		radius = in.readFloat();
 	}
 }

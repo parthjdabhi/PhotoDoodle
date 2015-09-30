@@ -11,10 +11,10 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
-import org.zakariya.photodoodle.geom.CircleLine;
-import org.zakariya.photodoodle.geom.InputPointLine;
 import org.zakariya.photodoodle.geom.Circle;
+import org.zakariya.photodoodle.geom.CircleLine;
 import org.zakariya.photodoodle.geom.InputPoint;
+import org.zakariya.photodoodle.geom.InputPointLine;
 import org.zakariya.photodoodle.geom.RectFUtil;
 
 import java.lang.ref.WeakReference;
@@ -46,7 +46,7 @@ public class LineDoodle extends Doodle {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Icepick.restoreInstanceState(this,savedInstanceState);
+		Icepick.restoreInstanceState(this, savedInstanceState);
 	}
 
 	@Override
@@ -186,7 +186,7 @@ public class LineDoodle extends Doodle {
 
 	void onTouchEventMove(@NonNull MotionEvent event) {
 		InputPoint lastPoint = currentInputPointLine.lastPoint();
-		currentInputPointLine.add(event.getX(),event.getY());
+		currentInputPointLine.add(event.getX(), event.getY());
 		InputPoint currentPoint = currentInputPointLine.lastPoint();
 
 		if (lastPoint != null && currentPoint != null) {

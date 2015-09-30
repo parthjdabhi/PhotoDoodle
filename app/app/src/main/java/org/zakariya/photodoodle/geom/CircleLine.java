@@ -24,7 +24,8 @@ public class CircleLine implements Serializable, Parcelable {
 
 	/**
 	 * Initialize a CircleLine from an inputPointLine, scaling the circles' radii by velocityScaling.
-	 * @param inputPointLine line describing drawing input
+	 *
+	 * @param inputPointLine  line describing drawing input
 	 * @param velocityScaling circles' radii are computed by multiplying velocityScaling by the dp-per-second the line was being drawn at a given point.
 	 */
 	public CircleLine(InputPointLine inputPointLine, float velocityScaling) {
@@ -106,6 +107,7 @@ public class CircleLine implements Serializable, Parcelable {
 
 	/**
 	 * Get number of circles making up list
+	 *
 	 * @return
 	 */
 	public int size() {
@@ -114,6 +116,7 @@ public class CircleLine implements Serializable, Parcelable {
 
 	/**
 	 * Check if list is empty
+	 *
 	 * @return true if list is empty
 	 */
 	public boolean isEmpty() {
@@ -139,6 +142,11 @@ public class CircleLine implements Serializable, Parcelable {
 		boundingRect = null;
 	}
 
+	public void addNoCheck(Circle circle) {
+		circles.add(circle);
+		boundingRect = null;
+	}
+
 	/**
 	 * @return The first circle in the line, or null if empty
 	 */
@@ -153,6 +161,10 @@ public class CircleLine implements Serializable, Parcelable {
 	@Nullable
 	public Circle lastCircle() {
 		return circles.isEmpty() ? null : circles.get(circles.size() - 1);
+	}
+
+	public void invalidateBoundingRect() {
+		boundingRect = null;
 	}
 
 	/**

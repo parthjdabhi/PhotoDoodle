@@ -9,6 +9,6 @@ import android.graphics.RectF;
 public class RectFUtil {
 
 	public static RectF containing(PointF a, PointF b) {
-		return new RectF(Math.min(a.x,b.x),Math.min(a.y,b.y), Math.max(a.x,b.x), Math.max(a.y,b.y));
+		return new RectF(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.max(a.x, b.x), Math.max(a.y, b.y));
 	}
 }

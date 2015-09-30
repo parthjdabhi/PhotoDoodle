@@ -27,7 +27,7 @@ public class InputPointLine {
 
 	@Nullable
 	public InputPoint lastPoint() {
-		return points.isEmpty() ? null : points.get(points.size()-1);
+		return points.isEmpty() ? null : points.get(points.size() - 1);
 	}
 
 	public void add(float x, float y) {

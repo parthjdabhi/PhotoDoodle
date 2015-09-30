@@ -52,8 +52,8 @@ public class LineTessellationDoodle extends Doodle {
 		linePaint.setStrokeWidth(1);
 		linePaint.setStyle(Paint.Style.STROKE);
 
-		float[] dashes = {2,2};
-		linePaint.setPathEffect(new DashPathEffect(dashes,0));
+		float[] dashes = {2, 2};
+		linePaint.setPathEffect(new DashPathEffect(dashes, 0));
 
 		pathPaint = new Paint();
 		pathPaint.setAntiAlias(true);
@@ -128,7 +128,7 @@ public class LineTessellationDoodle extends Doodle {
 		}
 
 		if (path != null) {
-			canvas.drawPath(path,pathPaint);
+			canvas.drawPath(path, pathPaint);
 		}
 	}
 
@@ -162,12 +162,18 @@ public class LineTessellationDoodle extends Doodle {
 
 	void onTouchEventMove(@NonNull MotionEvent event) {
 		if (draggingPoint != null) {
+
+			// update line
 			draggingPoint.position.x = event.getX();
 			draggingPoint.position.y = event.getY();
+			circleLine.invalidateBoundingRect();
 
+			// update tessellation
 			path.reset();
 			tessellator.tessellate(circleLine, path);
 		}
+
+		// trigger redraw
 		getInvalidationDelegate().invalidate(getBoundingRect());
 	}
 

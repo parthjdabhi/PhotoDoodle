@@ -21,7 +21,7 @@ public class FloatBuffer {
 
 	public void add(float v) {
 		if (size == buffer.length) {
-			buffer = Arrays.copyOf(buffer, (int)(buffer.length * 1.41));
+			buffer = Arrays.copyOf(buffer, (int) (buffer.length * 1.41));
 		}
 
 		buffer[size++] = v;

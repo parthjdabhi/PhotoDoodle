@@ -7,8 +7,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import org.zakariya.photodoodle.model.Doodle;
-
 /**
  * Created by shamyl on 8/9/15.
  */

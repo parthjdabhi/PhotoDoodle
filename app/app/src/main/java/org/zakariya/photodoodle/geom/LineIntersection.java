@@ -22,7 +22,7 @@ public class LineIntersection {
 	 * @return intersection PointF, if any intersection. Null if lines are collinear or do not intersect
 	 */
 	@Nullable
-	public PointF intersect(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
+	public static PointF intersect(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
 		// http://processingjs.org/learning/custom/intersect/
 
 		float a1, a2, b1, b2, c1, c2;
@@ -98,11 +98,11 @@ public class LineIntersection {
 	}
 
 	@Nullable
-	public PointF intersect(PointF a, PointF b, PointF c, PointF d) {
+	public static PointF intersect(PointF a, PointF b, PointF c, PointF d) {
 		return intersect(a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y);
 	}
 
-	boolean sameSign(float a, float b) {
+	private static boolean sameSign(float a, float b) {
 		return ((a * b) >= 0);
 	}
 

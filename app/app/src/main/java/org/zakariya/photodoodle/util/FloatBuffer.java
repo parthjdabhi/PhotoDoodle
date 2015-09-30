@@ -4,13 +4,14 @@ import java.util.Arrays;
 
 /**
  * Created by shamyl on 9/29/15.
+ * Represents a growable float buffer, like c++ std::vector<float>
  */
 public class FloatBuffer {
 	private float buffer[] = null;
 	private int size = 0;
 
 	public FloatBuffer() {
-		this(256);
+		this(16);
 	}
 
 	public FloatBuffer(int initialBufferSize) {
@@ -20,14 +21,30 @@ public class FloatBuffer {
 
 	public void add(float v) {
 		if (size == buffer.length) {
-			buffer = Arrays.copyOf(buffer, buffer.length * 2);
+			buffer = Arrays.copyOf(buffer, (int)(buffer.length * 1.41));
 		}
 
 		buffer[size++] = v;
 	}
 
 	public float get(int i) {
-		return buffer[i];
+		if (i < 0) {
+			return buffer[size + i];
+		} else {
+			return buffer[i];
+		}
+	}
+
+	public void set(int i, float v) {
+		if (i < 0) {
+			set(size + i, v);
+		} else {
+			if (i > size - 1) {
+				throw new ArrayIndexOutOfBoundsException(i);
+			} else {
+				buffer[i] = v;
+			}
+		}
 	}
 
 	public int size() {

@@ -15,12 +15,18 @@ import java.util.ArrayList;
  * Created by shamyl on 9/28/15.
  */
 public class CircleLine implements Serializable, Parcelable {
+	private static final float SNAP_DIST_SQUARED = 1;
 	private ArrayList<Circle> circles = new ArrayList<>();
 	private RectF boundingRect;
 
 	public CircleLine() {
 	}
 
+	/**
+	 * Initialize a CircleLine from an inputPointLine, scaling the circles' radii by velocityScaling.
+	 * @param inputPointLine line describing drawing input
+	 * @param velocityScaling circles' radii are computed by multiplying velocityScaling by the dp-per-second the line was being drawn at a given point.
+	 */
 	public CircleLine(InputPointLine inputPointLine, float velocityScaling) {
 		if (inputPointLine.size() < 2) {
 			return;
@@ -76,37 +82,82 @@ public class CircleLine implements Serializable, Parcelable {
 		}
 	}
 
+	/**
+	 * Get the array of circles. You shouldn't modify this array.
+	 *
+	 * @return ArrayList of circles making up this line
+	 */
 	public ArrayList<Circle> getCircles() {
 		return circles;
 	}
 
+	/**
+	 * Get the circle at index i. If i < 0, index from end of list
+	 *
+	 * @param i index
+	 * @return circle at index, or circle at size+index if index is negative
+	 */
 	public Circle get(int i) {
+		if (i < 0) {
+			return circles.get(circles.size() + i);
+		}
 		return circles.get(i);
 	}
 
+	/**
+	 * Get number of circles making up list
+	 * @return
+	 */
 	public int size() {
 		return circles.size();
 	}
 
+	/**
+	 * Check if list is empty
+	 * @return true if list is empty
+	 */
 	public boolean isEmpty() {
 		return circles.isEmpty();
 	}
 
+	/**
+	 * Adds a new circle to this line. If the new circle is close to the last circle in the line, the two will be averaged.
+	 *
+	 * @param circle
+	 */
 	public void add(Circle circle) {
-		circles.add(circle);
+		Circle lastCircle = this.lastCircle();
+		if (lastCircle != null && PointFUtil.distance2(circle.position, lastCircle.position) < SNAP_DIST_SQUARED) {
+			// average positions & radius of lastCircle and incoming circle
+			lastCircle.position.x = (lastCircle.position.x + circle.position.x) * 0.5f;
+			lastCircle.position.y = (lastCircle.position.y + circle.position.y) * 0.5f;
+			lastCircle.radius = (lastCircle.radius + circle.radius) * 0.5f;
+		} else {
+			circles.add(circle);
+		}
+
 		boundingRect = null;
 	}
 
+	/**
+	 * @return The first circle in the line, or null if empty
+	 */
 	@Nullable
 	public Circle firstCircle() {
 		return circles.isEmpty() ? null : circles.get(0);
 	}
 
+	/**
+	 * @return The last circle in the line, or null if empty
+	 */
 	@Nullable
 	public Circle lastCircle() {
 		return circles.isEmpty() ? null : circles.get(circles.size() - 1);
 	}
 
+	/**
+	 * @return The rect bounding this CircleLine
+	 */
 	public RectF getBoundingRect() {
 		if (boundingRect == null) {
 			if (isEmpty()) {

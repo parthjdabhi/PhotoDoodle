@@ -21,11 +21,15 @@ public class PointFUtil {
 	}
 
 	public static float length2(PointF a) {
-		return (a.x*a.x) + (a.y*a.y);
+		return (a.x * a.x) + (a.y * a.y);
 	}
 
 	public static PointF scale(PointF p, float scale) {
 		return new PointF(p.x * scale, p.y * scale);
+	}
+
+	public static PointF invert(PointF p) {
+		return new PointF(p.x * -1, p.y * -1);
 	}
 
 	public static PointF add(PointF a, PointF b) {
@@ -36,14 +40,14 @@ public class PointFUtil {
 		return new PointF(a.x - b.x, a.y - b.y);
 	}
 
-	public static Pair<PointF,Float> normalize(PointF p) {
+	public static Pair<PointF, Float> normalize(PointF p) {
 		float length = p.length() + 0.001f; // a tiny fudge to prevent div by zero
-		float rLength = 1/length;
+		float rLength = 1 / length;
 		return new Pair<>(new PointF(p.x * rLength, p.y * rLength), length);
 	}
 
-	public static Pair<PointF,Float> dir(PointF a, PointF b) {
-		return normalize(subtract(a,b));
+	public static Pair<PointF, Float> dir(PointF a, PointF b) {
+		return normalize(subtract(a, b));
 	}
 
 	public static PointF rotateCW(PointF p) {

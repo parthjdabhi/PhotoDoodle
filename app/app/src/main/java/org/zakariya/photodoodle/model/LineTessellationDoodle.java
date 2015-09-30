@@ -2,6 +2,7 @@ package org.zakariya.photodoodle.model;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -35,10 +36,11 @@ public class LineTessellationDoodle extends Doodle {
 
 	private InvalidationDelegate invalidationDelegate;
 	private CircleLine circleLine = new CircleLine();
-	private Paint linePaint, handlePaint, vectorPaint;
+	private Paint linePaint, handlePaint, pathPaint;
 	private Circle draggingPoint = null;
 	private Context context;
 	private CircleLineTessellator tessellator;
+	private Path path = new Path();
 
 	public LineTessellationDoodle(Context context) {
 		this.context = context;
@@ -46,15 +48,18 @@ public class LineTessellationDoodle extends Doodle {
 
 		linePaint = new Paint();
 		linePaint.setAntiAlias(true);
-		linePaint.setColor(0xFF000000);
+		linePaint.setColor(0xFF00FF00);
 		linePaint.setStrokeWidth(1);
 		linePaint.setStyle(Paint.Style.STROKE);
 
-		vectorPaint= new Paint();
-		vectorPaint.setAntiAlias(true);
-		vectorPaint.setColor(0xFFFF0000);
-		vectorPaint.setStrokeWidth(2);
-		vectorPaint.setStyle(Paint.Style.STROKE);
+		float[] dashes = {2,2};
+		linePaint.setPathEffect(new DashPathEffect(dashes,0));
+
+		pathPaint = new Paint();
+		pathPaint.setAntiAlias(true);
+		pathPaint.setColor(0xFF000000);
+		pathPaint.setStrokeWidth(1);
+		pathPaint.setStyle(Paint.Style.STROKE);
 
 		handlePaint = new Paint();
 		handlePaint.setAntiAlias(true);
@@ -122,7 +127,9 @@ public class LineTessellationDoodle extends Doodle {
 			canvas.drawPath(path, handlePaint);
 		}
 
-		tessellator.tessellate(circleLine, null, canvas);
+		if (path != null) {
+			canvas.drawPath(path,pathPaint);
+		}
 	}
 
 	@Override
@@ -157,6 +164,9 @@ public class LineTessellationDoodle extends Doodle {
 		if (draggingPoint != null) {
 			draggingPoint.position.x = event.getX();
 			draggingPoint.position.y = event.getY();
+
+			path.reset();
+			tessellator.tessellate(circleLine, path);
 		}
 		getInvalidationDelegate().invalidate(getBoundingRect());
 	}

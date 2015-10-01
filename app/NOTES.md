@@ -8,6 +8,9 @@ We don't want to draw the whole set of lines 60 times per second as user moves f
 	- render whole scenegraph but clipping to the above bounds
 - on touch up, add final location to stroke (per touch move), perform render of the whole stroke, add it to rendered strokes array, null out the current stroke.
 	- no need to perform another render, since rendering is up
+	
+# Nota Bene
+Android hardware accelerated drawing does not pass the clip rect to the Canvas in onDraw when invalidate(Rect) is called. Can't use for pruning.
 
 # Currently
 

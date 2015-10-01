@@ -1,5 +1,6 @@
 package org.zakariya.photodoodle.geom;
 
+import android.graphics.Path;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -18,6 +19,9 @@ public class CircleLine implements Serializable, Parcelable {
 	private static final float SNAP_DIST_SQUARED = 1;
 	private ArrayList<Circle> circles = new ArrayList<>();
 	private RectF boundingRect;
+	private Path path = new Path();
+	private boolean needsTessellation = true;
+	private CircleLineTessellator tessellator = new CircleLineTessellator();
 
 	public CircleLine() {
 	}
@@ -38,9 +42,6 @@ public class CircleLine implements Serializable, Parcelable {
 
 		// a is the previous point, b is current point, c is next point
 		InputPoint a = null, b = points.get(0), c = points.get(1);
-
-		// create bounding rect which isn't empty, so we can expand it in loop below
-		boundingRect = new RectF(b.position.x - 1, b.position.y - 1, b.position.x + 1, b.position.y + 1);
 
 		for (int i = 0, N = points.size(); i < N; i++) {
 			Circle cp = null;
@@ -71,16 +72,14 @@ public class CircleLine implements Serializable, Parcelable {
 
 			if (cp != null) {
 				this.circles.add(cp);
-				boundingRect.union(cp.position.x - cp.radius,
-						cp.position.y - cp.radius,
-						cp.position.x + cp.radius,
-						cp.position.y + cp.radius);
 			}
 
 			a = b;
 			b = c;
 			c = (i + 2 < N) ? points.get(i + 2) : null;
 		}
+
+		invalidate();
 	}
 
 	/**
@@ -139,12 +138,12 @@ public class CircleLine implements Serializable, Parcelable {
 			circles.add(circle);
 		}
 
-		boundingRect = null;
+		invalidate();
 	}
 
 	public void addNoCheck(Circle circle) {
 		circles.add(circle);
-		boundingRect = null;
+		invalidate();
 	}
 
 	/**
@@ -163,8 +162,22 @@ public class CircleLine implements Serializable, Parcelable {
 		return circles.isEmpty() ? null : circles.get(circles.size() - 1);
 	}
 
-	public void invalidateBoundingRect() {
+	public void invalidate() {
 		boundingRect = null;
+		path.reset();
+		needsTessellation = true;
+	}
+
+	/**
+	 * Get the tessellated path circumscribing this circleLine
+	 * @return Path representing this CircleLine
+	 */
+	public Path getPath() {
+		if (needsTessellation) {
+			tessellator.tessellate(this,path);
+		}
+
+		return path;
 	}
 
 	/**
@@ -205,6 +218,8 @@ public class CircleLine implements Serializable, Parcelable {
 			Circle cp = (Circle) in.readObject();
 			circles.add(cp);
 		}
+
+		invalidate();
 	}
 
 	// Parcelable
@@ -239,5 +254,7 @@ public class CircleLine implements Serializable, Parcelable {
 			Circle circle = in.readParcelable(null);
 			circles.add(circle);
 		}
+
+		invalidate();
 	}
 }

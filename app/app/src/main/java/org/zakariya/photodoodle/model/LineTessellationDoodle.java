@@ -15,7 +15,6 @@ import android.view.MotionEvent;
 import org.zakariya.photodoodle.DoodleView;
 import org.zakariya.photodoodle.geom.Circle;
 import org.zakariya.photodoodle.geom.CircleLine;
-import org.zakariya.photodoodle.geom.CircleLineTessellator;
 import org.zakariya.photodoodle.geom.PointFUtil;
 
 import java.io.BufferedInputStream;
@@ -36,35 +35,37 @@ public class LineTessellationDoodle extends Doodle {
 
 	private InvalidationDelegate invalidationDelegate;
 	private CircleLine circleLine = new CircleLine();
-	private Paint linePaint, handlePaint, pathPaint;
+	private Paint linePaint, circlePaint, pathFillPaint, pathStrokePaint;
 	private Circle draggingPoint = null;
 	private Context context;
-	private CircleLineTessellator tessellator;
-	private Path path = new Path();
 
 	public LineTessellationDoodle(Context context) {
 		this.context = context;
-		this.tessellator = new CircleLineTessellator();
 
 		linePaint = new Paint();
 		linePaint.setAntiAlias(true);
-		linePaint.setColor(0xFF00FF00);
+		linePaint.setColor(0xFF000000);
 		linePaint.setStrokeWidth(1);
 		linePaint.setStyle(Paint.Style.STROKE);
 
 		float[] dashes = {2, 2};
 		linePaint.setPathEffect(new DashPathEffect(dashes, 0));
 
-		pathPaint = new Paint();
-		pathPaint.setAntiAlias(true);
-		pathPaint.setColor(0xFF000000);
-		pathPaint.setStrokeWidth(1);
-		pathPaint.setStyle(Paint.Style.STROKE);
+		pathFillPaint = new Paint();
+		pathFillPaint.setAntiAlias(true);
+		pathFillPaint.setColor(0x880099FF);
+		pathFillPaint.setStyle(Paint.Style.FILL);
 
-		handlePaint = new Paint();
-		handlePaint.setAntiAlias(true);
-		handlePaint.setColor(0x5533ffff);
-		handlePaint.setStyle(Paint.Style.FILL);
+		pathStrokePaint = new Paint();
+		pathStrokePaint.setAntiAlias(true);
+		pathStrokePaint.setColor(0xFF000000);
+		pathStrokePaint.setStrokeWidth(1);
+		pathStrokePaint.setStyle(Paint.Style.STROKE);
+
+		circlePaint = new Paint();
+		circlePaint.setAntiAlias(true);
+		circlePaint.setColor(0x5533ffff);
+		circlePaint.setStyle(Paint.Style.FILL);
 
 		if (!loadPoints()) {
 			circleLine.add(new Circle(new PointF(50, 100), 10));
@@ -106,8 +107,13 @@ public class LineTessellationDoodle extends Doodle {
 		canvas.drawColor(0xFFFFFFFF);
 
 
-		// draw lines connecting circles
 		if (!circleLine.isEmpty()) {
+
+			// draw tessellated path
+			canvas.drawPath(circleLine.getPath(), pathFillPaint);
+			canvas.drawPath(circleLine.getPath(), pathStrokePaint);
+
+			// draw lines connecting circles
 			Circle circle = circleLine.get(0);
 			Path path = new Path();
 			path.moveTo(circle.position.x, circle.position.y);
@@ -118,17 +124,13 @@ public class LineTessellationDoodle extends Doodle {
 
 			canvas.drawPath(path, linePaint);
 
+			// draw circles
 			path = new Path();
 			for (int i = 0; i < circleLine.size(); i++) {
 				circle = circleLine.get(i);
 				path.addOval(circle.getBoundingRect(), Path.Direction.CW);
 			}
-
-			canvas.drawPath(path, handlePaint);
-		}
-
-		if (path != null) {
-			canvas.drawPath(path, pathPaint);
+			canvas.drawPath(path, circlePaint);
 		}
 	}
 
@@ -166,11 +168,7 @@ public class LineTessellationDoodle extends Doodle {
 			// update line
 			draggingPoint.position.x = event.getX();
 			draggingPoint.position.y = event.getY();
-			circleLine.invalidateBoundingRect();
-
-			// update tessellation
-			path.reset();
-			tessellator.tessellate(circleLine, path);
+			circleLine.invalidate();
 		}
 
 		// trigger redraw

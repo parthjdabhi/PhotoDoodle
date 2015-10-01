@@ -150,18 +150,10 @@ public class LineDoodle extends Doodle {
 		}
 
 		for (CircleLine circleLine : circleLines) {
-			for (Circle circle : circleLine.getCircles()) {
-				if (boundingRect.isEmpty()) {
-					boundingRect.set(circle.position.x - circle.radius,
-							circle.position.y - circle.radius,
-							circle.position.x + circle.radius,
-							circle.position.y + circle.radius);
-				} else {
-					boundingRect.union(circle.position.x - circle.radius,
-							circle.position.y - circle.radius,
-							circle.position.x + circle.radius,
-							circle.position.y + circle.radius);
-				}
+			if (boundingRect.isEmpty()) {
+				boundingRect = circleLine.getBoundingRect();
+			} else {
+				boundingRect.union(circleLine.getBoundingRect());
 			}
 		}
 	}

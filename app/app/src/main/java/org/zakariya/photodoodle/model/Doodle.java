@@ -23,6 +23,12 @@ public abstract class Doodle {
 		 * @param rect the region which needs to be redrawn
 		 */
 		void invalidate(RectF rect);
+
+		/**
+		 * Get the full bounds of the surface which will be invalidated
+		 * @return RectF describing full bounds of view/surface
+		 */
+		RectF getBounds();
 	}
 
 	public abstract DoodleView.InputDelegate inputDelegate();

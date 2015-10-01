@@ -5,6 +5,7 @@ import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import org.zakariya.photodoodle.util.Accumulator;
 
@@ -16,6 +17,9 @@ import java.util.ArrayList;
  * Created by shamyl on 9/28/15.
  */
 public class CircleLine implements Serializable, Parcelable {
+
+	private static final String TAG = "CircleLine";
+
 	private static final float SNAP_DIST_SQUARED = 1;
 	private ArrayList<Circle> circles = new ArrayList<>();
 	private RectF boundingRect;
@@ -30,9 +34,11 @@ public class CircleLine implements Serializable, Parcelable {
 	 * Initialize a CircleLine from an inputPointLine, scaling the circles' radii by velocityScaling.
 	 *
 	 * @param inputPointLine  line describing drawing input
-	 * @param velocityScaling circles' radii are computed by multiplying velocityScaling by the dp-per-second the line was being drawn at a given point.
+	 * @param minDiameter the min diameter of circles added for slow moving line segments
+	 * @param maxDiameter the max diameter of circles added for fast moving line segments
+	 * @param maxVel the max velocity of line segments to produce maxDiameter circles
 	 */
-	public CircleLine(InputPointLine inputPointLine, float velocityScaling) {
+	public CircleLine(InputPointLine inputPointLine, float minDiameter, float maxDiameter, float maxVel) {
 		if (inputPointLine.size() < 2) {
 			return;
 		}
@@ -42,6 +48,7 @@ public class CircleLine implements Serializable, Parcelable {
 
 		// a is the previous point, b is current point, c is next point
 		InputPoint a = null, b = points.get(0), c = points.get(1);
+		final float thicknessDelta = maxDiameter - minDiameter;
 
 		for (int i = 0, N = points.size(); i < N; i++) {
 			Circle cp = null;
@@ -61,12 +68,21 @@ public class CircleLine implements Serializable, Parcelable {
 
 					long millis = b.timestamp - a.timestamp;
 					float dpPerSecond = dist / (millis / 1000f);
-					float size = dpPerSecond * velocityScaling;
+					float velScale = dpPerSecond / maxVel;
+					if (velScale > 1) {
+						velScale = 1;
+					}
+
+					velScale *= velScale;
+
+					float diameter = minDiameter + velScale * thicknessDelta;
+
+					Log.i(TAG, "dpPerSecond: " + dpPerSecond + " velScale: " + velScale + " diameter: " + diameter);
 
 					// smooth the size
-					size = accumulator.add(size);
+					diameter = accumulator.add(diameter);
 
-					cp = new Circle(b.position, size / 2);
+					cp = new Circle(b.position, diameter * 0.5f);
 				}
 			}
 

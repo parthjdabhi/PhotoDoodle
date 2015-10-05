@@ -1,3 +1,7 @@
+# Line Smoothing
+
+I don't think Quadratics are going to cut it. They don't handle the S-curve scenario...
+
 # Drawing
 
 Performance is an issue. We probably want to render strokes to start backing bitmap.
@@ -8,7 +12,7 @@ Performance is an issue. We probably want to render strokes to start backing bit
 	Strokes are drawn in whatever color
 	Eraser is drawn using erase blend mode
 	
-	
+
  
  
 	

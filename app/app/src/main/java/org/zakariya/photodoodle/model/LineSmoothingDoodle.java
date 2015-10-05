@@ -35,22 +35,22 @@ public class LineSmoothingDoodle extends Doodle {
 
 	private InputPointLine inputPointLine = new InputPointLine();
 	private InvalidationDelegate invalidationDelegate;
-	private Paint inputLinePaint, controlPointPaint, smoothedLinePaint;
+	private Paint handlePaint, controlPointPaint, smoothedLinePaint;
 	private InputPoint draggingPoint;
 	private Context context;
 
 	public LineSmoothingDoodle(Context context) {
 		this.context = context;
 
-		inputLinePaint = new Paint();
-		inputLinePaint.setAntiAlias(true);
-		inputLinePaint.setColor(0xFFFF0000);
-		inputLinePaint.setStyle(Paint.Style.FILL);
+		handlePaint = new Paint();
+		handlePaint.setAntiAlias(true);
+		handlePaint.setColor(0x99FF0000);
+		handlePaint.setStyle(Paint.Style.FILL);
 
 		controlPointPaint = new Paint();
 		controlPointPaint.setAntiAlias(true);
-		controlPointPaint.setColor(0xFF00FF00);
-		controlPointPaint.setStyle(Paint.Style.FILL);
+		controlPointPaint.setColor(0x9900FF00);
+		controlPointPaint.setStyle(Paint.Style.STROKE);
 
 		smoothedLinePaint = new Paint();
 		smoothedLinePaint.setAntiAlias(true);
@@ -96,15 +96,20 @@ public class LineSmoothingDoodle extends Doodle {
 			for (int i = 0; i < points.size() - 1; i++) {
 				InputPoint a = points.get(i);
 				InputPoint b = points.get(i + 1);
-				PointF controlPoint = LineIntersection.infiniteLineIntersection(a.position,a.tangent,b.position,b.tangent);
+				PointF controlPoint = LineIntersection.infiniteLineIntersection(a.position, a.tangent, b.position, b.tangent);
 				if (controlPoint != null) {
-					canvas.drawCircle(controlPoint.x, controlPoint.y, HandleRadius, controlPointPaint);
+					canvas.drawCircle(controlPoint.x, controlPoint.y, HandleRadius*1.5f, controlPointPaint);
 				}
 			}
 
 			// draw dots representing the input points
 			for (InputPoint point : points) {
-				canvas.drawCircle(point.position.x, point.position.y, HandleRadius, inputLinePaint);
+				canvas.drawCircle(point.position.x, point.position.y, HandleRadius, handlePaint);
+
+				PointF a = new PointF(point.position.x - point.tangent.x * 2 * HandleRadius, point.position.y - point.tangent.y * 2 * HandleRadius);
+				PointF b = new PointF(point.position.x + point.tangent.x * 2 * HandleRadius, point.position.y + point.tangent.y * 2 * HandleRadius);
+
+				canvas.drawLine(a.x,a.y,b.x,b.y, handlePaint);
 			}
 
 		} else {

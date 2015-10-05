@@ -22,22 +22,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7fde0eb8-423e-4c88-926f-eb3a8950460c" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/LineSmoothingDoodle.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/QuadraticBezierInterpolator.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/BezierInterpolator.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/CubicBezierInterpolator.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/BezierPoint.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/CubicBezierPoint.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/Circle.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/Circle.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/CircleLine.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/CircleLine.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/CircleLineTessellator.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/CircleLineTessellator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/Doodle.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/Doodle.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/DoodleFragment.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/DoodleFragment.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/InputPoint.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/InputPoint.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/InputPointLine.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/InputPointLine.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/LineDoodle.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/LineDoodle.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/LineIntersection.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/LineIntersection.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/LineSmoothingDoodle.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/LineSmoothingDoodle.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/NOTES.md" afterPath="$PROJECT_DIR$/NOTES.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/PointFUtil.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/PointFUtil.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dictionaries/shamyl.xml" afterPath="$PROJECT_DIR$/.idea/dictionaries/shamyl.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="app.iws" />
@@ -66,11 +52,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="NOTES.md" pinned="false" current-in-tab="false">
+      <file leaf-file-name="NOTES.md" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/NOTES.md">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-6.206897">
-              <caret line="10" column="4" selection-start-line="10" selection-start-column="4" selection-end-line="10" selection-end-column="4" />
+            <state vertical-scroll-proportion="0.6101695">
+              <caret line="19" column="144" selection-start-line="19" selection-start-column="144" selection-end-line="19" selection-end-column="144" />
               <folding />
             </state>
           </provider>
@@ -99,11 +85,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="InputPointLine.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="InputPointLine.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/InputPointLine.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6688207">
-              <caret line="118" column="16" selection-start-line="118" selection-start-column="16" selection-end-line="118" selection-end-column="16" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="111" column="25" selection-start-line="111" selection-start-column="25" selection-end-line="111" selection-end-column="25" />
               <folding>
                 <element signature="e#591#592#0" expanded="true" />
                 <element signature="e#611#612#0" expanded="true" />
@@ -126,15 +112,15 @@
         <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/LineSmoothingDoodle.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="156" column="40" selection-start-line="156" selection-start-column="40" selection-end-line="156" selection-end-column="40" />
+              <caret line="61" column="40" selection-start-line="61" selection-start-column="40" selection-end-line="61" selection-end-column="40" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#2327#2328#0" expanded="true" />
-                <element signature="e#2373#2374#0" expanded="true" />
-                <element signature="e#3280#3281#0" expanded="true" />
-                <element signature="e#3317#3318#0" expanded="true" />
-                <element signature="e#3535#3536#0" expanded="true" />
-                <element signature="e#3569#3570#0" expanded="true" />
+                <element signature="e#2314#2315#0" expanded="true" />
+                <element signature="e#2360#2361#0" expanded="true" />
+                <element signature="e#3599#3600#0" expanded="true" />
+                <element signature="e#3636#3637#0" expanded="true" />
+                <element signature="e#3854#3855#0" expanded="true" />
+                <element signature="e#3888#3889#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -1627,7 +1613,6 @@
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/CircleLine.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/Doodle.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/LineDoodle.java" />
-        <option value="$PROJECT_DIR$/NOTES.md" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/BezierInterpolator.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/CubicBezierInterpolator.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/QuadraticBezierInterpolator.java" />
@@ -1635,8 +1620,9 @@
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/LineIntersection.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/DoodleFragment.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/InputPoint.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/LineSmoothingDoodle.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/InputPointLine.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/LineSmoothingDoodle.java" />
+        <option value="$PROJECT_DIR$/NOTES.md" />
       </list>
     </option>
   </component>
@@ -2479,17 +2465,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/NOTES.md">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-6.206897">
-          <caret line="10" column="4" selection-start-line="10" selection-start-column="4" selection-end-line="10" selection-end-column="4" />
-          <folding />
-        </state>
-      </provider>
-      <provider editor-type-id="MarkdownPreviewEditor">
-        <state />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/CircleLineTessellator.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.71899885">
@@ -2548,26 +2523,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/LineSmoothingDoodle.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="156" column="40" selection-start-line="156" selection-start-column="40" selection-end-line="156" selection-end-column="40" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2327#2328#0" expanded="true" />
-            <element signature="e#2373#2374#0" expanded="true" />
-            <element signature="e#3280#3281#0" expanded="true" />
-            <element signature="e#3317#3318#0" expanded="true" />
-            <element signature="e#3535#3536#0" expanded="true" />
-            <element signature="e#3569#3570#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/InputPointLine.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6688207">
-          <caret line="118" column="16" selection-start-line="118" selection-start-column="16" selection-end-line="118" selection-end-column="16" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="111" column="25" selection-start-line="111" selection-start-column="25" selection-end-line="111" selection-end-column="25" />
           <folding>
             <element signature="e#591#592#0" expanded="true" />
             <element signature="e#611#612#0" expanded="true" />
@@ -2583,6 +2542,33 @@
             <element signature="e#2524#2525#0" expanded="true" />
           </folding>
         </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/LineSmoothingDoodle.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="61" column="40" selection-start-line="61" selection-start-column="40" selection-end-line="61" selection-end-column="40" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#2314#2315#0" expanded="true" />
+            <element signature="e#2360#2361#0" expanded="true" />
+            <element signature="e#3599#3600#0" expanded="true" />
+            <element signature="e#3636#3637#0" expanded="true" />
+            <element signature="e#3854#3855#0" expanded="true" />
+            <element signature="e#3888#3889#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/NOTES.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.6101695">
+          <caret line="19" column="144" selection-start-line="19" selection-start-column="144" selection-end-line="19" selection-end-column="144" />
+          <folding />
+        </state>
+      </provider>
+      <provider editor-type-id="MarkdownPreviewEditor">
+        <state />
       </provider>
     </entry>
   </component>

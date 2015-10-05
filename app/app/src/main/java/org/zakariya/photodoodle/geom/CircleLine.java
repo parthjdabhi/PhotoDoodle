@@ -31,12 +31,12 @@ public class CircleLine implements Serializable, Parcelable {
 	}
 
 	/**
-	 * Initialize a CircleLine from an inputPointLine, scaling the circles' radii by velocityScaling.
+	 * Initialize start CircleLine from an inputPointLine, scaling the circles' radii by velocityScaling.
 	 *
-	 * @param inputPointLine  line describing drawing input
-	 * @param minDiameter the min diameter of circles added for slow moving line segments
-	 * @param maxDiameter the max diameter of circles added for fast moving line segments
-	 * @param maxVel the max velocity of line segments to produce maxDiameter circles
+	 * @param inputPointLine line describing drawing input
+	 * @param minDiameter    the min diameter of circles added for slow moving line segments
+	 * @param maxDiameter    the max diameter of circles added for fast moving line segments
+	 * @param maxVel         the max velocity of line segments to produce maxDiameter circles
 	 */
 	public CircleLine(InputPointLine inputPointLine, float minDiameter, float maxDiameter, float maxVel) {
 		if (inputPointLine.size() < 2) {
@@ -46,7 +46,7 @@ public class CircleLine implements Serializable, Parcelable {
 		Accumulator accumulator = new Accumulator(16, 0);
 		ArrayList<InputPoint> points = inputPointLine.getPoints();
 
-		// a is the previous point, b is current point, c is next point
+		// start is the previous point, b is current point, c is next point
 		InputPoint a = null, b = points.get(0), c = points.get(1);
 		final float thicknessDelta = maxDiameter - minDiameter;
 
@@ -63,7 +63,7 @@ public class CircleLine implements Serializable, Parcelable {
 				}
 			} else {
 				if (b != null) { // b should always be nonnull, just silencing compiler warnings
-					// this is a point in the sequence middle
+					// this is start point in the sequence middle
 					float dist = PointFUtil.distance(a.position, b.position);
 
 					long millis = b.timestamp - a.timestamp;
@@ -139,7 +139,7 @@ public class CircleLine implements Serializable, Parcelable {
 	}
 
 	/**
-	 * Adds a new circle to this line. If the new circle is close to the last circle in the line, the two will be averaged.
+	 * Adds start new circle to this line. If the new circle is close to the last circle in the line, the two will be averaged.
 	 *
 	 * @param circle
 	 */
@@ -186,11 +186,12 @@ public class CircleLine implements Serializable, Parcelable {
 
 	/**
 	 * Get the tessellated path circumscribing this circleLine
+	 *
 	 * @return Path representing this CircleLine
 	 */
 	public Path getPath() {
 		if (needsTessellation) {
-			tessellator.tessellate(this,path);
+			tessellator.tessellate(this, path);
 		}
 
 		return path;

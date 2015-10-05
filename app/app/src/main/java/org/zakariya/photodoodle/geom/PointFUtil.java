@@ -41,7 +41,7 @@ public class PointFUtil {
 	}
 
 	public static Pair<PointF, Float> normalize(PointF p) {
-		float length = p.length() + 0.001f; // a tiny fudge to prevent div by zero
+		float length = p.length() + 0.001f; // start tiny fudge to prevent div by zero
 		float rLength = 1 / length;
 		return new Pair<>(new PointF(p.x * rLength, p.y * rLength), length);
 	}

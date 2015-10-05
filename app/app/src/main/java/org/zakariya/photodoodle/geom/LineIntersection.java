@@ -9,101 +9,102 @@ import android.support.annotation.Nullable;
 public class LineIntersection {
 
 	/**
-	 * Compute intersection, if any, of two line segments
+	 * Compute intersection of two line segments
 	 *
-	 * @param x1 x coordinate of start of first line segment
-	 * @param y1 y coordinate of start of first line segment
-	 * @param x2 x coordinate of end of first line segment
-	 * @param y2 y coordinate of end of first line segment
-	 * @param x3 x coordinate of start of second line segment
-	 * @param y3 y coordinate of start of second line segment
-	 * @param x4 x coordinate of end of second line segment
-	 * @param y4 y coordinate of end of second line segment
-	 * @return intersection PointF, if any intersection. Null if lines are collinear or do not intersect
+	 * @param a0 start point of segment A
+	 * @param a1 end point of segment A
+	 * @param b0 start point of segment B
+	 * @param b1 end point of segment B
+	 * @return intersection point, iff the two segments intersect. Null otherwise.
 	 */
 	@Nullable
-	public static PointF intersect(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
-		// http://processingjs.org/learning/custom/intersect/
-
-		float a1, a2, b1, b2, c1, c2;
-		float r1, r2, r3, r4;
-		float denom, offset, num;
-
-		// Compute a1, b1, c1, where line joining points 1 and 2
-		// is "a1 x + b1 y + c1 = 0".
-		a1 = y2 - y1;
-		b1 = x1 - x2;
-		c1 = (x2 * y1) - (x1 * y2);
-
-		// Compute r3 and r4.
-		r3 = ((a1 * x3) + (b1 * y3) + c1);
-		r4 = ((a1 * x4) + (b1 * y4) + c1);
-
-		// Check signs of r3 and r4. If both point 3 and point 4 lie on
-		// same side of line 1, the line segments do not intersect.
-		if ((r3 != 0) && (r4 != 0) && sameSign(r3, r4)) {
-			return null;
-		}
-
-		// Compute a2, b2, c2
-		a2 = y4 - y3;
-		b2 = x3 - x4;
-		c2 = (x4 * y3) - (x3 * y4);
-
-		// Compute r1 and r2
-		r1 = (a2 * x1) + (b2 * y1) + c2;
-		r2 = (a2 * x2) + (b2 * y2) + c2;
-
-		// Check signs of r1 and r2. If both point 1 and point 2 lie
-		// on same side of second line segment, the line segments do
-		// not intersect.
-		if ((r1 != 0) && (r2 != 0) && (sameSign(r1, r2))) {
-			return null;
-		}
-
-		//Line segments intersect: compute intersection point.
-		denom = (a1 * b2) - (a2 * b1);
-
-		if (denom == 0) {
-			return null;
-		}
-
-		if (denom < 0) {
-			offset = -denom / 2;
-		} else {
-			offset = denom / 2;
-		}
-
-		float x, y;
-
-		// The denom/2 is to get rounding instead of truncating. It
-		// is added or subtracted to the numerator, depending upon the
-		// sign of the numerator.
-		num = (b1 * c2) - (b2 * c1);
-		if (num < 0) {
-			x = (num - offset) / denom;
-		} else {
-			x = (num + offset) / denom;
-		}
-
-		num = (a2 * c1) - (a1 * c2);
-		if (num < 0) {
-			y = (num - offset) / denom;
-		} else {
-			y = (num + offset) / denom;
-		}
-
-		// lines_intersect
-		return new PointF(x, y);
+	public static PointF lineSegmentIntersection(PointF a0, PointF a1, PointF b0, PointF b1) {
+		return lineSegmentIntersection(a0.x, a0.y, a1.x, a1.y, b0.x, b0.y, b1.x, b1.y);
 	}
 
+	/**
+	 * Compute intersection of two line segments
+	 *
+	 * @param a0x x coord of start of segment A
+	 * @param a0y y coord of start of segment A
+	 * @param a1x x coord of end of segment A
+	 * @param a1y y coord of end of segment A
+	 * @param b0x x coord of start of segment B
+	 * @param b0y y coord of start of segment B
+	 * @param b1x x coord of end of segment B
+	 * @param b1y y coord of end of segment B
+	 * @return intersection point, iff the two segments intersect. Null otherwise.
+	 */
 	@Nullable
-	public static PointF intersect(PointF a, PointF b, PointF c, PointF d) {
-		return intersect(a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y);
+	public static PointF lineSegmentIntersection(float a0x, float a0y, float a1x, float a1y, float b0x, float b0y, float b1x, float b1y) {
+		// cribbed from: http://wiki.processing.org/w/Line-Line_intersection
+		float adx = a1x - a0x;
+		float ady = a1y - a0y;
+		float bdx = b1x - b0x;
+		float bdy = b1y - b0y;
+		float ad_dot_bd = adx * bdy - ady * bdx;
+
+		if (Math.abs(ad_dot_bd) < 1e-4) {
+			return null;
+		}
+
+		float abx = b0x - a0x;
+		float aby = b0y - a0y;
+		float t = (abx * bdy - aby * bdx) / ad_dot_bd;
+
+		if (t < 1e-4 || t > 1 - 1e-4) {
+			return null;
+		}
+
+		float u = (abx * ady - aby * adx) / ad_dot_bd;
+		if (u < 1e-4 || u > 1 - 1e-4) {
+			return null;
+		}
+
+		return new PointF(a0x + t * adx, a0y + t * ady);
 	}
 
-	private static boolean sameSign(float a, float b) {
-		return ((a * b) >= 0);
+	/**
+	 * Compute intersection of two infinite-length lines
+	 *
+	 * @param a    coordinate of a point on line A
+	 * @param aDir direction of line A
+	 * @param b    coordinate of a point on line B
+	 * @param bDir direction of line B
+	 * @return intersection point iff lines aren't parallel. null if they are parallel
+	 */
+	@Nullable
+	public static PointF infiniteLineIntersection(PointF a, PointF aDir, PointF b, PointF bDir) {
+		return infiniteLineIntersection(a.x, a.y, aDir.x, aDir.y, b.x, b.y, bDir.x, bDir.y);
+	}
+
+	/**
+	 * Compute intersection of two infinite-length lines
+	 *
+	 * @param ax  x coord of a point on line A
+	 * @param ay  y coord of a point on line A
+	 * @param adx x direction of line A
+	 * @param ady y direction of line A
+	 * @param bx  x coord of a point on line B
+	 * @param by  y coord of a point on line B
+	 * @param bdx x direction of line B
+	 * @param bdy y direction of line B
+	 * @return intersection point iff lines aren't parallel. null if they are parallel
+	 */
+	@Nullable
+	public static PointF infiniteLineIntersection(float ax, float ay, float adx, float ady, float bx, float by, float bdx, float bdy) {
+		// cribbed from: http://wiki.processing.org/w/Line-Line_intersection
+
+		float dot = adx * bdy - ady * bdx;
+		if (Math.abs(dot) < 1e-4) {
+			return null;
+		}
+
+		float abx = bx - ax;
+		float aby = by - ay;
+		float t = (abx * bdy - aby * bdx) / dot;
+
+		return new PointF(ax + t * adx, ay + t * ady);
 	}
 
 }

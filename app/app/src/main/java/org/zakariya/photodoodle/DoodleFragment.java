@@ -10,8 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.zakariya.photodoodle.model.Doodle;
-import org.zakariya.photodoodle.model.LineDoodle;
-import org.zakariya.photodoodle.model.LineTessellationDoodle;
+import org.zakariya.photodoodle.model.LineSmoothingDoodle;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -32,7 +31,7 @@ public class DoodleFragment extends Fragment {
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
-		doodle = new LineDoodle();
+		doodle = new LineSmoothingDoodle(getActivity());
 		if (savedInstanceState != null) {
 			doodle.onCreate(savedInstanceState);
 		}
@@ -70,7 +69,7 @@ public class DoodleFragment extends Fragment {
 
 			@Override
 			public RectF getBounds() {
-				return new RectF(0,0,doodleView.getWidth(),doodleView.getHeight());
+				return new RectF(0, 0, doodleView.getWidth(), doodleView.getHeight());
 			}
 		});
 

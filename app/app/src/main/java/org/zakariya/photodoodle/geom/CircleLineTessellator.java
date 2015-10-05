@@ -18,7 +18,7 @@ public class CircleLineTessellator {
 	}
 
 	/**
-	 * Tessellate circles into a Path object suitable for rendering
+	 * Tessellate circles into start Path object suitable for rendering
 	 *
 	 * @param circles list of Circle instances, in order
 	 * @param path    destination Path into which tessellated closed path will be added, if non-null
@@ -75,7 +75,7 @@ public class CircleLineTessellator {
 
 			CircleLine sanitized = new CircleLine();
 
-			Circle a,b,c;
+			Circle a, b, c;
 
 			// handle first circle manually since loop handles the rest. only add first circle if
 			// it's not contained by the second circle
@@ -129,7 +129,7 @@ public class CircleLineTessellator {
 			// if aLeftAttachPoint->bLeftAttachPoint intersects line defined by previousSeg,
 			// update leftCoordinates[-2,-1] to that intersection, and only add bLeftAttachPoint
 
-			PointF intersection = LineIntersection.intersect(previousSegStartX, previousSegStartY, previousSegEndX, previousSegEndY, aLeftAttachPoint.x, aLeftAttachPoint.y, bLeftAttachPoint.x, bLeftAttachPoint.y);
+			PointF intersection = LineIntersection.lineSegmentIntersection(previousSegStartX, previousSegStartY, previousSegEndX, previousSegEndY, aLeftAttachPoint.x, aLeftAttachPoint.y, bLeftAttachPoint.x, bLeftAttachPoint.y);
 
 			if (intersection != null) {
 				leftCoordinates.set(-2, intersection.x);
@@ -158,7 +158,7 @@ public class CircleLineTessellator {
 			// if aRightAttachPoint->bRightAttachPoint intersects line defined by previousSeg,
 			// update rightCoordinates[-2,-1] to that intersection, and only add bLeftAttachPoint
 
-			PointF intersection = LineIntersection.intersect(previousSegStartX, previousSegStartY, previousSegEndX, previousSegEndY, aRightAttachPoint.x, aRightAttachPoint.y, bRightAttachPoint.x, bRightAttachPoint.y);
+			PointF intersection = LineIntersection.lineSegmentIntersection(previousSegStartX, previousSegStartY, previousSegEndX, previousSegEndY, aRightAttachPoint.x, aRightAttachPoint.y, bRightAttachPoint.x, bRightAttachPoint.y);
 
 			if (intersection != null) {
 				rightCoordinates.set(-2, intersection.x);

@@ -26,6 +26,7 @@ public abstract class Doodle {
 
 		/**
 		 * Get the full bounds of the surface which will be invalidated
+		 *
 		 * @return RectF describing full bounds of view/surface
 		 */
 		RectF getBounds();

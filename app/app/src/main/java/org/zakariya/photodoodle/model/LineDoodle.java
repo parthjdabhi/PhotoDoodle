@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
-import org.zakariya.photodoodle.geom.Circle;
 import org.zakariya.photodoodle.geom.CircleLine;
 import org.zakariya.photodoodle.geom.InputPoint;
 import org.zakariya.photodoodle.geom.InputPointLine;
@@ -102,7 +101,7 @@ public class LineDoodle extends Doodle {
 
 		// now draw our control points
 		for (CircleLine line : circleLines) {
-			if (!line.isEmpty() && RectF.intersects(invalidationRect,line.getBoundingRect())) {
+			if (!line.isEmpty() && RectF.intersects(invalidationRect, line.getBoundingRect())) {
 				canvas.drawPath(line.getPath(), strokePaint);
 			}
 		}

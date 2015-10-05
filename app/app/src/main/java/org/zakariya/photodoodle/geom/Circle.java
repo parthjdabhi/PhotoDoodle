@@ -33,7 +33,7 @@ public class Circle implements Serializable, Parcelable {
 
 	/**
 	 * Check if this circle is bigger than another circle, and completely contains it.
-	 * Note that a.contains(b) != b.contains(a)
+	 * Note that start.contains(b) != b.contains(start)
 	 *
 	 * @param other the circle to check if its inside this circle
 	 * @return true if other is completely inside this circle

@@ -9,13 +9,13 @@ import static org.zakariya.photodoodle.geom.PointFUtil.scale;
 /**
  * Created by shamyl on 9/2/15.
  */
-class BezierInterpolator {
-	BezierPoint start, end;
+class CubicBezierInterpolator {
+	CubicBezierPoint start, end;
 
-	public BezierInterpolator() {
+	public CubicBezierInterpolator() {
 	}
 
-	public BezierInterpolator(BezierPoint start, BezierPoint end) {
+	public CubicBezierInterpolator(CubicBezierPoint start, CubicBezierPoint end) {
 		this.start = start;
 		this.end = end;
 	}
@@ -45,7 +45,7 @@ class BezierInterpolator {
 
 	/**
 	 * @param scale the scale at which the line is being rendered
-	 * @return An estimated number of subdivisions to divide this bezier curve into to represent a visually smooth curve.
+	 * @return An estimated number of subdivisions to divide this bezier curve into to represent start visually smooth curve.
 	 */
 	int getRecommendedSubdivisions(float scale) {
 		// from http://ciechanowski.me/blog/2014/02/18/drawing-bezier-curves/

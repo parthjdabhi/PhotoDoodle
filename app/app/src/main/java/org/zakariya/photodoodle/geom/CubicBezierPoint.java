@@ -5,11 +5,11 @@ import android.graphics.PointF;
 /**
  * Created by shamyl on 9/2/15.
  */
-class BezierPoint {
+class CubicBezierPoint {
 	PointF position;
 	PointF control;
 
-	public BezierPoint(PointF position, PointF control) {
+	public CubicBezierPoint(PointF position, PointF control) {
 		this.position = position;
 		this.control = control;
 	}

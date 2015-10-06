@@ -47,7 +47,7 @@ public class PointFUtil {
 	}
 
 	public static Pair<PointF, Float> dir(PointF a, PointF b) {
-		return normalize(subtract(a, b));
+		return normalize(subtract(b, a));
 	}
 
 	public static PointF rotateCW(PointF p) {

@@ -83,7 +83,6 @@ public class InputPointLine implements Serializable, Parcelable {
 			PointF half = new PointF(abPrime.x + bcPrime.x, abPrime.y + bcPrime.y);
 			if (PointFUtil.length2(half) > 1e-4) {
 				b.tangent = PointFUtil.normalize(PointFUtil.rotateCW(half)).first;
-				;
 			} else {
 				b.tangent = bcPrime;
 			}
@@ -140,8 +139,8 @@ public class InputPointLine implements Serializable, Parcelable {
 
 				a.tangent = dir.first;
 			} else if (i == N - 1) {
-				InputPoint b = points.get(i);
 				InputPoint a = points.get(i - 1);
+				InputPoint b = points.get(i);
 				Pair<PointF, Float> dir = PointFUtil.dir(a.position, b.position);
 
 				b.tangent = dir.first;
@@ -159,7 +158,6 @@ public class InputPointLine implements Serializable, Parcelable {
 				PointF half = new PointF(abPrime.x + bcPrime.x, abPrime.y + bcPrime.y);
 				if (PointFUtil.length2(half) > 1e-4) {
 					b.tangent = PointFUtil.normalize(PointFUtil.rotateCW(half)).first;
-					;
 				} else {
 					b.tangent = bcPrime;
 				}

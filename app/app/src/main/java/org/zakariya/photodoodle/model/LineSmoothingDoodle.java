@@ -3,6 +3,7 @@ package org.zakariya.photodoodle.model;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
@@ -11,9 +12,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
+import org.zakariya.photodoodle.geom.CubicBezierInterpolator;
 import org.zakariya.photodoodle.geom.InputPoint;
 import org.zakariya.photodoodle.geom.InputPointLine;
-import org.zakariya.photodoodle.geom.LineIntersection;
 import org.zakariya.photodoodle.geom.PointFUtil;
 
 import java.io.BufferedInputStream;
@@ -93,12 +94,45 @@ public class LineSmoothingDoodle extends Doodle {
 		if (inputPointLine != null) {
 
 			ArrayList<InputPoint> points = inputPointLine.getPoints();
+			CubicBezierInterpolator cbi = new CubicBezierInterpolator();
 			for (int i = 0; i < points.size() - 1; i++) {
 				InputPoint a = points.get(i);
 				InputPoint b = points.get(i + 1);
-				PointF controlPoint = LineIntersection.infiniteLineIntersection(a.position, a.tangent, b.position, b.tangent);
-				if (controlPoint != null) {
-					canvas.drawCircle(controlPoint.x, controlPoint.y, HandleRadius*1.5f, controlPointPaint);
+
+				float length = PointFUtil.distance(a.position, b.position) / 4;
+				PointF controlPointA = PointFUtil.add(a.position, PointFUtil.scale(a.tangent, length));
+				PointF controlPointB = PointFUtil.add(b.position, PointFUtil.scale(b.tangent, -length));
+
+				controlPointPaint.setColor(0x9900FF00);
+				canvas.drawCircle(controlPointA.x, controlPointA.y, HandleRadius * 1.5f, controlPointPaint);
+
+				controlPointPaint.setColor(0x990000FF);
+				canvas.drawCircle(controlPointB.x, controlPointB.y, HandleRadius * 1.5f, controlPointPaint);
+
+				// now tessellate
+				PointF bp = new PointF();
+				Path path = new Path();
+				cbi.set(a.position,controlPointA,controlPointB,b.position);
+				int subdivisions = cbi.getRecommendedSubdivisions(1);
+
+				if (i == 0) {
+					Log.i(TAG, "subdivisions: " + subdivisions);
+				}
+
+				if (subdivisions > 2) {
+
+					path.moveTo(a.position.x, a.position.y);
+					float dt = 1f / subdivisions;
+					float t = dt;
+					for (int j = 0; j < subdivisions; j++, t+= dt) {
+						cbi.getBezierPoint(t, bp);
+						path.lineTo(bp.x, bp.y);
+					}
+
+					canvas.drawPath(path,smoothedLinePaint);
+
+				} else {
+					canvas.drawLine(a.position.x, a.position.y, b.position.x, b.position.y, smoothedLinePaint);
 				}
 			}
 
@@ -106,10 +140,9 @@ public class LineSmoothingDoodle extends Doodle {
 			for (InputPoint point : points) {
 				canvas.drawCircle(point.position.x, point.position.y, HandleRadius, handlePaint);
 
-				PointF a = new PointF(point.position.x - point.tangent.x * 2 * HandleRadius, point.position.y - point.tangent.y * 2 * HandleRadius);
-				PointF b = new PointF(point.position.x + point.tangent.x * 2 * HandleRadius, point.position.y + point.tangent.y * 2 * HandleRadius);
+				PointF t = new PointF(point.position.x + point.tangent.x * 2 * HandleRadius, point.position.y + point.tangent.y * 2 * HandleRadius);
 
-				canvas.drawLine(a.x,a.y,b.x,b.y, handlePaint);
+				canvas.drawLine(point.position.x, point.position.y, t.x, t.y, handlePaint);
 			}
 
 		} else {

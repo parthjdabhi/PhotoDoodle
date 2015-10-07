@@ -51,8 +51,8 @@ public class InputPointLine implements Serializable, Parcelable {
 		return points.isEmpty() ? null : points.get(points.size() - 1);
 	}
 
-	public void add(float x, float y) {
-		InputPoint p = new InputPoint(x, y);
+	public void add(float x, float y, long timestamp) {
+		InputPoint p = new InputPoint(x, y, timestamp);
 		points.add(p);
 
 		if (points.size() == 1) {
@@ -89,6 +89,10 @@ public class InputPointLine implements Serializable, Parcelable {
 		}
 	}
 
+	public void add(float x, float y) {
+		add(x,y,System.currentTimeMillis());
+	}
+
 	public void finish() {
 		int count = points.size();
 		if (count > 1) {
@@ -121,6 +125,28 @@ public class InputPointLine implements Serializable, Parcelable {
 
 
 		return boundingRect;
+	}
+
+	/**
+	 * Get rough estimate of the velocity, in dp-per-second, of the user's finger when drawing the point at index `i
+	 *
+	 * @param i index of point to query dp-per-second
+	 * @return rough dp-per-second of input point at requested index
+	 */
+	public float getDpPerSecond(int i) {
+		if (i == 0) {
+			return 0;
+		} else if (i < points.size()) {
+			final InputPoint a = points.get(i - 1);
+			final InputPoint b = points.get(i);
+			final float length = PointFUtil.distance(a.position, b.position);
+			final long millis = b.timestamp - a.timestamp;
+			return length / (millis / 1000f);
+		} else if (i < 0) {
+			return getDpPerSecond(points.size() + i);
+		} else {
+			return 0;
+		}
 	}
 
 	/**
@@ -164,6 +190,7 @@ public class InputPointLine implements Serializable, Parcelable {
 			}
 		}
 	}
+
 
 	// Serializable
 

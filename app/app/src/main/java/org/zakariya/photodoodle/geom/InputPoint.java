@@ -26,6 +26,12 @@ public class InputPoint implements Serializable, Parcelable {
 		timestamp = System.currentTimeMillis();
 	}
 
+	public InputPoint(float x, float y, long timestamp) {
+		position.x = x;
+		position.y = y;
+		this.timestamp = timestamp;
+	}
+
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 		out.writeFloat(position.x);
 		out.writeFloat(position.y);

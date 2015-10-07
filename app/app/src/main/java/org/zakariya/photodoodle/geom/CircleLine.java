@@ -1,6 +1,7 @@
 package org.zakariya.photodoodle.geom;
 
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -28,6 +29,76 @@ public class CircleLine implements Serializable, Parcelable {
 	private CircleLineTessellator tessellator = new CircleLineTessellator();
 
 	public CircleLine() {
+	}
+
+	@Nullable
+	public static CircleLine smoothedCircleLine(InputPointLine inputPointLine, float minDiameter, float maxDiameter, float maxVel) {
+		if (inputPointLine.size() < 2) {
+			return null;
+		}
+
+		CircleLine circleLine = new CircleLine();
+
+		ArrayList<InputPoint> inputPoints = inputPointLine.getPoints();
+		Accumulator accumulator = new Accumulator(16, 0);
+		CubicBezierInterpolator cbi = new CubicBezierInterpolator();
+
+		PointF controlPointA = new PointF();
+		PointF controlPointB = new PointF();
+		PointF bp = new PointF();
+
+		final float minRadius = minDiameter * 0.5f;
+		final float maxRadius = maxDiameter * 0.5f;
+		final float deltaRadius = maxRadius - minRadius;
+
+		for (int i = 0; i < inputPoints.size() - 1; i++) {
+			InputPoint a = inputPoints.get(i);
+			InputPoint b = inputPoints.get(i + 1);
+
+			float length = PointFUtil.distance(a.position, b.position) / 4;
+			controlPointA.x = a.position.x + a.tangent.x * length;
+			controlPointA.y = a.position.y + a.tangent.y * length;
+
+			controlPointB.x = b.position.x + b.tangent.x * -length;
+			controlPointB.y = b.position.y + b.tangent.y * -length;
+
+			// compute radius of circle for point A
+			final float aDpPerSecond = inputPointLine.getDpPerSecond(i);
+			final float aVelScale = Math.min(aDpPerSecond / maxVel, 1f);
+			final float aRadius = accumulator.add(minRadius + aVelScale * aVelScale * deltaRadius);
+
+			// prime the bezier interpolator
+			cbi.set(a.position, controlPointA, controlPointB, b.position);
+			int subdivisions = cbi.getRecommendedSubdivisions(1);
+
+			if (subdivisions > 1) {
+
+				circleLine.add(new Circle(a.position, aRadius));
+
+				// compute radius of circle for point B
+				final float bDpPerSecond = inputPointLine.getDpPerSecond(i+1);
+				final float bVelScale = Math.min(bDpPerSecond / maxVel, 1f);
+				final float bRadius = accumulator.add(minRadius + bVelScale * bVelScale * deltaRadius);
+
+				// time interpolator
+				final float dt = 1f / subdivisions;
+				float t = dt;
+
+				// radius interpolator
+				final float dr = (bRadius - aRadius) / subdivisions;
+				float r = aRadius + dr;
+
+				for (int j = 0; j < subdivisions; j++, t += dt, r += dr) {
+					cbi.getBezierPoint(t, bp);
+					circleLine.add(new Circle(bp, r));
+				}
+			} else {
+				circleLine.add(new Circle(a.position, aRadius));
+			}
+		}
+
+		circleLine.invalidate();
+		return circleLine;
 	}
 
 	/**
@@ -63,11 +134,11 @@ public class CircleLine implements Serializable, Parcelable {
 				}
 			} else {
 				if (b != null) { // b should always be nonnull, just silencing compiler warnings
-					// this is start point in the sequence middle
-					float dist = PointFUtil.distance(a.position, b.position);
 
-					long millis = b.timestamp - a.timestamp;
-					float dpPerSecond = dist / (millis / 1000f);
+
+					final float dist = PointFUtil.distance(a.position, b.position);
+					final long millis = b.timestamp - a.timestamp;
+					final float dpPerSecond = dist / (millis / 1000f);
 					float velScale = dpPerSecond / maxVel;
 					if (velScale > 1) {
 						velScale = 1;

@@ -117,8 +117,8 @@ public class CubicBezierInterpolator {
 		final float l1 = distance(startControl, endControl);
 		final float l2 = distance(endControl, end);
 		final float approximateLength = l0 + l1 + l2;
-		final float segments = approximateLength / 20;
-		final float slope = 0.8f;
+		final float segments = approximateLength / 3;
+		final float slope = 1.0f;
 
 		return (int) Math.ceil(Math.sqrt(segments * segments) * slope * scale);
 	}

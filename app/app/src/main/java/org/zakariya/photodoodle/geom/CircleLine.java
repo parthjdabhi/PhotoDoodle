@@ -51,7 +51,7 @@ public class CircleLine implements Serializable, Parcelable {
 		final float maxRadius = maxDiameter * 0.5f;
 		final float deltaRadius = maxRadius - minRadius;
 
-		for (int i = 0; i < inputPoints.size() - 1; i++) {
+		for (int i = 0, N = inputPoints.size() - 1; i < N; i++) {
 			InputPoint a = inputPoints.get(i);
 			InputPoint b = inputPoints.get(i + 1);
 

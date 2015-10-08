@@ -43,13 +43,13 @@ public class LineDoodle extends Doodle {
 	public LineDoodle() {
 		inputLinePaint = new Paint();
 		inputLinePaint.setAntiAlias(true);
-		inputLinePaint.setColor(0xFF000000);
+		inputLinePaint.setColor(0xFFFF0000);
 		inputLinePaint.setStrokeWidth(1);
 		inputLinePaint.setStyle(Paint.Style.STROKE);
 
 		strokePaint = new Paint();
 		strokePaint.setAntiAlias(true);
-		strokePaint.setColor(0xFF000000);
+		strokePaint.setColor(0xFF999999);
 		strokePaint.setStrokeWidth(1);
 		strokePaint.setStyle(Paint.Style.FILL);
 	}
@@ -85,7 +85,9 @@ public class LineDoodle extends Doodle {
 
 		if (currentCircleLine != null) {
 			canvas.drawPath(currentCircleLine.getPath(), strokePaint);
-		} else if (currentInputPointLine != null) {
+		}
+
+		else if (currentInputPointLine != null) {
 
 			Path p = new Path();
 			ArrayList<InputPoint> points = currentInputPointLine.getPoints();
@@ -139,7 +141,6 @@ public class LineDoodle extends Doodle {
 	void onTouchEventEnd(@NonNull MotionEvent event) {
 		currentInputPointLine.finish();
 		currentCircleLine = CircleLine.smoothedCircleLine(currentInputPointLine, MinStrokeThickness, MaxStrokeThickness, MaxStrokeVel);
-		currentInputPointLine = null;
 
 		// invalidate region containing the line we just generated
 		invalidationRect = currentCircleLine.getBoundingRect();

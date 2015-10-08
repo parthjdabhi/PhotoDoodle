@@ -12,6 +12,7 @@ import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
 import org.zakariya.photodoodle.geom.CircleLine;
+import org.zakariya.photodoodle.geom.CircleLineTessellator;
 import org.zakariya.photodoodle.geom.InputPoint;
 import org.zakariya.photodoodle.geom.InputPointLine;
 import org.zakariya.photodoodle.geom.RectFUtil;
@@ -33,7 +34,7 @@ public class LineDoodle extends Doodle {
 	private static final float MaxStrokeVel = 700;
 
 	private InputPointLine currentInputPointLine = null;
-	private ArrayList<CircleLine> circleLines = new ArrayList<>();
+	private CircleLine currentCircleLine = null;
 	private RectF boundingRect = null;
 	private InvalidationDelegate invalidationDelegate;
 	private Paint inputLinePaint, strokePaint;
@@ -82,8 +83,10 @@ public class LineDoodle extends Doodle {
 			invalidationRect = getInvalidationDelegate().getBounds();
 		}
 
-		if (currentInputPointLine != null) {
-			Log.d(TAG, "draw - Will draw currentInputPointLine with " + currentInputPointLine.size() + " points");
+		if (currentCircleLine != null) {
+			canvas.drawPath(currentCircleLine.getPath(), strokePaint);
+		} else if (currentInputPointLine != null) {
+
 			Path p = new Path();
 			ArrayList<InputPoint> points = currentInputPointLine.getPoints();
 			InputPoint firstPoint = points.get(0);
@@ -95,15 +98,6 @@ public class LineDoodle extends Doodle {
 			}
 
 			canvas.drawPath(p, inputLinePaint);
-		} else {
-			Log.d(TAG, "draw - currentInputPointLine is null");
-		}
-
-		// now draw our control points
-		for (CircleLine line : circleLines) {
-			if (!line.isEmpty() && RectF.intersects(invalidationRect, line.getBoundingRect())) {
-				canvas.drawPath(line.getPath(), strokePaint);
-			}
 		}
 
 		invalidationRect = null;
@@ -127,6 +121,7 @@ public class LineDoodle extends Doodle {
 	void onTouchEventBegin(@NonNull MotionEvent event) {
 		currentInputPointLine = new InputPointLine();
 		currentInputPointLine.add(event.getX(), event.getY());
+		currentCircleLine = null;
 	}
 
 	void onTouchEventMove(@NonNull MotionEvent event) {
@@ -143,14 +138,11 @@ public class LineDoodle extends Doodle {
 
 	void onTouchEventEnd(@NonNull MotionEvent event) {
 		currentInputPointLine.finish();
-		CircleLine line = new CircleLine(currentInputPointLine, MinStrokeThickness, MaxStrokeThickness, MaxStrokeVel);
-		circleLines.add(line);
+		currentCircleLine = CircleLine.smoothedCircleLine(currentInputPointLine, MinStrokeThickness, MaxStrokeThickness, MaxStrokeVel);
 		currentInputPointLine = null;
 
-		Log.d(TAG, "onTouchEventEnd added control point line with " + line.size() + " points, invalidating: " + line.getBoundingRect());
-
 		// invalidate region containing the line we just generated
-		invalidationRect = line.getBoundingRect();
+		invalidationRect = currentCircleLine.getBoundingRect();
 		getInvalidationDelegate().invalidate(invalidationRect);
 	}
 

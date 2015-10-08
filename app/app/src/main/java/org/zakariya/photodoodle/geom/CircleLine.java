@@ -67,6 +67,8 @@ public class CircleLine implements Serializable, Parcelable {
 			final float aVelScale = Math.min(aDpPerSecond / maxVel, 1f);
 			final float aRadius = accumulator.add(minRadius + aVelScale * aVelScale * deltaRadius);
 
+			//Log.i(TAG, "i: " + i + " aDpPerSecond: " + aDpPerSecond + " aVelScale: " + aVelScale + " aRadius: " + aRadius);
+
 			// prime the bezier interpolator
 			cbi.set(a.position, controlPointA, controlPointB, b.position);
 			int subdivisions = cbi.getRecommendedSubdivisions(1);
@@ -76,9 +78,11 @@ public class CircleLine implements Serializable, Parcelable {
 				circleLine.add(new Circle(a.position, aRadius));
 
 				// compute radius of circle for point B
-				final float bDpPerSecond = inputPointLine.getDpPerSecond(i+1);
+				final float bDpPerSecond = inputPointLine.getDpPerSecond(i + 1);
 				final float bVelScale = Math.min(bDpPerSecond / maxVel, 1f);
 				final float bRadius = accumulator.add(minRadius + bVelScale * bVelScale * deltaRadius);
+
+				//Log.i(TAG, "i: " + i + " bDpPerSecond: " + bDpPerSecond + " bVelScale: " + bVelScale + " bRadius: " + bRadius);
 
 				// time interpolator
 				final float dt = 1f / subdivisions;

@@ -36,6 +36,7 @@ public class LineSmoothingDoodle extends Doodle {
 	private static final String TAG = "LineSmoothingDoodle";
 	private static final String FILE = "LineSmoothingDoodle.dat";
 	private static final float HandleRadius = 10f;
+	private static boolean DrawBezierControlPoints = false;
 
 	private InputPointLine inputPointLine = new InputPointLine();
 	private CircleLine renderedCircleLine = null;
@@ -50,12 +51,11 @@ public class LineSmoothingDoodle extends Doodle {
 
 		handlePaint = new Paint();
 		handlePaint.setAntiAlias(true);
-		handlePaint.setColor(0x99FF0000);
+		handlePaint.setColor(0xFF00FFFF);
 		handlePaint.setStyle(Paint.Style.FILL);
 
 		controlPointPaint = new Paint();
 		controlPointPaint.setAntiAlias(true);
-		controlPointPaint.setColor(0x9900FF00);
 		controlPointPaint.setStyle(Paint.Style.STROKE);
 
 		smoothedLinePaint = new Paint();
@@ -121,11 +121,13 @@ public class LineSmoothingDoodle extends Doodle {
 				PointF controlPointA = PointFUtil.add(a.position, PointFUtil.scale(a.tangent, length));
 				PointF controlPointB = PointFUtil.add(b.position, PointFUtil.scale(b.tangent, -length));
 
-				controlPointPaint.setColor(0x9900FF00);
-				canvas.drawCircle(controlPointA.x, controlPointA.y, HandleRadius * 1.5f, controlPointPaint);
+				if (DrawBezierControlPoints) {
+					controlPointPaint.setColor(0x9900FF00);
+					canvas.drawCircle(controlPointA.x, controlPointA.y, HandleRadius * 1.5f, controlPointPaint);
 
-				controlPointPaint.setColor(0x990000FF);
-				canvas.drawCircle(controlPointB.x, controlPointB.y, HandleRadius * 1.5f, controlPointPaint);
+					controlPointPaint.setColor(0x990000FF);
+					canvas.drawCircle(controlPointB.x, controlPointB.y, HandleRadius * 1.5f, controlPointPaint);
+				}
 
 				// now tessellate
 				PointF bp = new PointF();
@@ -151,6 +153,7 @@ public class LineSmoothingDoodle extends Doodle {
 
 			// draw dots representing the input points
 			for (InputPoint point : points) {
+
 				canvas.drawCircle(point.position.x, point.position.y, HandleRadius, handlePaint);
 
 				PointF t = new PointF(point.position.x + point.tangent.x * 2 * HandleRadius, point.position.y + point.tangent.y * 2 * HandleRadius);
@@ -164,12 +167,12 @@ public class LineSmoothingDoodle extends Doodle {
 
 		if (renderedCircleLine != null) {
 
-			Path path = new Path();
-			renderedCircleLinePaint.setColor(0xFFFF0000);
-			renderedCircleLineTessellator.tessellate(renderedCircleLine, path);
-			canvas.drawPath(path, renderedCircleLinePaint);
+//			Path path = new Path();
+//			renderedCircleLinePaint.setColor(0xFFFF0000);
+//			renderedCircleLineTessellator.tessellate(renderedCircleLine, path);
+//			canvas.drawPath(path, renderedCircleLinePaint);
 
-			renderedCircleLinePaint.setColor(0x66FF0000);
+//			renderedCircleLinePaint.setColor(0x66FF0000);
 			for (Circle circle : renderedCircleLine.getCircles()) {
 				canvas.drawCircle(circle.position.x, circle.position.y, circle.radius, renderedCircleLinePaint);
 			}
@@ -263,7 +266,8 @@ public class LineSmoothingDoodle extends Doodle {
 	}
 
 	private void updateCircleLine() {
-		renderedCircleLine = CircleLine.smoothedCircleLine(inputPointLine, 20, 50, 200);
+		renderedCircleLine = CircleLine.smoothedCircleLine(inputPointLine, 5, 100, 600);
+		//renderedCircleLine = new CircleLine(inputPointLine,5,100,600);
 	}
 
 	private static class InputDelegate implements DoodleView.InputDelegate {

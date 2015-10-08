@@ -11,7 +11,9 @@ public class Accumulator {
 	int index = 0;
 
 	public Accumulator(int size, float current) {
-		values = new float[size];
+		if (size > 0) {
+			values = new float[size];
+		}
 		this.size = size;
 		this.index = 0;
 		this.accumulator = 0;

@@ -12,9 +12,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
-import org.zakariya.photodoodle.geom.Circle;
-import org.zakariya.photodoodle.geom.CircleLine;
-import org.zakariya.photodoodle.geom.CircleLineTessellator;
+import org.zakariya.photodoodle.geom.Stroke;
 import org.zakariya.photodoodle.geom.CubicBezierInterpolator;
 import org.zakariya.photodoodle.geom.InputStroke;
 import org.zakariya.photodoodle.geom.PointFUtil;
@@ -38,10 +36,9 @@ public class LineSmoothingDoodle extends Doodle {
 	private static boolean DrawBezierControlPoints = false;
 
 	private InputStroke inputStroke = new InputStroke();
-	private CircleLine renderedCircleLine = null;
-	private CircleLineTessellator renderedCircleLineTessellator = new CircleLineTessellator();
+	private Stroke renderedStroke = null;
 	private InvalidationDelegate invalidationDelegate;
-	private Paint handlePaint, controlPointPaint, smoothedLinePaint, renderedCircleLinePaint;
+	private Paint handlePaint, controlPointPaint, smoothedLinePaint, renderedStrokePaint;
 	private InputStroke.Point draggingPoint;
 	private Context context;
 
@@ -63,11 +60,11 @@ public class LineSmoothingDoodle extends Doodle {
 		smoothedLinePaint.setStrokeWidth(1);
 		smoothedLinePaint.setStyle(Paint.Style.STROKE);
 
-		renderedCircleLinePaint = new Paint();
-		renderedCircleLinePaint.setAntiAlias(true);
-		renderedCircleLinePaint.setColor(0xFFFF0000);
-		renderedCircleLinePaint.setStrokeWidth(1);
-		renderedCircleLinePaint.setStyle(Paint.Style.STROKE);
+		renderedStrokePaint = new Paint();
+		renderedStrokePaint.setAntiAlias(true);
+		renderedStrokePaint.setColor(0xFFFF0000);
+		renderedStrokePaint.setStrokeWidth(1);
+		renderedStrokePaint.setStyle(Paint.Style.STROKE);
 
 		if (!loadPoints()) {
 			long timestamp = 0;
@@ -164,16 +161,14 @@ public class LineSmoothingDoodle extends Doodle {
 			Log.d(TAG, "draw - inputStroke is null");
 		}
 
-		if (renderedCircleLine != null) {
+		if (renderedStroke != null) {
 
-//			Path path = new Path();
-//			renderedCircleLinePaint.setColor(0xFFFF0000);
-//			renderedCircleLineTessellator.tessellate(renderedCircleLine, path);
-//			canvas.drawPath(path, renderedCircleLinePaint);
+			renderedStrokePaint.setColor(0xFFFF0000);
+			canvas.drawPath(renderedStroke.getPath(), renderedStrokePaint);
 
-//			renderedCircleLinePaint.setColor(0x66FF0000);
-			for (Circle circle : renderedCircleLine.getCircles()) {
-				canvas.drawCircle(circle.position.x, circle.position.y, circle.radius, renderedCircleLinePaint);
+			renderedStrokePaint.setColor(0x66FF0000);
+			for (Stroke.Point point : renderedStroke.getPoints()) {
+				canvas.drawCircle(point.position.x, point.position.y, point.radius, renderedStrokePaint);
 			}
 		}
 	}
@@ -265,8 +260,8 @@ public class LineSmoothingDoodle extends Doodle {
 	}
 
 	private void updateCircleLine() {
-		renderedCircleLine = CircleLine.smoothedCircleLine(inputStroke, 5, 100, 600);
-		//renderedCircleLine = new CircleLine(inputStroke,5,100,600);
+		renderedStroke = Stroke.smoothedStroke(inputStroke, 5, 100, 600);
+		//renderedStroke = new Stroke(inputStroke,5,100,600);
 	}
 
 	private static class InputDelegate implements DoodleView.InputDelegate {

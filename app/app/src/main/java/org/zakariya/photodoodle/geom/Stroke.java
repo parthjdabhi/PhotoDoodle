@@ -17,27 +17,27 @@ import java.util.ArrayList;
 /**
  * Created by shamyl on 9/28/15.
  */
-public class CircleLine implements Serializable, Parcelable {
+public class Stroke implements Serializable, Parcelable {
 
-	private static final String TAG = "CircleLine";
+	private static final String TAG = "Stroke";
 
 	private static final float SNAP_DIST_SQUARED = 1;
-	private ArrayList<Circle> circles = new ArrayList<>();
+	private ArrayList<Point> points = new ArrayList<>();
 	private RectF boundingRect;
 	private Path path = new Path();
 	private boolean needsTessellation = true;
-	private CircleLineTessellator tessellator = new CircleLineTessellator();
+	private StrokeTessellator tessellator = new StrokeTessellator();
 
-	public CircleLine() {
+	public Stroke() {
 	}
 
 	@Nullable
-	public static CircleLine smoothedCircleLine(InputStroke inputStroke, float minDiameter, float maxDiameter, float maxVel) {
+	public static Stroke smoothedStroke(InputStroke inputStroke, float minDiameter, float maxDiameter, float maxVel) {
 		if (inputStroke.size() < 2) {
 			return null;
 		}
 
-		CircleLine circleLine = new CircleLine();
+		Stroke stroke = new Stroke();
 
 		ArrayList<InputStroke.Point> points = inputStroke.getPoints();
 		Accumulator accumulator = new Accumulator(16, 0);
@@ -62,7 +62,7 @@ public class CircleLine implements Serializable, Parcelable {
 			controlPointB.x = b.position.x + b.tangent.x * -length;
 			controlPointB.y = b.position.y + b.tangent.y * -length;
 
-			// compute radius of circle for point A
+			// compute radius of point for point A
 			final float aDpPerSecond = inputStroke.getDpPerSecond(i);
 			final float aVelScale = Math.min(aDpPerSecond / maxVel, 1f);
 			final float aRadius = accumulator.add(minRadius + aVelScale * aVelScale * deltaRadius);
@@ -75,9 +75,9 @@ public class CircleLine implements Serializable, Parcelable {
 
 			if (subdivisions > 1) {
 
-				circleLine.add(new Circle(a.position, aRadius));
+				stroke.add(new Point(a.position, aRadius));
 
-				// compute radius of circle for point B
+				// compute radius of point for point B
 				final float bDpPerSecond = inputStroke.getDpPerSecond(i + 1);
 				final float bVelScale = Math.min(bDpPerSecond / maxVel, 1f);
 				final float bRadius = accumulator.add(minRadius + bVelScale * bVelScale * deltaRadius);
@@ -94,26 +94,26 @@ public class CircleLine implements Serializable, Parcelable {
 
 				for (int j = 0; j < subdivisions; j++, t += dt, r += dr) {
 					cbi.getBezierPoint(t, bp);
-					circleLine.add(new Circle(bp, r));
+					stroke.add(new Point(bp, r));
 				}
 			} else {
-				circleLine.add(new Circle(a.position, aRadius));
+				stroke.add(new Point(a.position, aRadius));
 			}
 		}
 
-		circleLine.invalidate();
-		return circleLine;
+		stroke.invalidate();
+		return stroke;
 	}
 
 	/**
-	 * Initialize start CircleLine from an inputStroke, scaling the circles' radii by velocityScaling.
+	 * Initialize start Stroke from an inputStroke, scaling the points' radii by velocityScaling.
 	 *
 	 * @param inputStroke line describing drawing input
-	 * @param minDiameter the min diameter of circles added for slow moving line segments
-	 * @param maxDiameter the max diameter of circles added for fast moving line segments
-	 * @param maxVel      the max velocity of line segments to produce maxDiameter circles
+	 * @param minDiameter the min diameter of points added for slow moving line segments
+	 * @param maxDiameter the max diameter of points added for fast moving line segments
+	 * @param maxVel      the max velocity of line segments to produce maxDiameter points
 	 */
-	public CircleLine(InputStroke inputStroke, float minDiameter, float maxDiameter, float maxVel) {
+	public Stroke(InputStroke inputStroke, float minDiameter, float maxDiameter, float maxVel) {
 		if (inputStroke.size() < 2) {
 			return;
 		}
@@ -126,15 +126,15 @@ public class CircleLine implements Serializable, Parcelable {
 		final float thicknessDelta = maxDiameter - minDiameter;
 
 		for (int i = 0, N = points.size(); i < N; i++) {
-			Circle cp = null;
+			Point cp = null;
 			if (a == null) {
 				if (b != null && c != null) { // b & c should always be nonnull, just silencing compiler warnings
-					cp = new Circle(b.position, 0);
+					cp = new Point(b.position, 0);
 				}
 			} else if (c == null) {
 				if (b != null) { // b should always be nonnull, just silencing compiler warnings
 					// this is last point in sequence
-					cp = new Circle(b.position, 0);
+					cp = new Point(b.position, 0);
 				}
 			} else {
 				if (b != null) { // b should always be nonnull, just silencing compiler warnings
@@ -157,12 +157,12 @@ public class CircleLine implements Serializable, Parcelable {
 					// smooth the size
 					diameter = accumulator.add(diameter);
 
-					cp = new Circle(b.position, diameter * 0.5f);
+					cp = new Point(b.position, diameter * 0.5f);
 				}
 			}
 
 			if (cp != null) {
-				this.circles.add(cp);
+				this.points.add(cp);
 			}
 
 			a = b;
@@ -174,34 +174,34 @@ public class CircleLine implements Serializable, Parcelable {
 	}
 
 	/**
-	 * Get the array of circles. You shouldn't modify this array.
+	 * Get the array of points. You shouldn't modify this array.
 	 *
-	 * @return ArrayList of circles making up this line
+	 * @return ArrayList of points making up this line
 	 */
-	public ArrayList<Circle> getCircles() {
-		return circles;
+	public ArrayList<Point> getPoints() {
+		return points;
 	}
 
 	/**
-	 * Get the circle at index i. If i < 0, index from end of list
+	 * Get the point at index i. If i < 0, index from end of list
 	 *
 	 * @param i index
-	 * @return circle at index, or circle at size+index if index is negative
+	 * @return point at index, or point at size+index if index is negative
 	 */
-	public Circle get(int i) {
+	public Point get(int i) {
 		if (i < 0) {
-			return circles.get(circles.size() + i);
+			return points.get(points.size() + i);
 		}
-		return circles.get(i);
+		return points.get(i);
 	}
 
 	/**
-	 * Get number of circles making up list
+	 * Get number of points making up list
 	 *
 	 * @return
 	 */
 	public int size() {
-		return circles.size();
+		return points.size();
 	}
 
 	/**
@@ -210,62 +210,62 @@ public class CircleLine implements Serializable, Parcelable {
 	 * @return true if list is empty
 	 */
 	public boolean isEmpty() {
-		return circles.isEmpty();
+		return points.isEmpty();
 	}
 
 	/**
-	 * Adds start new circle to this line. If the new circle is close to the last circle in the line, the two will be averaged.
+	 * Adds start new point to this line. If the new point is close to the last point in the line, the two will be averaged.
 	 *
-	 * @param circle
+	 * @param point
 	 */
-	public void add(Circle circle) {
-		Circle lastCircle = this.lastCircle();
-		if (lastCircle != null && PointFUtil.distance2(circle.position, lastCircle.position) < SNAP_DIST_SQUARED) {
-			// average positions & radius of lastCircle and incoming circle
-			lastCircle.position.x = (lastCircle.position.x + circle.position.x) * 0.5f;
-			lastCircle.position.y = (lastCircle.position.y + circle.position.y) * 0.5f;
-			lastCircle.radius = (lastCircle.radius + circle.radius) * 0.5f;
+	public void add(Point point) {
+		Point lastPoint = this.lastCircle();
+		if (lastPoint != null && PointFUtil.distance2(point.position, lastPoint.position) < SNAP_DIST_SQUARED) {
+			// average positions & radius of lastPoint and incoming point
+			lastPoint.position.x = (lastPoint.position.x + point.position.x) * 0.5f;
+			lastPoint.position.y = (lastPoint.position.y + point.position.y) * 0.5f;
+			lastPoint.radius = (lastPoint.radius + point.radius) * 0.5f;
 		} else {
-			circles.add(circle);
+			points.add(point);
 		}
 
 		invalidate();
 	}
 
-	public void addNoCheck(Circle circle) {
-		circles.add(circle);
+	public void addNoCheck(Point point) {
+		points.add(point);
 		invalidate();
 	}
 
 	/**
-	 * @return The first circle in the line, or null if empty
+	 * @return The first point in the line, or null if empty
 	 */
 	@Nullable
-	public Circle firstCircle() {
-		return circles.isEmpty() ? null : circles.get(0);
+	public Point firstCircle() {
+		return points.isEmpty() ? null : points.get(0);
 	}
 
 	/**
-	 * @return The last circle in the line, or null if empty
+	 * @return The last point in the line, or null if empty
 	 */
 	@Nullable
-	public Circle lastCircle() {
-		return circles.isEmpty() ? null : circles.get(circles.size() - 1);
+	public Point lastCircle() {
+		return points.isEmpty() ? null : points.get(points.size() - 1);
 	}
 
 	public void invalidate() {
 		boundingRect = null;
-		path.reset();
 		needsTessellation = true;
 	}
 
 	/**
 	 * Get the tessellated path circumscribing this circleLine
 	 *
-	 * @return Path representing this CircleLine
+	 * @return Path representing this Stroke
 	 */
 	public Path getPath() {
 		if (needsTessellation) {
+			path.reset();
 			tessellator.tessellate(this, path);
 		}
 
@@ -273,7 +273,7 @@ public class CircleLine implements Serializable, Parcelable {
 	}
 
 	/**
-	 * @return The rect bounding this CircleLine
+	 * @return The rect bounding this Stroke
 	 */
 	public RectF getBoundingRect() {
 		if (boundingRect == null) {
@@ -281,7 +281,7 @@ public class CircleLine implements Serializable, Parcelable {
 				// empty
 				boundingRect = new RectF();
 			} else {
-				Circle c = get(0);
+				Point c = get(0);
 				boundingRect = new RectF(c.position.x - c.radius, c.position.y - c.radius, c.position.x + c.radius, c.position.y + c.radius);
 				for (int i = 1, N = size(); i < N; i++) {
 					c = get(i);
@@ -299,16 +299,16 @@ public class CircleLine implements Serializable, Parcelable {
 		int count = size();
 		out.writeInt(count);
 		for (int i = 0; i < count; i++) {
-			out.writeObject(circles.get(i));
+			out.writeObject(points.get(i));
 		}
 	}
 
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		circles = new ArrayList<>();
+		points = new ArrayList<>();
 		int count = in.readInt();
 		for (int i = 0; i < count; i++) {
-			Circle cp = (Circle) in.readObject();
-			circles.add(cp);
+			Point cp = (Point) in.readObject();
+			points.add(cp);
 		}
 
 		invalidate();
@@ -324,29 +324,123 @@ public class CircleLine implements Serializable, Parcelable {
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeInt(size());
-		for (Circle circle : circles) {
-			dest.writeParcelable(circle, 0);
+		for (Point point : points) {
+			dest.writeParcelable(point, 0);
 		}
 	}
 
-	public static final Parcelable.Creator<CircleLine> CREATOR = new Parcelable.Creator<CircleLine>() {
-		public CircleLine createFromParcel(Parcel in) {
-			return new CircleLine(in);
+	public static final Parcelable.Creator<Stroke> CREATOR = new Parcelable.Creator<Stroke>() {
+		public Stroke createFromParcel(Parcel in) {
+			return new Stroke(in);
 		}
 
-		public CircleLine[] newArray(int size) {
-			return new CircleLine[size];
+		public Stroke[] newArray(int size) {
+			return new Stroke[size];
 		}
 	};
 
-	private CircleLine(Parcel in) {
+	private Stroke(Parcel in) {
 		int size = in.readInt();
-		circles = new ArrayList<>();
+		points = new ArrayList<>();
 		for (int i = 0; i < size; i++) {
-			Circle circle = in.readParcelable(null);
-			circles.add(circle);
+			Point point = in.readParcelable(null);
+			points.add(point);
 		}
 
 		invalidate();
+	}
+
+	/**
+	 * Created by shamyl on 9/22/15.
+	 */
+	public static class Point implements Serializable, Parcelable {
+
+		private static final long serialVersionUID = 0L;
+
+		public PointF position; // the position of the point
+		public float radius; // the half thickness of the line at this point
+
+		Point() {
+			position = new PointF(0, 0);
+		}
+
+		public Point(PointF position, float radius) {
+			this.position = new PointF(position.x, position.y);
+			this.radius = radius;
+		}
+
+		public RectF getBoundingRect() {
+			return new RectF(position.x - radius, position.y - radius, position.x + radius, position.y + radius);
+		}
+
+		/**
+		 * Check if this point is bigger than another point, and completely contains it.
+		 * Note that start.contains(b) != b.contains(start)
+		 *
+		 * @param other the point to check if its inside this point
+		 * @return true if other is completely inside this point
+		 */
+		public boolean contains(Point other) {
+			if (other.radius < radius) {
+				float minDist = radius - other.radius;
+				float minDist2 = minDist * minDist;
+				float dist2 = PointFUtil.distance2(position, other.position);
+				return dist2 < minDist2;
+			} else if (other.radius == radius) {
+				return PointFUtil.distance2(position, other.position) < 1e-3;
+			} else {
+				return false;
+			}
+		}
+
+		/**
+		 * Check if this point intersects another point
+		 *
+		 * @param other the point to test if it intersects with this point
+		 * @return true if the two points intersect
+		 */
+		public boolean intersects(Point other) {
+			float minDist2 = radius * radius;
+			float dist2 = PointFUtil.distance2(position, other.position);
+			return dist2 < minDist2;
+		}
+
+		private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+			out.writeFloat(position.x);
+			out.writeFloat(position.y);
+			out.writeFloat(radius);
+		}
+
+		private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+			position = new PointF(in.readFloat(), in.readFloat());
+			radius = in.readFloat();
+		}
+
+		@Override
+		public int describeContents() {
+			return 0;
+		}
+
+		@Override
+		public void writeToParcel(Parcel dest, int flags) {
+			dest.writeFloat(position.x);
+			dest.writeFloat(position.y);
+			dest.writeFloat(radius);
+		}
+
+		public static final Creator<Point> CREATOR = new Creator<Point>() {
+			public Point createFromParcel(Parcel in) {
+				return new Point(in);
+			}
+
+			public Point[] newArray(int size) {
+				return new Point[size];
+			}
+		};
+
+		private Point(Parcel in) {
+			position = new PointF(in.readFloat(), in.readFloat());
+			radius = in.readFloat();
+		}
 	}
 }

@@ -10,7 +10,7 @@ import android.support.annotation.NonNull;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
-import org.zakariya.photodoodle.geom.CircleLine;
+import org.zakariya.photodoodle.geom.Stroke;
 import org.zakariya.photodoodle.geom.InputStroke;
 import org.zakariya.photodoodle.geom.RectFUtil;
 
@@ -31,7 +31,7 @@ public class LineDoodle extends Doodle {
 	private static final float MaxStrokeVel = 700;
 
 	private InputStroke currentInputStroke = null;
-	private CircleLine currentCircleLine = null;
+	private Stroke currentStroke = null;
 	private RectF boundingRect = null;
 	private InvalidationDelegate invalidationDelegate;
 	private Paint inputLinePaint, strokePaint;
@@ -80,8 +80,8 @@ public class LineDoodle extends Doodle {
 			invalidationRect = getInvalidationDelegate().getBounds();
 		}
 
-		if (currentCircleLine != null) {
-			canvas.drawPath(currentCircleLine.getPath(), strokePaint);
+		if (currentStroke != null) {
+			canvas.drawPath(currentStroke.getPath(), strokePaint);
 		} else if (currentInputStroke != null) {
 
 			Path p = new Path();
@@ -122,7 +122,7 @@ public class LineDoodle extends Doodle {
 	void onTouchEventBegin(@NonNull MotionEvent event) {
 		currentInputStroke = new InputStroke();
 		currentInputStroke.add(event.getX(), event.getY());
-		currentCircleLine = null;
+		currentStroke = null;
 	}
 
 	void onTouchEventMove(@NonNull MotionEvent event) {
@@ -139,10 +139,10 @@ public class LineDoodle extends Doodle {
 
 	void onTouchEventEnd(@NonNull MotionEvent event) {
 		currentInputStroke.finish();
-		currentCircleLine = CircleLine.smoothedCircleLine(currentInputStroke, MinStrokeThickness, MaxStrokeThickness, MaxStrokeVel);
+		currentStroke = Stroke.smoothedStroke(currentInputStroke, MinStrokeThickness, MaxStrokeThickness, MaxStrokeVel);
 
 		// invalidate region containing the line we just generated
-		invalidationRect = currentCircleLine.getBoundingRect();
+		invalidationRect = currentStroke.getBoundingRect();
 		if (invalidationRect != null) {
 			getInvalidationDelegate().invalidate(invalidationRect);
 		} else {

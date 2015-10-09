@@ -251,7 +251,7 @@ public class InputStroke implements Serializable, Parcelable {
 
 	/**
 	 * Represents user input. As user drags across screen, each location is recorded along with its timestamp.
-	 * The timestamps can be compared across an array of Circle to determine the velocity of the touch,
+	 * The timestamps can be compared across an array of Point to determine the velocity of the touch,
 	 * which will be used to determine line thickness.
 	 */
 	public static class Point implements Serializable, Parcelable {

@@ -9,41 +9,41 @@ import org.zakariya.photodoodle.util.FloatBuffer;
 /**
  * Created by shamyl on 9/24/15.
  */
-public class CircleLineTessellator {
+public class StrokeTessellator {
 
 	private FloatBuffer leftCoordinates;
 	private FloatBuffer rightCoordinates;
 
-	public CircleLineTessellator() {
+	public StrokeTessellator() {
 	}
 
 	/**
-	 * Tessellate circles into start Path object suitable for rendering
+	 * Tessellate stroke into Path object suitable for rendering
 	 *
-	 * @param circles list of Circle instances, in order
+	 * @param stroke list of Point instances, in order
 	 * @param path    destination Path into which tessellated closed path will be added, if non-null
 	 */
-	public void tessellate(CircleLine circles, @Nullable Path path) {
+	public void tessellate(Stroke stroke, @Nullable Path path) {
 
 		// set up our buffers
 		if (leftCoordinates == null) {
-			leftCoordinates = new FloatBuffer((int) (circles.size() * 1.5));
+			leftCoordinates = new FloatBuffer((int) (stroke.size() * 1.5));
 		} else {
 			leftCoordinates.clear();
 		}
 
 		if (rightCoordinates == null) {
-			rightCoordinates = new FloatBuffer((int) (circles.size() * 1.5));
+			rightCoordinates = new FloatBuffer((int) (stroke.size() * 1.5));
 		} else {
 			rightCoordinates.clear();
 		}
 
-		circles = sanitize(circles);
+		stroke = sanitize(stroke);
 
 		// tessellate!
-		int count = circles.size();
+		int count = stroke.size();
 		for (int i = 0; i < count - 1; i++) {
-			tessellateSegment(circles.get(i), circles.get(i + 1));
+			tessellateSegment(stroke.get(i), stroke.get(i + 1));
 		}
 
 		// and we're done - add to Path
@@ -52,14 +52,14 @@ public class CircleLineTessellator {
 		}
 	}
 
-	private CircleLine sanitize(CircleLine circleLine) {
+	private Stroke sanitize(Stroke stroke) {
 
 		// check if sanitizing is needed, breaking loop early if that's the case
 		boolean needsSanitizing = false;
-		final int N = circleLine.size();
+		final int N = stroke.size();
 		for (int i = 0; i < N - 1; i++) {
-			Circle a = circleLine.get(i);
-			Circle b = circleLine.get(i + 1);
+			Stroke.Point a = stroke.get(i);
+			Stroke.Point b = stroke.get(i + 1);
 
 			// check for containment
 			if (a.contains(b) || b.contains(a)) {
@@ -69,48 +69,48 @@ public class CircleLineTessellator {
 		}
 
 		if (needsSanitizing) {
-			if (circleLine.size() < 3) {
-				return circleLine;
+			if (stroke.size() < 3) {
+				return stroke;
 			}
 
-			CircleLine sanitized = new CircleLine();
+			Stroke sanitized = new Stroke();
 
-			Circle a, b, c;
+			Stroke.Point a, b, c;
 
-			// handle first circle manually since loop handles the rest. only add first circle if
-			// it's not contained by the second circle
-			a = circleLine.get(0);
-			b = circleLine.get(1);
+			// handle first point manually since loop handles the rest. only add first point if
+			// it's not contained by the second point
+			a = stroke.get(0);
+			b = stroke.get(1);
 			if (!b.contains(a)) {
 				sanitized.addNoCheck(a);
 			}
 
 			for (int i = 1; i < N - 1; i++) {
-				// note: 'b' is the current circle
-				a = circleLine.get(i - 1);
-				b = circleLine.get(i);
-				c = circleLine.get(i + 1);
+				// note: 'b' is the current point
+				a = stroke.get(i - 1);
+				b = stroke.get(i);
+				c = stroke.get(i + 1);
 
 				if (!a.contains(b) && !c.contains(b)) {
 					sanitized.addNoCheck(b);
 				}
 			}
 
-			// handle last circle
-			a = circleLine.get(-2);
-			b = circleLine.get(-1);
+			// handle last point
+			a = stroke.get(-2);
+			b = stroke.get(-1);
 			if (!a.contains(b)) {
 				sanitized.addNoCheck(b);
 			}
 
-			// recurse until circleLine is clean
+			// recurse until stroke is clean
 			return sanitize(sanitized);
 		} else {
-			return circleLine;
+			return stroke;
 		}
 	}
 
-	private void tessellateSegment(Circle a, Circle b) {
+	private void tessellateSegment(Stroke.Point a, Stroke.Point b) {
 		PointF dir = PointFUtil.dir(a.position, b.position).first;
 		PointF aLeftAttachDir = PointFUtil.scale(PointFUtil.rotateCCW(dir), a.radius);
 		PointF aLeftAttachPoint = PointFUtil.add(a.position, aLeftAttachDir);

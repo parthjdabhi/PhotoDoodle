@@ -14,14 +14,14 @@ import java.util.ArrayList;
 /**
  * Created by shamyl on 9/28/15.
  */
-public class InputPointLine implements Serializable, Parcelable {
-	private ArrayList<InputPoint> points = new ArrayList<>();
+public class InputStroke implements Serializable, Parcelable {
+	private ArrayList<Point> points = new ArrayList<>();
 	RectF boundingRect = new RectF();
 
-	public InputPointLine() {
+	public InputStroke() {
 	}
 
-	public ArrayList<InputPoint> getPoints() {
+	public ArrayList<Point> getPoints() {
 		return points;
 	}
 
@@ -33,7 +33,7 @@ public class InputPointLine implements Serializable, Parcelable {
 		return points.isEmpty();
 	}
 
-	public InputPoint get(int i) {
+	public Point get(int i) {
 		if (i < 0) {
 			return get(points.size() + i);
 		} else {
@@ -42,17 +42,17 @@ public class InputPointLine implements Serializable, Parcelable {
 	}
 
 	@Nullable
-	public InputPoint firstPoint() {
+	public Point firstPoint() {
 		return points.isEmpty() ? null : points.get(0);
 	}
 
 	@Nullable
-	public InputPoint lastPoint() {
+	public Point lastPoint() {
 		return points.isEmpty() ? null : points.get(points.size() - 1);
 	}
 
 	public void add(float x, float y, long timestamp) {
-		InputPoint p = new InputPoint(x, y, timestamp);
+		Point p = new Point(x, y, timestamp);
 		points.add(p);
 
 		if (points.size() == 1) {
@@ -64,15 +64,15 @@ public class InputPointLine implements Serializable, Parcelable {
 
 		int count = points.size();
 		if (count == 2) {
-			InputPoint a = points.get(0);
-			InputPoint b = points.get(1);
+			Point a = points.get(0);
+			Point b = points.get(1);
 			a.tangent = PointFUtil.dir(a.position, b.position).first;
 		}
 
 		if (count > 2) {
-			InputPoint a = points.get(count - 3);
-			InputPoint b = points.get(count - 2);
-			InputPoint c = points.get(count - 1);
+			Point a = points.get(count - 3);
+			Point b = points.get(count - 2);
+			Point c = points.get(count - 1);
 
 			Pair<PointF, Float> abDir = PointFUtil.dir(a.position, b.position);
 			PointF abPrime = PointFUtil.rotateCCW(abDir.first);
@@ -96,8 +96,8 @@ public class InputPointLine implements Serializable, Parcelable {
 	public void finish() {
 		int count = points.size();
 		if (count > 1) {
-			InputPoint a = points.get(count - 2);
-			InputPoint b = points.get(count - 1);
+			Point a = points.get(count - 2);
+			Point b = points.get(count - 1);
 			a.tangent = PointFUtil.dir(a.position, b.position).first;
 		}
 	}
@@ -113,7 +113,7 @@ public class InputPointLine implements Serializable, Parcelable {
 
 	public RectF computeBoundingRect() {
 		if (!isEmpty()) {
-			InputPoint p = get(0);
+			Point p = get(0);
 			boundingRect = new RectF(p.position.x - 0.5f, p.position.y - 0.5f, p.position.x + 0.5f, p.position.y + 0.5f);
 			for (int i = 1, N = size(); i < N; i++) {
 				p = get(i);
@@ -137,8 +137,8 @@ public class InputPointLine implements Serializable, Parcelable {
 		if (i == 0) {
 			return 0;
 		} else if (i < points.size()) {
-			final InputPoint a = points.get(i - 1);
-			final InputPoint b = points.get(i);
+			final Point a = points.get(i - 1);
+			final Point b = points.get(i);
 			final float length = PointFUtil.distance(a.position, b.position);
 			final long millis = b.timestamp - a.timestamp;
 			return length / (millis / 1000f);
@@ -159,21 +159,21 @@ public class InputPointLine implements Serializable, Parcelable {
 
 		for (int i = 0, N = points.size(); i < N; i++) {
 			if (i == 0) {
-				InputPoint a = points.get(i);
-				InputPoint b = points.get(i + 1);
+				Point a = points.get(i);
+				Point b = points.get(i + 1);
 				Pair<PointF, Float> dir = PointFUtil.dir(a.position, b.position);
 
 				a.tangent = dir.first;
 			} else if (i == N - 1) {
-				InputPoint a = points.get(i - 1);
-				InputPoint b = points.get(i);
+				Point a = points.get(i - 1);
+				Point b = points.get(i);
 				Pair<PointF, Float> dir = PointFUtil.dir(a.position, b.position);
 
 				b.tangent = dir.first;
 			} else {
-				InputPoint a = points.get(i - 1);
-				InputPoint b = points.get(i);
-				InputPoint c = points.get(i + 1);
+				Point a = points.get(i - 1);
+				Point b = points.get(i);
+				Point c = points.get(i + 1);
 
 				Pair<PointF, Float> abDir = PointFUtil.dir(a.position, b.position);
 				PointF abPrime = PointFUtil.rotateCCW(abDir.first);
@@ -206,7 +206,7 @@ public class InputPointLine implements Serializable, Parcelable {
 		points = new ArrayList<>();
 		int count = in.readInt();
 		for (int i = 0; i < count; i++) {
-			InputPoint p = (InputPoint) in.readObject();
+			Point p = (Point) in.readObject();
 			points.add(p);
 		}
 
@@ -223,29 +223,99 @@ public class InputPointLine implements Serializable, Parcelable {
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeInt(size());
-		for (InputPoint point : points) {
+		for (Point point : points) {
 			dest.writeParcelable(point, 0);
 		}
 	}
 
-	public static final Parcelable.Creator<InputPointLine> CREATOR = new Parcelable.Creator<InputPointLine>() {
-		public InputPointLine createFromParcel(Parcel in) {
-			return new InputPointLine(in);
+	public static final Parcelable.Creator<InputStroke> CREATOR = new Parcelable.Creator<InputStroke>() {
+		public InputStroke createFromParcel(Parcel in) {
+			return new InputStroke(in);
 		}
 
-		public InputPointLine[] newArray(int size) {
-			return new InputPointLine[size];
+		public InputStroke[] newArray(int size) {
+			return new InputStroke[size];
 		}
 	};
 
-	private InputPointLine(Parcel in) {
+	private InputStroke(Parcel in) {
 		points = new ArrayList<>();
 		int count = in.readInt();
 		for (int i = 0; i < count; i++) {
-			InputPoint p = in.readParcelable(null);
+			Point p = in.readParcelable(null);
 			points.add(p);
 		}
 
 		invalidate();
+	}
+
+	/**
+	 * Represents user input. As user drags across screen, each location is recorded along with its timestamp.
+	 * The timestamps can be compared across an array of Circle to determine the velocity of the touch,
+	 * which will be used to determine line thickness.
+	 */
+	public static class Point implements Serializable, Parcelable {
+		public PointF position = new PointF();
+		public PointF tangent = new PointF();
+		public long timestamp;
+
+		Point() {
+		}
+
+		public Point(float x, float y) {
+			position.x = x;
+			position.y = y;
+			timestamp = System.currentTimeMillis();
+		}
+
+		public Point(float x, float y, long timestamp) {
+			position.x = x;
+			position.y = y;
+			this.timestamp = timestamp;
+		}
+
+		private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+			out.writeFloat(position.x);
+			out.writeFloat(position.y);
+			out.writeFloat(tangent.x);
+			out.writeFloat(tangent.y);
+			out.writeLong(timestamp);
+		}
+
+		private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+			position = new PointF(in.readFloat(), in.readFloat());
+			tangent = new PointF(in.readFloat(), in.readFloat());
+			timestamp = in.readLong();
+		}
+
+		@Override
+		public int describeContents() {
+			return 0;
+		}
+
+		@Override
+		public void writeToParcel(Parcel dest, int flags) {
+			dest.writeFloat(position.x);
+			dest.writeFloat(position.y);
+			dest.writeFloat(tangent.x);
+			dest.writeFloat(tangent.y);
+			dest.writeLong(timestamp);
+		}
+
+		public static final Creator<Point> CREATOR = new Creator<Point>() {
+			public Point createFromParcel(Parcel in) {
+				return new Point(in);
+			}
+
+			public Point[] newArray(int size) {
+				return new Point[size];
+			}
+		};
+
+		private Point(Parcel in) {
+			position = new PointF(in.readFloat(), in.readFloat());
+			tangent = new PointF(in.readFloat(), in.readFloat());
+			timestamp = in.readLong();
+		}
 	}
 }

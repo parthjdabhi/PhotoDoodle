@@ -32,14 +32,14 @@ public class CircleLine implements Serializable, Parcelable {
 	}
 
 	@Nullable
-	public static CircleLine smoothedCircleLine(InputPointLine inputPointLine, float minDiameter, float maxDiameter, float maxVel) {
-		if (inputPointLine.size() < 2) {
+	public static CircleLine smoothedCircleLine(InputStroke inputStroke, float minDiameter, float maxDiameter, float maxVel) {
+		if (inputStroke.size() < 2) {
 			return null;
 		}
 
 		CircleLine circleLine = new CircleLine();
 
-		ArrayList<InputPoint> inputPoints = inputPointLine.getPoints();
+		ArrayList<InputStroke.Point> points = inputStroke.getPoints();
 		Accumulator accumulator = new Accumulator(16, 0);
 		CubicBezierInterpolator cbi = new CubicBezierInterpolator();
 
@@ -51,9 +51,9 @@ public class CircleLine implements Serializable, Parcelable {
 		final float maxRadius = maxDiameter * 0.5f;
 		final float deltaRadius = maxRadius - minRadius;
 
-		for (int i = 0, N = inputPoints.size() - 1; i < N; i++) {
-			InputPoint a = inputPoints.get(i);
-			InputPoint b = inputPoints.get(i + 1);
+		for (int i = 0, N = points.size() - 1; i < N; i++) {
+			InputStroke.Point a = points.get(i);
+			InputStroke.Point b = points.get(i + 1);
 
 			float length = PointFUtil.distance(a.position, b.position) / 4;
 			controlPointA.x = a.position.x + a.tangent.x * length;
@@ -63,7 +63,7 @@ public class CircleLine implements Serializable, Parcelable {
 			controlPointB.y = b.position.y + b.tangent.y * -length;
 
 			// compute radius of circle for point A
-			final float aDpPerSecond = inputPointLine.getDpPerSecond(i);
+			final float aDpPerSecond = inputStroke.getDpPerSecond(i);
 			final float aVelScale = Math.min(aDpPerSecond / maxVel, 1f);
 			final float aRadius = accumulator.add(minRadius + aVelScale * aVelScale * deltaRadius);
 
@@ -78,7 +78,7 @@ public class CircleLine implements Serializable, Parcelable {
 				circleLine.add(new Circle(a.position, aRadius));
 
 				// compute radius of circle for point B
-				final float bDpPerSecond = inputPointLine.getDpPerSecond(i + 1);
+				final float bDpPerSecond = inputStroke.getDpPerSecond(i + 1);
 				final float bVelScale = Math.min(bDpPerSecond / maxVel, 1f);
 				final float bRadius = accumulator.add(minRadius + bVelScale * bVelScale * deltaRadius);
 
@@ -106,23 +106,23 @@ public class CircleLine implements Serializable, Parcelable {
 	}
 
 	/**
-	 * Initialize start CircleLine from an inputPointLine, scaling the circles' radii by velocityScaling.
+	 * Initialize start CircleLine from an inputStroke, scaling the circles' radii by velocityScaling.
 	 *
-	 * @param inputPointLine line describing drawing input
+	 * @param inputStroke line describing drawing input
 	 * @param minDiameter    the min diameter of circles added for slow moving line segments
 	 * @param maxDiameter    the max diameter of circles added for fast moving line segments
 	 * @param maxVel         the max velocity of line segments to produce maxDiameter circles
 	 */
-	public CircleLine(InputPointLine inputPointLine, float minDiameter, float maxDiameter, float maxVel) {
-		if (inputPointLine.size() < 2) {
+	public CircleLine(InputStroke inputStroke, float minDiameter, float maxDiameter, float maxVel) {
+		if (inputStroke.size() < 2) {
 			return;
 		}
 
 		Accumulator accumulator = new Accumulator(16, 0);
-		ArrayList<InputPoint> points = inputPointLine.getPoints();
+		ArrayList<InputStroke.Point> points = inputStroke.getPoints();
 
 		// start is the previous point, b is current point, c is next point
-		InputPoint a = null, b = points.get(0), c = points.get(1);
+		InputStroke.Point a = null, b = points.get(0), c = points.get(1);
 		final float thicknessDelta = maxDiameter - minDiameter;
 
 		for (int i = 0, N = points.size(); i < N; i++) {

@@ -23,7 +23,7 @@ public class QuadraticBezierInterpolator {
 		this.end = end;
 	}
 
-	public void set(InputPoint a, InputPoint b) {
+	public void set(InputStroke.Point a, InputStroke.Point b) {
 		start = a.position;
 		end = b.position;
 

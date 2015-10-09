@@ -7,14 +7,11 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
 import org.zakariya.photodoodle.geom.CircleLine;
-import org.zakariya.photodoodle.geom.CircleLineTessellator;
-import org.zakariya.photodoodle.geom.InputPoint;
-import org.zakariya.photodoodle.geom.InputPointLine;
+import org.zakariya.photodoodle.geom.InputStroke;
 import org.zakariya.photodoodle.geom.RectFUtil;
 
 import java.lang.ref.WeakReference;
@@ -33,7 +30,7 @@ public class LineDoodle extends Doodle {
 	private static final float MaxStrokeThickness = 16;
 	private static final float MaxStrokeVel = 700;
 
-	private InputPointLine currentInputPointLine = null;
+	private InputStroke currentInputStroke = null;
 	private CircleLine currentCircleLine = null;
 	private RectF boundingRect = null;
 	private InvalidationDelegate invalidationDelegate;
@@ -87,11 +84,11 @@ public class LineDoodle extends Doodle {
 			canvas.drawPath(currentCircleLine.getPath(), strokePaint);
 		}
 
-		else if (currentInputPointLine != null) {
+		else if (currentInputStroke != null) {
 
 			Path p = new Path();
-			ArrayList<InputPoint> points = currentInputPointLine.getPoints();
-			InputPoint firstPoint = points.get(0);
+			ArrayList<InputStroke.Point> points = currentInputStroke.getPoints();
+			InputStroke.Point firstPoint = points.get(0);
 			p.moveTo(firstPoint.position.x, firstPoint.position.y);
 
 			for (int i = 1, N = points.size(); i < N; i++) {
@@ -125,15 +122,15 @@ public class LineDoodle extends Doodle {
 	}
 
 	void onTouchEventBegin(@NonNull MotionEvent event) {
-		currentInputPointLine = new InputPointLine();
-		currentInputPointLine.add(event.getX(), event.getY());
+		currentInputStroke = new InputStroke();
+		currentInputStroke.add(event.getX(), event.getY());
 		currentCircleLine = null;
 	}
 
 	void onTouchEventMove(@NonNull MotionEvent event) {
-		InputPoint lastPoint = currentInputPointLine.lastPoint();
-		currentInputPointLine.add(event.getX(), event.getY());
-		InputPoint currentPoint = currentInputPointLine.lastPoint();
+		InputStroke.Point lastPoint = currentInputStroke.lastPoint();
+		currentInputStroke.add(event.getX(), event.getY());
+		InputStroke.Point currentPoint = currentInputStroke.lastPoint();
 
 		if (lastPoint != null && currentPoint != null) {
 			// invalidate the region containing the last point plotted and the current one
@@ -143,8 +140,8 @@ public class LineDoodle extends Doodle {
 	}
 
 	void onTouchEventEnd(@NonNull MotionEvent event) {
-		currentInputPointLine.finish();
-		currentCircleLine = CircleLine.smoothedCircleLine(currentInputPointLine, MinStrokeThickness, MaxStrokeThickness, MaxStrokeVel);
+		currentInputStroke.finish();
+		currentCircleLine = CircleLine.smoothedCircleLine(currentInputStroke, MinStrokeThickness, MaxStrokeThickness, MaxStrokeVel);
 
 		// invalidate region containing the line we just generated
 		invalidationRect = currentCircleLine.getBoundingRect();

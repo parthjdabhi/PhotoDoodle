@@ -16,8 +16,7 @@ import org.zakariya.photodoodle.geom.Circle;
 import org.zakariya.photodoodle.geom.CircleLine;
 import org.zakariya.photodoodle.geom.CircleLineTessellator;
 import org.zakariya.photodoodle.geom.CubicBezierInterpolator;
-import org.zakariya.photodoodle.geom.InputPoint;
-import org.zakariya.photodoodle.geom.InputPointLine;
+import org.zakariya.photodoodle.geom.InputStroke;
 import org.zakariya.photodoodle.geom.PointFUtil;
 
 import java.io.BufferedInputStream;
@@ -38,12 +37,12 @@ public class LineSmoothingDoodle extends Doodle {
 	private static final float HandleRadius = 10f;
 	private static boolean DrawBezierControlPoints = false;
 
-	private InputPointLine inputPointLine = new InputPointLine();
+	private InputStroke inputStroke = new InputStroke();
 	private CircleLine renderedCircleLine = null;
 	private CircleLineTessellator renderedCircleLineTessellator = new CircleLineTessellator();
 	private InvalidationDelegate invalidationDelegate;
 	private Paint handlePaint, controlPointPaint, smoothedLinePaint, renderedCircleLinePaint;
-	private InputPoint draggingPoint;
+	private InputStroke.Point draggingPoint;
 	private Context context;
 
 	public LineSmoothingDoodle(Context context) {
@@ -74,15 +73,15 @@ public class LineSmoothingDoodle extends Doodle {
 			long timestamp = 0;
 			long deltaTimestamp = 500;
 
-			inputPointLine.add(50, 100, timestamp);
+			inputStroke.add(50, 100, timestamp);
 			timestamp += deltaTimestamp;
-			inputPointLine.add(350, 100, timestamp);
+			inputStroke.add(350, 100, timestamp);
 			timestamp += deltaTimestamp;
-			inputPointLine.add(350, 300, timestamp);
+			inputStroke.add(350, 300, timestamp);
 			timestamp += deltaTimestamp;
-			inputPointLine.add(50, 300, timestamp);
+			inputStroke.add(50, 300, timestamp);
 			timestamp += deltaTimestamp;
-			inputPointLine.add(50, 400, timestamp);
+			inputStroke.add(50, 400, timestamp);
 		}
 	}
 
@@ -96,7 +95,7 @@ public class LineSmoothingDoodle extends Doodle {
 
 	@Override
 	public RectF getBoundingRect() {
-		return inputPointLine.getBoundingRect();
+		return inputStroke.getBoundingRect();
 	}
 
 	@Override
@@ -109,13 +108,13 @@ public class LineSmoothingDoodle extends Doodle {
 		// clear canvas
 		canvas.drawColor(0xFFFFFFFF);
 
-		if (inputPointLine != null) {
+		if (inputStroke != null) {
 
-			ArrayList<InputPoint> points = inputPointLine.getPoints();
+			ArrayList<InputStroke.Point> points = inputStroke.getPoints();
 			CubicBezierInterpolator cbi = new CubicBezierInterpolator();
 			for (int i = 0; i < points.size() - 1; i++) {
-				InputPoint a = points.get(i);
-				InputPoint b = points.get(i + 1);
+				InputStroke.Point a = points.get(i);
+				InputStroke.Point b = points.get(i + 1);
 
 				float length = PointFUtil.distance(a.position, b.position) / 4;
 				PointF controlPointA = PointFUtil.add(a.position, PointFUtil.scale(a.tangent, length));
@@ -152,7 +151,7 @@ public class LineSmoothingDoodle extends Doodle {
 			}
 
 			// draw dots representing the input points
-			for (InputPoint point : points) {
+			for (InputStroke.Point point : points) {
 
 				canvas.drawCircle(point.position.x, point.position.y, HandleRadius, handlePaint);
 
@@ -162,7 +161,7 @@ public class LineSmoothingDoodle extends Doodle {
 			}
 
 		} else {
-			Log.d(TAG, "draw - inputPointLine is null");
+			Log.d(TAG, "draw - inputStroke is null");
 		}
 
 		if (renderedCircleLine != null) {
@@ -198,8 +197,8 @@ public class LineSmoothingDoodle extends Doodle {
 
 		PointF point = new PointF(event.getX(), event.getY());
 		float minDist2 = Float.MAX_VALUE;
-		for (int i = 0; i < inputPointLine.size(); i++) {
-			InputPoint p = inputPointLine.get(i);
+		for (int i = 0; i < inputStroke.size(); i++) {
+			InputStroke.Point p = inputStroke.get(i);
 			float d2 = PointFUtil.distance2(point, p.position);
 			if (d2 < minDist2) {
 				minDist2 = d2;
@@ -219,7 +218,7 @@ public class LineSmoothingDoodle extends Doodle {
 			// update line
 			draggingPoint.position.x = event.getX();
 			draggingPoint.position.y = event.getY();
-			inputPointLine.invalidate();
+			inputStroke.invalidate();
 			updateCircleLine();
 		}
 
@@ -240,7 +239,7 @@ public class LineSmoothingDoodle extends Doodle {
 			BufferedOutputStream bos = new BufferedOutputStream(fos);
 			ObjectOutputStream oos = new ObjectOutputStream(bos);
 
-			oos.writeObject(inputPointLine);
+			oos.writeObject(inputStroke);
 			oos.close();
 
 			Log.i(TAG, "Saved to " + FILE);
@@ -255,10 +254,10 @@ public class LineSmoothingDoodle extends Doodle {
 			BufferedInputStream bis = new BufferedInputStream(fis);
 			ObjectInputStream ois = new ObjectInputStream(bis);
 
-			inputPointLine = (InputPointLine) ois.readObject();
+			inputStroke = (InputStroke) ois.readObject();
 			updateCircleLine();
-			Log.i(TAG, "Loaded " + inputPointLine.size() + " points from " + FILE);
-			return inputPointLine.size() > 0;
+			Log.i(TAG, "Loaded " + inputStroke.size() + " points from " + FILE);
+			return inputStroke.size() > 0;
 		} catch (Exception e) {
 			Log.e(TAG, "Error opening file: " + FILE + " e: " + e);
 			return false;
@@ -266,8 +265,8 @@ public class LineSmoothingDoodle extends Doodle {
 	}
 
 	private void updateCircleLine() {
-		renderedCircleLine = CircleLine.smoothedCircleLine(inputPointLine, 5, 100, 600);
-		//renderedCircleLine = new CircleLine(inputPointLine,5,100,600);
+		renderedCircleLine = CircleLine.smoothedCircleLine(inputStroke, 5, 100, 600);
+		//renderedCircleLine = new CircleLine(inputStroke,5,100,600);
 	}
 
 	private static class InputDelegate implements DoodleView.InputDelegate {

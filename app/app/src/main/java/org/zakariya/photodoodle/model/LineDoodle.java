@@ -102,6 +102,10 @@ public class LineDoodle extends Doodle {
 			canvas.drawPath(p, inputLinePaint);
 		}
 
+		if (invalidationRect != null) {
+			canvas.drawRect(invalidationRect, inputLinePaint);
+		}
+
 		invalidationRect = null;
 	}
 

@@ -82,9 +82,7 @@ public class LineDoodle extends Doodle {
 
 		if (currentCircleLine != null) {
 			canvas.drawPath(currentCircleLine.getPath(), strokePaint);
-		}
-
-		else if (currentInputStroke != null) {
+		} else if (currentInputStroke != null) {
 
 			Path p = new Path();
 			ArrayList<InputStroke.Point> points = currentInputStroke.getPoints();

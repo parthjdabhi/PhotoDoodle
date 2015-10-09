@@ -90,7 +90,7 @@ public class InputStroke implements Serializable, Parcelable {
 	}
 
 	public void add(float x, float y) {
-		add(x,y,System.currentTimeMillis());
+		add(x, y, System.currentTimeMillis());
 	}
 
 	public void finish() {

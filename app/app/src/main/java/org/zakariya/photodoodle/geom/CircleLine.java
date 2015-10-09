@@ -109,9 +109,9 @@ public class CircleLine implements Serializable, Parcelable {
 	 * Initialize start CircleLine from an inputStroke, scaling the circles' radii by velocityScaling.
 	 *
 	 * @param inputStroke line describing drawing input
-	 * @param minDiameter    the min diameter of circles added for slow moving line segments
-	 * @param maxDiameter    the max diameter of circles added for fast moving line segments
-	 * @param maxVel         the max velocity of line segments to produce maxDiameter circles
+	 * @param minDiameter the min diameter of circles added for slow moving line segments
+	 * @param maxDiameter the max diameter of circles added for fast moving line segments
+	 * @param maxVel      the max velocity of line segments to produce maxDiameter circles
 	 */
 	public CircleLine(InputStroke inputStroke, float minDiameter, float maxDiameter, float maxVel) {
 		if (inputStroke.size() < 2) {

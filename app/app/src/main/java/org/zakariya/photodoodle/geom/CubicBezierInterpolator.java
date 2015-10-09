@@ -3,9 +3,7 @@ package org.zakariya.photodoodle.geom;
 import android.graphics.PointF;
 import android.support.annotation.NonNull;
 
-import static org.zakariya.photodoodle.geom.PointFUtil.add;
 import static org.zakariya.photodoodle.geom.PointFUtil.distance;
-import static org.zakariya.photodoodle.geom.PointFUtil.scale;
 
 /**
  * Created by shamyl on 9/2/15.
@@ -75,7 +73,7 @@ public class CubicBezierInterpolator {
 	/**
 	 * Get the point on the bezier line defined by start->end distance `t along that line, where `t varies from 0->1
 	 *
-	 * @param t distance along the bezier line, varying from 0->1
+	 * @param t    distance along the bezier line, varying from 0->1
 	 * @param into a PointF instance into which to write the bezier point value
 	 * @return the bezier point value of the curve defined by start->end stored in `into
 	 */

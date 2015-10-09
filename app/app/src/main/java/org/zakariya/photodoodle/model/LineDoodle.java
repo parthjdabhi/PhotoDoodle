@@ -29,8 +29,8 @@ public class LineDoodle extends Doodle {
 
 	private static final String TAG = "LineDoodle";
 
-	private static final float MinStrokeThickness = 1;
-	private static final float MaxStrokeThickness = 10;
+	private static final float MinStrokeThickness = 2;
+	private static final float MaxStrokeThickness = 16;
 	private static final float MaxStrokeVel = 700;
 
 	private InputPointLine currentInputPointLine = null;
@@ -144,7 +144,11 @@ public class LineDoodle extends Doodle {
 
 		// invalidate region containing the line we just generated
 		invalidationRect = currentCircleLine.getBoundingRect();
-		getInvalidationDelegate().invalidate(invalidationRect);
+		if (invalidationRect != null) {
+			getInvalidationDelegate().invalidate(invalidationRect);
+		} else {
+			getInvalidationDelegate().invalidate();
+		}
 	}
 
 	private static class InputDelegate implements DoodleView.InputDelegate {

@@ -41,6 +41,40 @@ public class InputStroke implements Serializable, Parcelable {
 		}
 	}
 
+	public PointF getTangent(int i) {
+		if (i < 0) {
+			return getTangent(points.size() + i);
+		} else {
+			final int count = points.size();
+			if (count < 2) {
+				return new PointF(0, 0);
+			}
+
+			if (i == 0) {
+				return PointFUtil.dir(get(0).position, get(1).position).first;
+			} else if (i == count - 1) {
+				return PointFUtil.dir(get(i-1).position,get(i).position).first;
+			} else {
+				PointF a = get(i-1).position;
+				PointF b = get(i).position;
+				PointF c = get(i+1).position;
+
+				Pair<PointF, Float> abDir = PointFUtil.dir(a, b);
+				PointF abPrime = PointFUtil.rotateCCW(abDir.first);
+
+				Pair<PointF, Float> bcDir = PointFUtil.dir(b, c);
+				PointF bcPrime = PointFUtil.rotateCCW(bcDir.first);
+
+				PointF half = new PointF(abPrime.x + bcPrime.x, abPrime.y + bcPrime.y);
+				if (PointFUtil.length2(half) > 1e-4) {
+					return PointFUtil.normalize(PointFUtil.rotateCW(half)).first;
+				} else {
+					return bcPrime;
+				}
+			}
+		}
+	}
+
 	@Nullable
 	public Point firstPoint() {
 		return points.isEmpty() ? null : points.get(0);
@@ -61,50 +95,16 @@ public class InputStroke implements Serializable, Parcelable {
 		} else {
 			boundingRect.union(x, y);
 		}
-
-		int count = points.size();
-		if (count == 2) {
-			Point a = points.get(0);
-			Point b = points.get(1);
-			a.tangent = PointFUtil.dir(a.position, b.position).first;
-		}
-
-		if (count > 2) {
-			Point a = points.get(count - 3);
-			Point b = points.get(count - 2);
-			Point c = points.get(count - 1);
-
-			Pair<PointF, Float> abDir = PointFUtil.dir(a.position, b.position);
-			PointF abPrime = PointFUtil.rotateCCW(abDir.first);
-
-			Pair<PointF, Float> bcDir = PointFUtil.dir(b.position, c.position);
-			PointF bcPrime = PointFUtil.rotateCCW(bcDir.first);
-
-			PointF half = new PointF(abPrime.x + bcPrime.x, abPrime.y + bcPrime.y);
-			if (PointFUtil.length2(half) > 1e-4) {
-				b.tangent = PointFUtil.normalize(PointFUtil.rotateCW(half)).first;
-			} else {
-				b.tangent = bcPrime;
-			}
-		}
 	}
 
 	public void add(float x, float y) {
 		add(x, y, System.currentTimeMillis());
 	}
 
-	public void finish() {
-		int count = points.size();
-		if (count > 1) {
-			Point a = points.get(count - 2);
-			Point b = points.get(count - 1);
-			a.tangent = PointFUtil.dir(a.position, b.position).first;
-		}
-	}
+	public void finish() {}
 
 	public void invalidate() {
 		computeBoundingRect();
-		computeTangents();
 	}
 
 	public RectF getBoundingRect() {
@@ -148,49 +148,6 @@ public class InputStroke implements Serializable, Parcelable {
 			return 0;
 		}
 	}
-
-	/**
-	 * Analyze the line and compute tangent vectors for each vertex
-	 */
-	public void computeTangents() {
-		if (points.size() < 3) {
-			return;
-		}
-
-		for (int i = 0, N = points.size(); i < N; i++) {
-			if (i == 0) {
-				Point a = points.get(i);
-				Point b = points.get(i + 1);
-				Pair<PointF, Float> dir = PointFUtil.dir(a.position, b.position);
-
-				a.tangent = dir.first;
-			} else if (i == N - 1) {
-				Point a = points.get(i - 1);
-				Point b = points.get(i);
-				Pair<PointF, Float> dir = PointFUtil.dir(a.position, b.position);
-
-				b.tangent = dir.first;
-			} else {
-				Point a = points.get(i - 1);
-				Point b = points.get(i);
-				Point c = points.get(i + 1);
-
-				Pair<PointF, Float> abDir = PointFUtil.dir(a.position, b.position);
-				PointF abPrime = PointFUtil.rotateCCW(abDir.first);
-
-				Pair<PointF, Float> bcDir = PointFUtil.dir(b.position, c.position);
-				PointF bcPrime = PointFUtil.rotateCCW(bcDir.first);
-
-				PointF half = new PointF(abPrime.x + bcPrime.x, abPrime.y + bcPrime.y);
-				if (PointFUtil.length2(half) > 1e-4) {
-					b.tangent = PointFUtil.normalize(PointFUtil.rotateCW(half)).first;
-				} else {
-					b.tangent = bcPrime;
-				}
-			}
-		}
-	}
-
 
 	// Serializable
 
@@ -256,7 +213,6 @@ public class InputStroke implements Serializable, Parcelable {
 	 */
 	public static class Point implements Serializable, Parcelable {
 		public PointF position = new PointF();
-		public PointF tangent = new PointF();
 		public long timestamp;
 
 		Point() {
@@ -277,14 +233,11 @@ public class InputStroke implements Serializable, Parcelable {
 		private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 			out.writeFloat(position.x);
 			out.writeFloat(position.y);
-			out.writeFloat(tangent.x);
-			out.writeFloat(tangent.y);
 			out.writeLong(timestamp);
 		}
 
 		private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 			position = new PointF(in.readFloat(), in.readFloat());
-			tangent = new PointF(in.readFloat(), in.readFloat());
 			timestamp = in.readLong();
 		}
 
@@ -297,8 +250,6 @@ public class InputStroke implements Serializable, Parcelable {
 		public void writeToParcel(Parcel dest, int flags) {
 			dest.writeFloat(position.x);
 			dest.writeFloat(position.y);
-			dest.writeFloat(tangent.x);
-			dest.writeFloat(tangent.y);
 			dest.writeLong(timestamp);
 		}
 
@@ -314,7 +265,6 @@ public class InputStroke implements Serializable, Parcelable {
 
 		private Point(Parcel in) {
 			position = new PointF(in.readFloat(), in.readFloat());
-			tangent = new PointF(in.readFloat(), in.readFloat());
 			timestamp = in.readLong();
 		}
 	}

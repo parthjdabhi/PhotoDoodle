@@ -13,6 +13,7 @@ import org.zakariya.photodoodle.model.Doodle;
 import org.zakariya.photodoodle.model.IncrementalStrokeDoodle;
 import org.zakariya.photodoodle.model.LineDoodle;
 import org.zakariya.photodoodle.model.LineSmoothingDoodle;
+import org.zakariya.photodoodle.model.LineTessellationDoodle;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;

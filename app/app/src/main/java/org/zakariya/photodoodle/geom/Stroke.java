@@ -58,13 +58,15 @@ public class Stroke implements Serializable, Parcelable {
 		for (int i = startIndex; i < endIndex; i++) {
 			InputStroke.Point a = points.get(i);
 			InputStroke.Point b = points.get(i + 1);
+			PointF aTangent = inputStroke.getTangent(i);
+			PointF bTangent = inputStroke.getTangent(i+1);
 
 			float length = PointFUtil.distance(a.position, b.position) / 4;
-			controlPointA.x = a.position.x + a.tangent.x * length;
-			controlPointA.y = a.position.y + a.tangent.y * length;
+			controlPointA.x = a.position.x + aTangent.x * length;
+			controlPointA.y = a.position.y + aTangent.y * length;
 
-			controlPointB.x = b.position.x + b.tangent.x * -length;
-			controlPointB.y = b.position.y + b.tangent.y * -length;
+			controlPointB.x = b.position.x + bTangent.x * -length;
+			controlPointB.y = b.position.y + bTangent.y * -length;
 
 			// compute radius of point for point A
 			final float aDpPerSecond = inputStroke.getDpPerSecond(i);

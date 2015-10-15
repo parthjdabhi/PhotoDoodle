@@ -112,10 +112,12 @@ public class LineSmoothingDoodle extends Doodle {
 			for (int i = 0; i < points.size() - 1; i++) {
 				InputStroke.Point a = points.get(i);
 				InputStroke.Point b = points.get(i + 1);
+				PointF aTangent = inputStroke.getTangent(i);
+				PointF bTangent = inputStroke.getTangent(i+1);
 
 				float length = PointFUtil.distance(a.position, b.position) / 4;
-				PointF controlPointA = PointFUtil.add(a.position, PointFUtil.scale(a.tangent, length));
-				PointF controlPointB = PointFUtil.add(b.position, PointFUtil.scale(b.tangent, -length));
+				PointF controlPointA = PointFUtil.add(a.position, PointFUtil.scale(aTangent, length));
+				PointF controlPointB = PointFUtil.add(b.position, PointFUtil.scale(bTangent, -length));
 
 				if (DrawBezierControlPoints) {
 					controlPointPaint.setColor(0x9900FF00);
@@ -148,11 +150,12 @@ public class LineSmoothingDoodle extends Doodle {
 			}
 
 			// draw dots representing the input points
-			for (InputStroke.Point point : points) {
-
+			for (int i = 0, N = inputStroke.size(); i < N; i++) {
+				InputStroke.Point point = inputStroke.get(i);
+				PointF tangent = inputStroke.getTangent(i);
 				canvas.drawCircle(point.position.x, point.position.y, HandleRadius, handlePaint);
 
-				PointF t = new PointF(point.position.x + point.tangent.x * 2 * HandleRadius, point.position.y + point.tangent.y * 2 * HandleRadius);
+				PointF t = new PointF(point.position.x + tangent.x * 2 * HandleRadius, point.position.y + tangent.y * 2 * HandleRadius);
 
 				canvas.drawLine(point.position.x, point.position.y, t.x, t.y, handlePaint);
 			}

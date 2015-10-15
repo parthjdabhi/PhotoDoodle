@@ -27,22 +27,26 @@ public class Stroke implements Serializable, Parcelable {
 	private Path path = new Path();
 	private boolean needsTessellation = true;
 	private StrokeTessellator tessellator = new StrokeTessellator();
+	private Accumulator accumulator;
+	private CubicBezierInterpolator cbi;
 
 	public Stroke() {
 	}
 
-	@Nullable
-	public static Stroke smoothedStroke(InputStroke inputStroke, float minDiameter, float maxDiameter, float maxVel) {
+	public void appendAndSmooth(InputStroke inputStroke, int startIndex, int endIndex, float minDiameter, float maxDiameter, float maxVel) {
 		if (inputStroke.size() < 2) {
-			return null;
+			return;
 		}
 
-		Stroke stroke = new Stroke();
+		if (accumulator == null) {
+			accumulator = new Accumulator(16,0);
+		}
+
+		if (cbi == null) {
+			cbi = new CubicBezierInterpolator();
+		}
 
 		ArrayList<InputStroke.Point> points = inputStroke.getPoints();
-		Accumulator accumulator = new Accumulator(16, 0);
-		CubicBezierInterpolator cbi = new CubicBezierInterpolator();
-
 		PointF controlPointA = new PointF();
 		PointF controlPointB = new PointF();
 		PointF bp = new PointF();
@@ -51,7 +55,7 @@ public class Stroke implements Serializable, Parcelable {
 		final float maxRadius = maxDiameter * 0.5f;
 		final float deltaRadius = maxRadius - minRadius;
 
-		for (int i = 0, N = points.size() - 1; i < N; i++) {
+		for (int i = startIndex; i < endIndex; i++) {
 			InputStroke.Point a = points.get(i);
 			InputStroke.Point b = points.get(i + 1);
 
@@ -75,7 +79,7 @@ public class Stroke implements Serializable, Parcelable {
 
 			if (subdivisions > 1) {
 
-				stroke.add(new Point(a.position, aRadius));
+				add(new Point(a.position, aRadius));
 
 				// compute radius of point for point B
 				final float bDpPerSecond = inputStroke.getDpPerSecond(i + 1);
@@ -94,14 +98,20 @@ public class Stroke implements Serializable, Parcelable {
 
 				for (int j = 0; j < subdivisions; j++, t += dt, r += dr) {
 					cbi.getBezierPoint(t, bp);
-					stroke.add(new Point(bp, r));
+					add(new Point(bp, r));
 				}
 			} else {
-				stroke.add(new Point(a.position, aRadius));
+				add(new Point(a.position, aRadius));
 			}
 		}
 
-		stroke.invalidate();
+		invalidate();
+	}
+
+	@Nullable
+	public static Stroke smoothedStroke(InputStroke inputStroke, float minDiameter, float maxDiameter, float maxVel) {
+		Stroke stroke = new Stroke();
+		stroke.appendAndSmooth(inputStroke, 0, inputStroke.size() - 1, minDiameter, maxDiameter, maxVel);
 		return stroke;
 	}
 
@@ -154,7 +164,7 @@ public class Stroke implements Serializable, Parcelable {
 
 					Log.i(TAG, "dpPerSecond: " + dpPerSecond + " velScale: " + velScale + " diameter: " + diameter);
 
-					// smooth the size
+					// appendAndSmooth the size
 					diameter = accumulator.add(diameter);
 
 					cp = new Point(b.position, diameter * 0.5f);

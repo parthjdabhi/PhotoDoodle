@@ -2,11 +2,40 @@ package org.zakariya.photodoodle.geom;
 
 import android.graphics.PointF;
 import android.support.annotation.Nullable;
+import android.util.Pair;
 
 /**
  * Created by shamyl on 9/24/15.
  */
-public class LineIntersection {
+public class Lines {
+
+	/**
+	 * Compute distance of point `point to line defined by `a and `b
+	 * @param a start of line
+	 * @param b end of line
+	 * @param point point to test
+	 * @return distance of test point from line
+	 */
+	public static float distance(PointF a, PointF b, PointF point) {
+
+		Pair<PointF,Float> dir = PointFUtil.dir(a,b);
+		PointF toPoint = PointFUtil.subtract(point, a);
+		float projectedLength = PointFUtil.dot(toPoint,dir.first);
+
+		// early exit condition, we'll have to get distance from endpoints
+		if ( projectedLength < 0 )
+		{
+			return PointFUtil.distance(point, a);
+		}
+		else if ( projectedLength > dir.second )
+		{
+			return PointFUtil.distance(point,b);
+		}
+
+		// compute distance from point to the closest projection point on the line segment
+		PointF projectedOnSegment = PointFUtil.add(a, PointFUtil.scale(dir.first,projectedLength));
+		return PointFUtil.distance(point, projectedOnSegment);
+	}
 
 	/**
 	 * Compute intersection of two line segments

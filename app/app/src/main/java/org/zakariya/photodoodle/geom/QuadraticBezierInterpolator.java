@@ -65,7 +65,7 @@ public class QuadraticBezierInterpolator {
 
 	/**
 	 * @param scale the scale at which the line is being rendered
-	 * @return An estimated number of subdivisions to divide this bezier curve into to represent start visually smooth curve.
+	 * @return An estimated number of subdivisions to divide this bezier curve into to represent start visually appendAndSmooth curve.
 	 */
 	public int getRecommendedSubdivisions(float scale) {
 		// from http://ciechanowski.me/blog/2014/02/18/drawing-bezier-curves/

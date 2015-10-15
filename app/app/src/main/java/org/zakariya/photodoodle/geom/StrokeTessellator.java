@@ -21,7 +21,7 @@ public class StrokeTessellator {
 	 * Tessellate stroke into Path object suitable for rendering
 	 *
 	 * @param stroke list of Point instances, in order
-	 * @param path    destination Path into which tessellated closed path will be added, if non-null
+	 * @param path   destination Path into which tessellated closed path will be added, if non-null
 	 */
 	public void tessellate(Stroke stroke, @Nullable Path path) {
 
@@ -129,7 +129,7 @@ public class StrokeTessellator {
 			// if aLeftAttachPoint->bLeftAttachPoint intersects line defined by previousSeg,
 			// update leftCoordinates[-2,-1] to that intersection, and only add bLeftAttachPoint
 
-			PointF intersection = LineIntersection.lineSegmentIntersection(previousSegStartX, previousSegStartY, previousSegEndX, previousSegEndY, aLeftAttachPoint.x, aLeftAttachPoint.y, bLeftAttachPoint.x, bLeftAttachPoint.y);
+			PointF intersection = Lines.lineSegmentIntersection(previousSegStartX, previousSegStartY, previousSegEndX, previousSegEndY, aLeftAttachPoint.x, aLeftAttachPoint.y, bLeftAttachPoint.x, bLeftAttachPoint.y);
 
 			if (intersection != null) {
 				leftCoordinates.set(-2, intersection.x);
@@ -158,7 +158,7 @@ public class StrokeTessellator {
 			// if aRightAttachPoint->bRightAttachPoint intersects line defined by previousSeg,
 			// update rightCoordinates[-2,-1] to that intersection, and only add bLeftAttachPoint
 
-			PointF intersection = LineIntersection.lineSegmentIntersection(previousSegStartX, previousSegStartY, previousSegEndX, previousSegEndY, aRightAttachPoint.x, aRightAttachPoint.y, bRightAttachPoint.x, bRightAttachPoint.y);
+			PointF intersection = Lines.lineSegmentIntersection(previousSegStartX, previousSegStartY, previousSegEndX, previousSegEndY, aRightAttachPoint.x, aRightAttachPoint.y, bRightAttachPoint.x, bRightAttachPoint.y);
 
 			if (intersection != null) {
 				rightCoordinates.set(-2, intersection.x);

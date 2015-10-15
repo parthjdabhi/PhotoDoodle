@@ -12,10 +12,10 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
-import org.zakariya.photodoodle.geom.Stroke;
 import org.zakariya.photodoodle.geom.CubicBezierInterpolator;
 import org.zakariya.photodoodle.geom.InputStroke;
 import org.zakariya.photodoodle.geom.PointFUtil;
+import org.zakariya.photodoodle.geom.Stroke;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

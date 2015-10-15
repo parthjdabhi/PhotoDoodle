@@ -1,6 +1,6 @@
 # Line Smoothing
 
-I don't think Quadratics are going to cut it. They don't handle the S-curve scenario...
+I may want to /refine/ the inputstroke via the line simplification algorithm I used in Surfacer. As points are added to the inputstroke, run that algo on them to generate a simplified stroke in the backing store. This might allow for more graceful lines. -- Ramer-Douglas-Peucker simplification
 
 # Drawing
 

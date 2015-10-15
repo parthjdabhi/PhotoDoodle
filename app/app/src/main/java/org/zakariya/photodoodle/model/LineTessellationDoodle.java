@@ -13,8 +13,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
-import org.zakariya.photodoodle.geom.Stroke;
 import org.zakariya.photodoodle.geom.PointFUtil;
+import org.zakariya.photodoodle.geom.Stroke;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -156,7 +156,7 @@ public class LineTessellationDoodle extends Doodle {
 		}
 
 		// now, confirm closest match was inside handle
-		if (PointFUtil.distance2(point, draggingPoint.position) > draggingPoint.radius * draggingPoint.radius) {
+		if (PointFUtil.distance2(point, draggingPoint.position) > (draggingPoint.radius * draggingPoint.radius)) {
 			draggingPoint = null;
 		}
 	}

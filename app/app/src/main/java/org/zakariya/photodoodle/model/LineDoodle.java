@@ -10,9 +10,9 @@ import android.support.annotation.NonNull;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
-import org.zakariya.photodoodle.geom.Stroke;
 import org.zakariya.photodoodle.geom.InputStroke;
 import org.zakariya.photodoodle.geom.RectFUtil;
+import org.zakariya.photodoodle.geom.Stroke;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -34,15 +34,15 @@ public class LineDoodle extends Doodle {
 	private Stroke currentStroke = null;
 	private RectF boundingRect = null;
 	private InvalidationDelegate invalidationDelegate;
-	private Paint inputLinePaint, strokePaint;
+	private Paint inputStrokePaint, strokePaint;
 	private RectF invalidationRect;
 
 	public LineDoodle() {
-		inputLinePaint = new Paint();
-		inputLinePaint.setAntiAlias(true);
-		inputLinePaint.setColor(0xFFFF0000);
-		inputLinePaint.setStrokeWidth(1);
-		inputLinePaint.setStyle(Paint.Style.STROKE);
+		inputStrokePaint = new Paint();
+		inputStrokePaint.setAntiAlias(true);
+		inputStrokePaint.setColor(0xFFFF0000);
+		inputStrokePaint.setStrokeWidth(1);
+		inputStrokePaint.setStyle(Paint.Style.STROKE);
 
 		strokePaint = new Paint();
 		strokePaint.setAntiAlias(true);
@@ -82,7 +82,9 @@ public class LineDoodle extends Doodle {
 
 		if (currentStroke != null) {
 			canvas.drawPath(currentStroke.getPath(), strokePaint);
-		} else if (currentInputStroke != null) {
+		}
+
+		if (currentInputStroke != null) {
 
 			Path p = new Path();
 			ArrayList<InputStroke.Point> points = currentInputStroke.getPoints();
@@ -94,11 +96,11 @@ public class LineDoodle extends Doodle {
 				p.lineTo(point.x, point.y);
 			}
 
-			canvas.drawPath(p, inputLinePaint);
+			canvas.drawPath(p, inputStrokePaint);
 		}
 
 		if (invalidationRect != null) {
-			canvas.drawRect(invalidationRect, inputLinePaint);
+			canvas.drawRect(invalidationRect, inputStrokePaint);
 		}
 
 		invalidationRect = null;

@@ -20,6 +20,10 @@ public class PointFUtil {
 		return (dx * dx) + (dy * dy);
 	}
 
+	public static float dot(PointF a, PointF b) {
+		return a.x*b.x + a.y*b.y;
+	}
+
 	public static float length2(PointF a) {
 		return (a.x * a.x) + (a.y * a.y);
 	}
@@ -38,6 +42,10 @@ public class PointFUtil {
 
 	public static PointF subtract(PointF a, PointF b) {
 		return new PointF(a.x - b.x, a.y - b.y);
+	}
+
+	public static PointF multiply(PointF a, PointF b) {
+		return new PointF(a.x*b.x, a.y*b.y);
 	}
 
 	public static Pair<PointF, Float> normalize(PointF p) {

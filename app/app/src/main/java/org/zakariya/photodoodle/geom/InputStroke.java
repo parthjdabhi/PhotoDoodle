@@ -189,7 +189,7 @@ public class InputStroke implements Serializable, Parcelable {
 		return optimized;
 	}
 
-	private InputStroke optimize(InputStroke in, float thresholdSquared, int depth) {
+	private static InputStroke optimize(InputStroke in, float thresholdSquared, int depth) {
 
 		if (in.size() <= 2) {
 			return in;
@@ -226,12 +226,13 @@ public class InputStroke implements Serializable, Parcelable {
 			//	Partition 'in' into left and right sub vectors, optimize them and join
 			//
 
-			InputStroke left = in.slice(0, maxDistSquaredIndex + 1);
-			InputStroke right = in.slice(maxDistSquaredIndex, size);
+			InputStroke left = slice(in, 0, maxDistSquaredIndex + 1);
+			InputStroke right = slice(in, maxDistSquaredIndex, size);
 			InputStroke leftSimplified = optimize(left, thresholdSquared, depth + 1);
 			InputStroke rightSimplified = optimize(right, thresholdSquared, depth + 1);
 
 			InputStroke joined = new InputStroke();
+			joined.points.ensureCapacity(leftSimplified.size() + rightSimplified.size() - 1);
 
 			for (int i = 0; i < leftSimplified.size() - 1; i++) {
 				joined.points.add(leftSimplified.points.get(i));
@@ -250,6 +251,7 @@ public class InputStroke implements Serializable, Parcelable {
 			//
 
 			InputStroke optimized = new InputStroke();
+			optimized.points.ensureCapacity(2);
 			optimized.points.add(first);
 			optimized.points.add(last);
 
@@ -260,17 +262,18 @@ public class InputStroke implements Serializable, Parcelable {
 	/**
 	 * Cut out a slice of an InputStroke starting at index start, up to but not including element at end index
 	 *
+	 * @param stroke the stroke to slice
 	 * @param start index of first element to copy
 	 * @param end   end of slice, not included in output
 	 * @return sub slice of this InputStroke
 	 * NOTE: Does not update bounds of slice, you must call computeBoundingRect if you need the bounds updated.
 	 */
-	private InputStroke slice(int start, int end) {
+	private static InputStroke slice(InputStroke stroke, int start, int end) {
 		InputStroke s = new InputStroke();
-		//s.points.ensureCapacity(end - start);
+		s.points.ensureCapacity(end - start);
 
 		for (int i = start; i < end; i++) {
-			s.points.add(points.get(i));
+			s.points.add(stroke.points.get(i));
 		}
 
 		return s;

@@ -189,7 +189,7 @@ public class InputStroke implements Serializable, Parcelable {
 		return optimized;
 	}
 
-	private InputStroke optimize(InputStroke in, float threshold, int depth) {
+	private InputStroke optimize(InputStroke in, float thresholdSquared, int depth) {
 
 		if (in.size() <= 2) {
 			return in;
@@ -199,37 +199,37 @@ public class InputStroke implements Serializable, Parcelable {
 		//	Find the vertex farthest from the line defined by the start and and of the path
 		//
 
-		float maxDist = 0;
-		int maxDistIndex = 0;
+		float maxDistSquared = 0;
+		int maxDistSquaredIndex = 0;
 		final int size = in.size();
 		final Point first = in.get(0);
 		final Point last = in.get(size - 1);
 		final LineSegment line = new LineSegment(first.position, last.position);
 
 		for (int i = 1; i < size - 1; i++) {
-			float dist = line.distance(in.get(i).position, true);
-			if (dist > maxDist) {
-				maxDist = dist;
-				maxDistIndex = i;
+			float dist = line.distanceSquared(in.get(i).position, true);
+			if (dist > maxDistSquared) {
+				maxDistSquared = dist;
+				maxDistSquaredIndex = i;
 			}
 		}
 
 		//
-		//	If the farthest vertex is greater than our threshold, we need to
+		//	If the farthest vertex is greater than our thresholdSquared, we need to
 		//	partition and optimize left and right separately
 		//
 
-		if (maxDist > threshold) {
+		if (maxDistSquared > thresholdSquared) {
 
 
 			//
 			//	Partition 'in' into left and right sub vectors, optimize them and join
 			//
 
-			InputStroke left = in.slice(0, maxDistIndex + 1);
-			InputStroke right = in.slice(maxDistIndex, size);
-			InputStroke leftSimplified = optimize(left, threshold, depth + 1);
-			InputStroke rightSimplified = optimize(right, threshold, depth + 1);
+			InputStroke left = in.slice(0, maxDistSquaredIndex + 1);
+			InputStroke right = in.slice(maxDistSquaredIndex, size);
+			InputStroke leftSimplified = optimize(left, thresholdSquared, depth + 1);
+			InputStroke rightSimplified = optimize(right, thresholdSquared, depth + 1);
 
 			InputStroke joined = new InputStroke();
 

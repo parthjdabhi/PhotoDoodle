@@ -27,7 +27,7 @@ public class LineDoodle extends Doodle {
 
 	private static final String TAG = "LineDoodle";
 
-	private static final float OptimizationThreshold = 4;
+	private static final float OptimizationThreshold = 2;
 	private static final float MinStrokeThickness = 2;
 	private static final float MaxStrokeThickness = 16;
 	private static final float MaxStrokeVel = 700;
@@ -95,7 +95,7 @@ public class LineDoodle extends Doodle {
 				drawInputStroke(canvas, optimizedCurrentInputStroke, 0xaa00FF00, 4);
 			}
 		}
-		
+
 		if (invalidationRect != null) {
 			canvas.drawRect(invalidationRect, inputStrokePaint);
 		}

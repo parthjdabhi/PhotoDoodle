@@ -82,6 +82,16 @@ public class InputStroke implements Serializable, Parcelable {
 		}
 	}
 
+	public PointF getSegmentDirection(int i) {
+		if (i < size() - 1) {
+			PointF a = points.get(i).position;
+			PointF b = points.get(i + 1).position;
+			return PointFUtil.dir(a, b).first;
+		} else {
+			return null;
+		}
+	}
+
 	/**
 	 * Get rough estimate of the velocity, in dp-per-second, of the user's finger when drawing the point at index `i
 	 *

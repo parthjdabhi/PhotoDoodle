@@ -79,6 +79,8 @@ public class LineSmoothingDoodle extends Doodle {
 			inputStroke.add(50, 300, timestamp);
 			timestamp += deltaTimestamp;
 			inputStroke.add(50, 400, timestamp);
+
+			updateCircleLine();
 		}
 	}
 
@@ -106,49 +108,6 @@ public class LineSmoothingDoodle extends Doodle {
 		canvas.drawColor(0xFFFFFFFF);
 
 		if (inputStroke != null) {
-
-			ArrayList<InputStroke.Point> points = inputStroke.getPoints();
-			CubicBezierInterpolator cbi = new CubicBezierInterpolator();
-			for (int i = 0; i < points.size() - 1; i++) {
-				InputStroke.Point a = points.get(i);
-				InputStroke.Point b = points.get(i + 1);
-				PointF aTangent = inputStroke.getTangent(i);
-				PointF bTangent = inputStroke.getTangent(i+1);
-
-				float length = PointFUtil.distance(a.position, b.position) / 4;
-				PointF controlPointA = PointFUtil.add(a.position, PointFUtil.scale(aTangent, length));
-				PointF controlPointB = PointFUtil.add(b.position, PointFUtil.scale(bTangent, -length));
-
-				if (DrawBezierControlPoints) {
-					controlPointPaint.setColor(0x9900FF00);
-					canvas.drawCircle(controlPointA.x, controlPointA.y, HandleRadius * 1.5f, controlPointPaint);
-
-					controlPointPaint.setColor(0x990000FF);
-					canvas.drawCircle(controlPointB.x, controlPointB.y, HandleRadius * 1.5f, controlPointPaint);
-				}
-
-				// now tessellate
-				PointF bp = new PointF();
-				Path path = new Path();
-				cbi.set(a.position, controlPointA, controlPointB, b.position);
-				int subdivisions = cbi.getRecommendedSubdivisions(1);
-				if (subdivisions > 1) {
-
-					path.moveTo(a.position.x, a.position.y);
-					float dt = 1f / subdivisions;
-					float t = dt;
-					for (int j = 0; j < subdivisions; j++, t += dt) {
-						cbi.getBezierPoint(t, bp);
-						path.lineTo(bp.x, bp.y);
-					}
-
-					canvas.drawPath(path, smoothedLinePaint);
-
-				} else {
-					canvas.drawLine(a.position.x, a.position.y, b.position.x, b.position.y, smoothedLinePaint);
-				}
-			}
-
 			// draw dots representing the input points
 			for (int i = 0, N = inputStroke.size(); i < N; i++) {
 				InputStroke.Point point = inputStroke.get(i);
@@ -166,13 +125,20 @@ public class LineSmoothingDoodle extends Doodle {
 
 		if (renderedStroke != null) {
 
-			renderedStrokePaint.setColor(0xFFFF0000);
+			renderedStrokePaint.setColor(0xFFAA0000);
 			canvas.drawPath(renderedStroke.getPath(), renderedStrokePaint);
 
-			renderedStrokePaint.setColor(0x66FF0000);
-			for (Stroke.Point point : renderedStroke.getPoints()) {
-				canvas.drawCircle(point.position.x, point.position.y, point.radius, renderedStrokePaint);
+			renderedStrokePaint.setColor(0xFF000000);
+			Path path = new Path();
+			Stroke.Point point = renderedStroke.get(0);
+			path.moveTo(point.position.x, point.position.y);
+
+			for (int i = 1; i < renderedStroke.size(); i++) {
+				point = renderedStroke.get(i);
+				path.lineTo(point.position.x, point.position.y);
 			}
+
+			canvas.drawPath(path,renderedStrokePaint);
 		}
 	}
 
@@ -264,7 +230,6 @@ public class LineSmoothingDoodle extends Doodle {
 
 	private void updateCircleLine() {
 		renderedStroke = Stroke.smoothedStroke(inputStroke, 5, 100, 600);
-		//renderedStroke = new Stroke(inputStroke,5,100,600);
 	}
 
 	private static class InputDelegate implements DoodleView.InputDelegate {

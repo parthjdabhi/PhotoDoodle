@@ -39,7 +39,7 @@ public class Stroke implements Serializable, Parcelable {
 		}
 
 		if (accumulator == null) {
-			accumulator = new Accumulator(16,0);
+			accumulator = new Accumulator(16, 0);
 		}
 
 		if (cbi == null) {
@@ -49,6 +49,9 @@ public class Stroke implements Serializable, Parcelable {
 		ArrayList<InputStroke.Point> points = inputStroke.getPoints();
 		PointF controlPointA = new PointF();
 		PointF controlPointB = new PointF();
+		PointF previousSegmentDir = null;
+		PointF currentSegmentDir = inputStroke.getSegmentDirection(startIndex);
+		PointF nextSegmentDir = inputStroke.getSegmentDirection(startIndex+1);
 		PointF bp = new PointF();
 
 		final float minRadius = minDiameter * 0.5f;
@@ -59,14 +62,29 @@ public class Stroke implements Serializable, Parcelable {
 			InputStroke.Point a = points.get(i);
 			InputStroke.Point b = points.get(i + 1);
 			PointF aTangent = inputStroke.getTangent(i);
-			PointF bTangent = inputStroke.getTangent(i+1);
+			PointF bTangent = inputStroke.getTangent(i + 1);
+			float controlPointLength = PointFUtil.distance(a.position, b.position) / 4;
+			float aControlPointLength = controlPointLength;
+			float bControlPointLength = controlPointLength;
 
-			float length = PointFUtil.distance(a.position, b.position) / 4;
-			controlPointA.x = a.position.x + aTangent.x * length;
-			controlPointA.y = a.position.y + aTangent.y * length;
+			if (previousSegmentDir != null) {
+				float dot = PointFUtil.dot(previousSegmentDir,currentSegmentDir);
+				float acuteness = -1 * Math.min(dot, 0); // clamp dot from [-1,0] and invert so we have an acuteness from 0 to 1
+				aControlPointLength *= 1-acuteness;
+			}
 
-			controlPointB.x = b.position.x + bTangent.x * -length;
-			controlPointB.y = b.position.y + bTangent.y * -length;
+			controlPointA.x = a.position.x + aTangent.x * aControlPointLength;
+			controlPointA.y = a.position.y + aTangent.y * aControlPointLength;
+
+			nextSegmentDir = inputStroke.getSegmentDirection(i+1);
+			if (nextSegmentDir != null) {
+				float dot = PointFUtil.dot(nextSegmentDir, currentSegmentDir);
+				float acuteness = -1 * Math.min(dot,0); // clamp dot from [-1,0] and invert so we have an acuteness from 0 to 1
+				bControlPointLength *= 1-acuteness;
+			}
+
+			controlPointB.x = b.position.x + bTangent.x * -bControlPointLength;
+			controlPointB.y = b.position.y + bTangent.y * -bControlPointLength;
 
 			// compute radius of point for point A
 			final float aDpPerSecond = inputStroke.getDpPerSecond(i);
@@ -105,6 +123,10 @@ public class Stroke implements Serializable, Parcelable {
 			} else {
 				add(new Point(a.position, aRadius));
 			}
+
+			// update segment directions for angle acuteness testing
+			previousSegmentDir = currentSegmentDir;
+			currentSegmentDir = nextSegmentDir;
 		}
 
 		invalidate();

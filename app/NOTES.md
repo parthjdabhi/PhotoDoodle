@@ -1,6 +1,6 @@
 # Line Smoothing
 
-I may want to /refine/ the inputstroke via the line simplification algorithm I used in Surfacer. As points are added to the inputstroke, run that algo on them to generate a simplified stroke in the backing store. This might allow for more graceful lines. -- Ramer-Douglas-Peucker simplification
+When computing bezier tangents, consider scenario where angle is severely acute, and in that case break the bezier and point it at next point in sequence. This will give us sharp corners, but retain smoothed lines.
 
 # Drawing
 

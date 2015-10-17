@@ -7,6 +7,7 @@ import java.util.Arrays;
  * Represents a growable float buffer, like c++ std::vector<float>
  */
 public class FloatBuffer {
+	private static final float GROWTH_FACTOR = 1.625f;
 	private float buffer[] = null;
 	private int size = 0;
 
@@ -21,7 +22,7 @@ public class FloatBuffer {
 
 	public void add(float v) {
 		if (size == buffer.length) {
-			buffer = Arrays.copyOf(buffer, (int) (buffer.length * 1.41));
+			buffer = Arrays.copyOf(buffer, (int) (buffer.length * GROWTH_FACTOR));
 		}
 
 		buffer[size++] = v;

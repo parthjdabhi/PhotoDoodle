@@ -5,6 +5,8 @@ import android.graphics.RectF;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
 import java.io.IOException;
@@ -15,8 +17,11 @@ import java.util.ArrayList;
  * Created by shamyl on 9/28/15.
  */
 public class InputStroke implements Serializable, Parcelable {
+
+	private static final String TAG = "InputStroke";
+
 	private ArrayList<Point> points = new ArrayList<>();
-	RectF boundingRect = new RectF();
+	private RectF boundingRect = new RectF();
 
 	public InputStroke() {
 	}
@@ -41,37 +46,61 @@ public class InputStroke implements Serializable, Parcelable {
 		}
 	}
 
+	/**
+	 * Get the tangent of the line at a given point
+	 *
+	 * @param i the index of the point of interest
+	 * @return the tangent vector, computed as the bisecting unit vector between the preceeding line segment and the outgoing line segment, pointing "forward"
+	 */
 	public PointF getTangent(int i) {
-		if (i < 0) {
-			return getTangent(points.size() + i);
+		final int count = points.size();
+		if (count < 2) {
+			return new PointF(0, 0);
+		}
+
+		if (i == 0) {
+			return PointFUtil.dir(get(0).position, get(1).position).first;
+		} else if (i == count - 1) {
+			return PointFUtil.dir(get(i - 1).position, get(i).position).first;
 		} else {
-			final int count = points.size();
-			if (count < 2) {
-				return new PointF(0, 0);
-			}
+			PointF a = get(i - 1).position;
+			PointF b = get(i).position;
+			PointF c = get(i + 1).position;
 
-			if (i == 0) {
-				return PointFUtil.dir(get(0).position, get(1).position).first;
-			} else if (i == count - 1) {
-				return PointFUtil.dir(get(i-1).position,get(i).position).first;
+			Pair<PointF, Float> abDir = PointFUtil.dir(a, b);
+			PointF abPrime = PointFUtil.rotateCCW(abDir.first);
+
+			Pair<PointF, Float> bcDir = PointFUtil.dir(b, c);
+			PointF bcPrime = PointFUtil.rotateCCW(bcDir.first);
+
+			PointF half = new PointF(abPrime.x + bcPrime.x, abPrime.y + bcPrime.y);
+			if (PointFUtil.length2(half) > 1e-4) {
+				return PointFUtil.normalize(PointFUtil.rotateCW(half)).first;
 			} else {
-				PointF a = get(i-1).position;
-				PointF b = get(i).position;
-				PointF c = get(i+1).position;
-
-				Pair<PointF, Float> abDir = PointFUtil.dir(a, b);
-				PointF abPrime = PointFUtil.rotateCCW(abDir.first);
-
-				Pair<PointF, Float> bcDir = PointFUtil.dir(b, c);
-				PointF bcPrime = PointFUtil.rotateCCW(bcDir.first);
-
-				PointF half = new PointF(abPrime.x + bcPrime.x, abPrime.y + bcPrime.y);
-				if (PointFUtil.length2(half) > 1e-4) {
-					return PointFUtil.normalize(PointFUtil.rotateCW(half)).first;
-				} else {
-					return bcPrime;
-				}
+				return bcPrime;
 			}
+		}
+	}
+
+	/**
+	 * Get rough estimate of the velocity, in dp-per-second, of the user's finger when drawing the point at index `i
+	 *
+	 * @param i index of point to query dp-per-second
+	 * @return rough dp-per-second of input point at requested index
+	 */
+	public float getDpPerSecond(int i) {
+		if (i == 0) {
+			return 0;
+		} else if (i < points.size()) {
+			final Point a = points.get(i - 1);
+			final Point b = points.get(i);
+			final float length = PointFUtil.distance(a.position, b.position);
+			final long millis = b.timestamp - a.timestamp;
+			return length / (millis / 1000f);
+		} else if (i < 0) {
+			return getDpPerSecond(points.size() + i);
+		} else {
+			return 0;
 		}
 	}
 
@@ -101,8 +130,6 @@ public class InputStroke implements Serializable, Parcelable {
 		add(x, y, System.currentTimeMillis());
 	}
 
-	public void finish() {}
-
 	public void invalidate() {
 		computeBoundingRect();
 	}
@@ -123,30 +150,130 @@ public class InputStroke implements Serializable, Parcelable {
 			boundingRect = new RectF();
 		}
 
-
 		return boundingRect;
 	}
 
-	/**
-	 * Get rough estimate of the velocity, in dp-per-second, of the user's finger when drawing the point at index `i
-	 *
-	 * @param i index of point to query dp-per-second
-	 * @return rough dp-per-second of input point at requested index
-	 */
-	public float getDpPerSecond(int i) {
-		if (i == 0) {
-			return 0;
-		} else if (i < points.size()) {
-			final Point a = points.get(i - 1);
-			final Point b = points.get(i);
-			final float length = PointFUtil.distance(a.position, b.position);
-			final long millis = b.timestamp - a.timestamp;
-			return length / (millis / 1000f);
-		} else if (i < 0) {
-			return getDpPerSecond(points.size() + i);
-		} else {
-			return 0;
+	@Override
+	public String toString() {
+		return TextUtils.join(",", points);
+	}
+
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		return copy();
+	}
+
+	public InputStroke copy() {
+		InputStroke c = new InputStroke();
+		int size = points.size();
+		c.points.ensureCapacity(size);
+		for (int i = 0; i < size; i++) {
+			c.points.add(points.get(i).copy());
 		}
+
+		return c;
+	}
+
+	/**
+	 * Return an optimized InputStroke where vertices which deviate less than `threshold from the line defined by their neighbors are excised
+	 *
+	 * @param threshold the minimum linear deviation for a vertex to be included in final stroke
+	 * @return optimized InputStroke with fewer points
+	 */
+	public InputStroke optimize(float threshold) {
+		InputStroke optimized = optimize(this, threshold, 0);
+		optimized.computeBoundingRect();
+
+		Log.i(TAG, "optimize this.size: " + size() + " optimized.size: " + optimized.size());
+
+		return optimized;
+	}
+
+	private InputStroke optimize(InputStroke in, float threshold, int depth) {
+
+		if (in.size() <= 2) {
+			return in;
+		}
+
+		//
+		//	Find the vertex farthest from the line defined by the start and and of the path
+		//
+
+		float maxDist = 0;
+		int maxDistIndex = 0;
+		final int size = in.size();
+		final Point first = in.get(0);
+		final Point last = in.get(size - 1);
+		final LineSegment line = new LineSegment(first.position, last.position);
+
+		for (int i = 1; i < size - 1; i++) {
+			float dist = line.distance(in.get(i).position, true);
+			if (dist > maxDist) {
+				maxDist = dist;
+				maxDistIndex = i;
+			}
+		}
+
+		//
+		//	If the farthest vertex is greater than our threshold, we need to
+		//	partition and optimize left and right separately
+		//
+
+		if (maxDist > threshold) {
+
+
+			//
+			//	Partition 'in' into left and right sub vectors, optimize them and join
+			//
+
+			InputStroke left = in.slice(0, maxDistIndex + 1);
+			InputStroke right = in.slice(maxDistIndex, size);
+			InputStroke leftSimplified = optimize(left, threshold, depth + 1);
+			InputStroke rightSimplified = optimize(right, threshold, depth + 1);
+
+			InputStroke joined = new InputStroke();
+
+			for (int i = 0; i < leftSimplified.size() - 1; i++) {
+				joined.points.add(leftSimplified.points.get(i));
+			}
+
+			// skip first point of right since it's same as last of left
+			for (int i = 0; i < rightSimplified.size(); i++) {
+				joined.points.add(rightSimplified.points.get(i));
+			}
+
+			return joined;
+		} else {
+
+			//
+			//  The line's straight enough that we don't need to keep the middle points
+			//
+
+			InputStroke optimized = new InputStroke();
+			optimized.points.add(first);
+			optimized.points.add(last);
+
+			return optimized;
+		}
+	}
+
+	/**
+	 * Cut out a slice of an InputStroke starting at index start, up to but not including element at end index
+	 *
+	 * @param start index of first element to copy
+	 * @param end   end of slice, not included in output
+	 * @return sub slice of this InputStroke
+	 * NOTE: Does not update bounds of slice, you must call computeBoundingRect if you need the bounds updated.
+	 */
+	private InputStroke slice(int start, int end) {
+		InputStroke s = new InputStroke();
+		//s.points.ensureCapacity(end - start);
+
+		for (int i = start; i < end; i++) {
+			s.points.add(points.get(i));
+		}
+
+		return s;
 	}
 
 	// Serializable
@@ -228,6 +355,20 @@ public class InputStroke implements Serializable, Parcelable {
 			position.x = x;
 			position.y = y;
 			this.timestamp = timestamp;
+		}
+
+		@Override
+		public String toString() {
+			return "(" + position.x + "," + position.y + ")";
+		}
+
+		@Override
+		protected Object clone() throws CloneNotSupportedException {
+			return copy();
+		}
+
+		public Point copy() {
+			return new Point(position.x, position.y, timestamp);
 		}
 
 		private void writeObject(java.io.ObjectOutputStream out) throws IOException {

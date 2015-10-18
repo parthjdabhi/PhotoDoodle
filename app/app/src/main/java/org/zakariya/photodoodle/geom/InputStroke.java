@@ -20,10 +20,19 @@ public class InputStroke implements Serializable, Parcelable {
 
 	private static final String TAG = "InputStroke";
 
+	// as vertices are added, when a new segment represents a corner greater than this size,
+	// and autoOptimizationThreshold is > 0, the line will be optimized in-place.
+	private static final float AUTO_OPTIMIZE_CORNER_THRESHOLD = (float) Math.cos(30);
+
 	private ArrayList<Point> points = new ArrayList<>();
 	private RectF boundingRect = new RectF();
+	private float autoOptimizationThreshold = 0;
 
 	public InputStroke() {
+	}
+
+	public InputStroke(float autoOptimizationThreshold) {
+		this.autoOptimizationThreshold = autoOptimizationThreshold;
 	}
 
 	public ArrayList<Point> getPoints() {
@@ -44,6 +53,14 @@ public class InputStroke implements Serializable, Parcelable {
 		} else {
 			return points.get(i);
 		}
+	}
+
+	public float getAutoOptimizationThreshold() {
+		return autoOptimizationThreshold;
+	}
+
+	public void setAutoOptimizationThreshold(float autoOptimizationThreshold) {
+		this.autoOptimizationThreshold = Math.max(autoOptimizationThreshold,0);
 	}
 
 	/**
@@ -134,6 +151,27 @@ public class InputStroke implements Serializable, Parcelable {
 		} else {
 			boundingRect.union(x, y);
 		}
+
+		final int size = points.size();
+		if (autoOptimizationThreshold > 0 && size > 2) {
+
+			// look to see if the newly added segment represents a tight corner to the previous segment.
+			int newSegmentIndex = size - 2;
+			int previousSegmentIndex = size - 3;
+			PointF previousSegmentDir = getSegmentDirection(previousSegmentIndex);
+			PointF newSegmentDir = getSegmentDirection(newSegmentIndex);
+			float dot = PointFUtil.dot(previousSegmentDir, newSegmentDir);
+
+			if (dot < AUTO_OPTIMIZE_CORNER_THRESHOLD) {
+				optimize(autoOptimizationThreshold);
+			}
+		}
+	}
+
+	public void finish() {
+		if (autoOptimizationThreshold > 0 && points.size() > 2) {
+			optimize(autoOptimizationThreshold);
+		}
 	}
 
 	public void add(float x, float y) {
@@ -185,21 +223,31 @@ public class InputStroke implements Serializable, Parcelable {
 	}
 
 	/**
+	 * Optimizes this InputStroke to use fewer points
+	 * @param threshold minimum linear deviation for a vertex to be included in optimized stroke
+	 */
+	public void optimize(float threshold) {
+		final int size = points.size();
+		if (threshold > 0 && size > 2) {
+			InputStroke optimized = this.optimized(threshold);
+			this.points = optimized.points;
+			this.boundingRect = optimized.boundingRect;
+		}
+	}
+
+	/**
 	 * Return an optimized InputStroke where vertices which deviate less than `threshold from the line defined by their neighbors are excised
 	 *
 	 * @param threshold the minimum linear deviation for a vertex to be included in final stroke
 	 * @return optimized InputStroke with fewer points
 	 */
-	public InputStroke optimize(float threshold) {
-		InputStroke optimized = optimize(this, threshold, 0);
+	public InputStroke optimized(float threshold) {
+		InputStroke optimized = _optimize(this, threshold, 0);
 		optimized.computeBoundingRect();
-
-		Log.i(TAG, "optimize this.size: " + size() + " optimized.size: " + optimized.size());
-
 		return optimized;
 	}
 
-	private static InputStroke optimize(InputStroke in, float thresholdSquared, int depth) {
+	private static InputStroke _optimize(InputStroke in, float thresholdSquared, int depth) {
 
 		if (in.size() <= 2) {
 			return in;
@@ -231,15 +279,14 @@ public class InputStroke implements Serializable, Parcelable {
 
 		if (maxDistSquared > thresholdSquared) {
 
-
 			//
 			//	Partition 'in' into left and right sub vectors, optimize them and join
 			//
 
-			InputStroke left = slice(in, 0, maxDistSquaredIndex + 1);
-			InputStroke right = slice(in, maxDistSquaredIndex, size);
-			InputStroke leftSimplified = optimize(left, thresholdSquared, depth + 1);
-			InputStroke rightSimplified = optimize(right, thresholdSquared, depth + 1);
+			InputStroke left = _slice(in, 0, maxDistSquaredIndex + 1);
+			InputStroke right = _slice(in, maxDistSquaredIndex, size);
+			InputStroke leftSimplified = _optimize(left, thresholdSquared, depth + 1);
+			InputStroke rightSimplified = _optimize(right, thresholdSquared, depth + 1);
 
 			InputStroke joined = new InputStroke();
 			joined.points.ensureCapacity(leftSimplified.size() + rightSimplified.size() - 1);
@@ -273,12 +320,12 @@ public class InputStroke implements Serializable, Parcelable {
 	 * Cut out a slice of an InputStroke starting at index start, up to but not including element at end index
 	 *
 	 * @param stroke the stroke to slice
-	 * @param start index of first element to copy
-	 * @param end   end of slice, not included in output
+	 * @param start  index of first element to copy
+	 * @param end    end of slice, not included in output
 	 * @return sub slice of this InputStroke
 	 * NOTE: Does not update bounds of slice, you must call computeBoundingRect if you need the bounds updated.
 	 */
-	private static InputStroke slice(InputStroke stroke, int start, int end) {
+	private static InputStroke _slice(InputStroke stroke, int start, int end) {
 		InputStroke s = new InputStroke();
 		s.points.ensureCapacity(end - start);
 

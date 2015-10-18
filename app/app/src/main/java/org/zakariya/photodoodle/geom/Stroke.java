@@ -132,7 +132,6 @@ public class Stroke implements Serializable, Parcelable {
 		invalidate();
 	}
 
-	@Nullable
 	public static Stroke smoothedStroke(InputStroke inputStroke, float minDiameter, float maxDiameter, float maxVel) {
 		Stroke stroke = new Stroke();
 		stroke.appendAndSmooth(inputStroke, 0, inputStroke.size() - 1, minDiameter, maxDiameter, maxVel);

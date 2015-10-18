@@ -33,7 +33,6 @@ public class LineDoodle extends Doodle {
 	private static final float MaxStrokeVel = 700;
 
 	private InputStroke currentInputStroke = null;
-	private InputStroke optimizedCurrentInputStroke = null;
 	private Stroke currentStroke = null;
 	private RectF boundingRect = null;
 	private InvalidationDelegate invalidationDelegate;
@@ -85,15 +84,8 @@ public class LineDoodle extends Doodle {
 
 		if (currentStroke != null) {
 			canvas.drawPath(currentStroke.getPath(), strokePaint);
-		} else {
-
-			if (currentInputStroke != null) {
-				drawInputStroke(canvas, currentInputStroke, 0xFFFF0000, 8);
-			}
-
-			if (optimizedCurrentInputStroke != null) {
-				drawInputStroke(canvas, optimizedCurrentInputStroke, 0xaa00FF00, 4);
-			}
+		} else if (currentInputStroke != null) {
+			drawInputStroke(canvas, currentInputStroke, 0xFFFF0000, 8);
 		}
 
 		if (invalidationRect != null) {
@@ -140,8 +132,7 @@ public class LineDoodle extends Doodle {
 	}
 
 	void onTouchEventBegin(@NonNull MotionEvent event) {
-		optimizedCurrentInputStroke = null;
-		currentInputStroke = new InputStroke();
+		currentInputStroke = new InputStroke(OptimizationThreshold);
 		currentInputStroke.add(event.getX(), event.getY());
 		currentStroke = null;
 	}
@@ -159,8 +150,8 @@ public class LineDoodle extends Doodle {
 	}
 
 	void onTouchEventEnd(@NonNull MotionEvent event) {
-		optimizedCurrentInputStroke = currentInputStroke.optimize(OptimizationThreshold);
-		currentStroke = Stroke.smoothedStroke(optimizedCurrentInputStroke, MinStrokeThickness, MaxStrokeThickness, MaxStrokeVel);
+		currentInputStroke.finish();
+		currentStroke = Stroke.smoothedStroke(currentInputStroke, MinStrokeThickness, MaxStrokeThickness, MaxStrokeVel);
 
 		// invalidate region containing the line we just generated
 		invalidationRect = currentStroke.getBoundingRect();

@@ -32,7 +32,6 @@ public class IncrementalStrokeDoodle extends Doodle implements IncrementalStroke
 	private Paint invalidationRectPaint, inputStrokePaint, strokePaint;
 	private RectF invalidationRect;
 	private IncrementalStrokeBuilder strokeBuilder;
-	private Path inputStrokePath;
 
 	public IncrementalStrokeDoodle() {
 		invalidationRectPaint = new Paint();
@@ -49,7 +48,7 @@ public class IncrementalStrokeDoodle extends Doodle implements IncrementalStroke
 
 		strokePaint = new Paint();
 		strokePaint.setAntiAlias(true);
-		strokePaint.setColor(0xFF999999);
+		strokePaint.setColor(0xFF666666);
 		strokePaint.setStrokeWidth(1);
 		strokePaint.setStyle(Paint.Style.FILL);
 	}
@@ -81,8 +80,25 @@ public class IncrementalStrokeDoodle extends Doodle implements IncrementalStroke
 		// clear canvas
 		canvas.drawColor(0xFFFFFFFF);
 
-		if (inputStrokePath != null) {
-			canvas.drawPath(inputStrokePath, inputStrokePaint);
+		if (strokeBuilder != null) {
+
+			Stroke stroke = strokeBuilder.getStroke();
+			if (stroke != null) {
+				canvas.drawPath(stroke.getPath(),strokePaint);
+			}
+
+			InputStroke inputStroke = strokeBuilder.getInputStroke();
+			if (inputStroke != null) {
+				Path path = new Path();
+				InputStroke.Point p = inputStroke.get(0);
+				path.moveTo(p.position.x, p.position.y);
+				for (int i = 1, N = inputStroke.size(); i < N; i++) {
+					p = inputStroke.get(i);
+					path.lineTo(p.position.x, p.position.y);
+				}
+
+				canvas.drawPath(path,inputStrokePaint);
+			}
 		}
 
 		// draw the invalidation rect
@@ -109,15 +125,6 @@ public class IncrementalStrokeDoodle extends Doodle implements IncrementalStroke
 	public void onInputStrokeModified(InputStroke inputStroke, int startIndex, int endIndex, RectF rect) {
 		invalidationRect = rect;
 		getInvalidationDelegate().invalidate(rect);
-
-		for (int i = startIndex; i <= endIndex; i++) {
-			PointF p = inputStroke.getPoints().get(i).position;
-			if (inputStrokePath.isEmpty()) {
-				inputStrokePath.moveTo(p.x, p.y);
-			} else {
-				inputStrokePath.lineTo(p.x, p.y);
-			}
-		}
 	}
 
 	@Override
@@ -126,8 +133,27 @@ public class IncrementalStrokeDoodle extends Doodle implements IncrementalStroke
 		getInvalidationDelegate().invalidate(rect);
 	}
 
+	@Override
+	public float getInputStrokeAutoOptimizationThreshold() {
+		return 3;
+	}
+
+	@Override
+	public float getStrokeMinWidth() {
+		return 1;
+	}
+
+	@Override
+	public float getStrokeMaxWidth() {
+		return 20;
+	}
+
+	@Override
+	public float getStrokeMaxVelDPps() {
+		return 700;
+	}
+
 	void onTouchEventBegin(@NonNull MotionEvent event) {
-		inputStrokePath = new Path();
 		strokeBuilder = new IncrementalStrokeBuilder(this);
 		strokeBuilder.add(event.getX(), event.getY());
 	}

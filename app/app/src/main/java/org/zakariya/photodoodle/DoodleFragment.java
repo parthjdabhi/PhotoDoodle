@@ -35,7 +35,9 @@ public class DoodleFragment extends Fragment {
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
 		//doodle = new LineSmoothingDoodle(getActivity());
-		doodle = new LineDoodle();
+		//doodle = new LineDoodle();
+		doodle = new IncrementalStrokeDoodle();
+
 		if (savedInstanceState != null) {
 			doodle.onCreate(savedInstanceState);
 		}

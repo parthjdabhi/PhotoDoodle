@@ -27,17 +27,42 @@ public class IncrementalStrokeBuilder {
 		 * @param rect   the rect containing the updated stroke
 		 */
 		void onStrokeModified(Stroke stroke, RectF rect);
+
+		/**
+		 * @return auto optimization threshold for the input stroke. If > 0, the stroke will be optimized as it's drawn.
+		 */
+		float getInputStrokeAutoOptimizationThreshold();
+
+		/**
+		 * @return Min-width for generated stroke
+		 */
+		float getStrokeMinWidth();
+
+		/**
+		 * @return Max-width for generated stroke
+		 */
+		float getStrokeMaxWidth();
+
+		/**
+		 * @return Max input velocity which generates max width stroke. Input velocity lower than this trends towards min width stroke.
+		 */
+		float getStrokeMaxVelDPps();
 	}
 
 	private InputStroke inputStroke;
 	private Stroke stroke;
 	private WeakReference<StrokeConsumer> strokeConsumerWeakReference;
 	private int finishedStrokeStartIndex = -1;
+	private float autoOptimizationThreshold, strokeMinWidth, strokeMaxWidth, strokeMaxVelDPps;
 
 	public IncrementalStrokeBuilder(StrokeConsumer strokeConsumer) {
-		inputStroke = new InputStroke();
-		stroke = new Stroke();
+		autoOptimizationThreshold = strokeConsumer.getInputStrokeAutoOptimizationThreshold();
+		strokeMinWidth = strokeConsumer.getStrokeMinWidth();
+		strokeMaxWidth = strokeConsumer.getStrokeMaxWidth();
+		strokeMaxVelDPps = strokeConsumer.getStrokeMaxVelDPps();
+
 		strokeConsumerWeakReference = new WeakReference<>(strokeConsumer);
+		inputStroke = new InputStroke(autoOptimizationThreshold);
 	}
 
 	public InputStroke getInputStroke() {
@@ -53,24 +78,31 @@ public class IncrementalStrokeBuilder {
 		inputStroke.add(x, y);
 		InputStroke.Point currentPoint = inputStroke.lastPoint();
 
+		StrokeConsumer strokeConsumer = strokeConsumerWeakReference.get();
+
+
 		// we can tessellate up to size - 2
 		if (inputStroke.size() > 4) {
-			
+			if (autoOptimizationThreshold > 0) {
+				inputStroke.optimize(autoOptimizationThreshold);
+			}
 
+			stroke = Stroke.smoothedStroke(inputStroke,strokeMinWidth,strokeMaxWidth,strokeMaxVelDPps);
 		}
 
-		StrokeConsumer strokeConsumer = strokeConsumerWeakReference.get();
 		if (strokeConsumer != null) {
 			if (lastPoint != null && currentPoint != null) {
 				RectF invalidationRect = RectFUtil.containing(lastPoint.position, currentPoint.position);
 				strokeConsumer.onInputStrokeModified(inputStroke, inputStroke.size() - 2, inputStroke.size() - 1, invalidationRect);
 			}
 
-
+			if (stroke != null) {
+				strokeConsumer.onStrokeModified(stroke, stroke.getBoundingRect());
+			}
 		}
 	}
 
 	public void finish() {
-
+		inputStroke.finish();
 	}
 }

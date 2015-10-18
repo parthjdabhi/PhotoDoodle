@@ -7,7 +7,6 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
@@ -32,7 +31,8 @@ public class LineDoodle extends Doodle {
 	private static final float MaxStrokeThickness = 16;
 	private static final float MaxStrokeVel = 700;
 
-	private InputStroke currentInputStroke = null;
+	private InputStroke optimizingInputStroke = null;
+	private InputStroke rawInputStroke = null;
 	private Stroke currentStroke = null;
 	private RectF boundingRect = null;
 	private InvalidationDelegate invalidationDelegate;
@@ -84,8 +84,14 @@ public class LineDoodle extends Doodle {
 
 		if (currentStroke != null) {
 			canvas.drawPath(currentStroke.getPath(), strokePaint);
-		} else if (currentInputStroke != null) {
-			drawInputStroke(canvas, currentInputStroke, 0xFFFF0000, 8);
+		}
+
+		if (rawInputStroke != null) {
+			drawInputStroke(canvas, rawInputStroke, 0xFF0000FF, 3, 8);
+		}
+
+		if (optimizingInputStroke != null) {
+			drawInputStroke(canvas, optimizingInputStroke, 0xFFFF0000, 1, 4);
 		}
 
 		if (invalidationRect != null) {
@@ -95,9 +101,10 @@ public class LineDoodle extends Doodle {
 		invalidationRect = null;
 	}
 
-	private void drawInputStroke(Canvas canvas, InputStroke stroke, int color, float radius) {
+	private void drawInputStroke(Canvas canvas, InputStroke stroke, int color, float width, float radius) {
 		inputStrokePaint.setColor(color);
 		inputStrokePaint.setStyle(Paint.Style.FILL);
+		inputStrokePaint.setStrokeWidth(width);
 
 		Path p = new Path();
 		ArrayList<InputStroke.Point> points = stroke.getPoints();
@@ -109,7 +116,9 @@ public class LineDoodle extends Doodle {
 			PointF point = points.get(i).position;
 			p.lineTo(point.x, point.y);
 
-			canvas.drawCircle(point.x, point.y,radius,inputStrokePaint);
+			if (radius > 0) {
+				canvas.drawCircle(point.x, point.y, radius, inputStrokePaint);
+			}
 		}
 
 		inputStrokePaint.setStyle(Paint.Style.STROKE);
@@ -132,15 +141,21 @@ public class LineDoodle extends Doodle {
 	}
 
 	void onTouchEventBegin(@NonNull MotionEvent event) {
-		currentInputStroke = new InputStroke(OptimizationThreshold);
-		currentInputStroke.add(event.getX(), event.getY());
 		currentStroke = null;
+
+		rawInputStroke = new InputStroke();
+		rawInputStroke.add(event.getX(),event.getY());
+
+		optimizingInputStroke = new InputStroke(OptimizationThreshold);
+		optimizingInputStroke.add(event.getX(), event.getY());
 	}
 
 	void onTouchEventMove(@NonNull MotionEvent event) {
-		InputStroke.Point lastPoint = currentInputStroke.lastPoint();
-		currentInputStroke.add(event.getX(), event.getY());
-		InputStroke.Point currentPoint = currentInputStroke.lastPoint();
+		InputStroke.Point lastPoint = rawInputStroke.lastPoint();
+		rawInputStroke.add(event.getX(),event.getY());
+		InputStroke.Point currentPoint = rawInputStroke.lastPoint();
+
+		optimizingInputStroke.add(event.getX(), event.getY());
 
 		if (lastPoint != null && currentPoint != null) {
 			// invalidate the region containing the last point plotted and the current one
@@ -150,8 +165,9 @@ public class LineDoodle extends Doodle {
 	}
 
 	void onTouchEventEnd(@NonNull MotionEvent event) {
-		currentInputStroke.finish();
-		currentStroke = Stroke.smoothedStroke(currentInputStroke, MinStrokeThickness, MaxStrokeThickness, MaxStrokeVel);
+		rawInputStroke.finish();
+		optimizingInputStroke.finish();
+		currentStroke = Stroke.smoothedStroke(optimizingInputStroke, MinStrokeThickness, MaxStrokeThickness, MaxStrokeVel);
 
 		// invalidate region containing the line we just generated
 		invalidationRect = currentStroke.getBoundingRect();

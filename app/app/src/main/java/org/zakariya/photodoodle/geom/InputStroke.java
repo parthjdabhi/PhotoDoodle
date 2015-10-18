@@ -22,7 +22,7 @@ public class InputStroke implements Serializable, Parcelable {
 
 	// as vertices are added, when a new segment represents a corner greater than this size,
 	// and autoOptimizationThreshold is > 0, the line will be optimized in-place.
-	private static final float AUTO_OPTIMIZE_CORNER_THRESHOLD = (float) Math.cos(30);
+	private static final float AUTO_OPTIMIZE_CORNER_THRESHOLD = (float) Math.cos(15);
 
 	private ArrayList<Point> points = new ArrayList<>();
 	private RectF boundingRect = new RectF();

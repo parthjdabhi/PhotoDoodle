@@ -3,16 +3,14 @@ package org.zakariya.photodoodle.model;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
-import org.zakariya.photodoodle.geom.IncrementalStrokeBuilder;
+import org.zakariya.photodoodle.geom.IncrementalInputStrokeTessellator;
 import org.zakariya.photodoodle.geom.InputStroke;
-import org.zakariya.photodoodle.geom.Stroke;
 
 import java.lang.ref.WeakReference;
 
@@ -21,17 +19,13 @@ import icepick.Icepick;
 /**
  * Created by shamyl on 10/14/15.
  */
-public class IncrementalStrokeDoodle extends Doodle implements IncrementalStrokeBuilder.StrokeConsumer {
+public class IncrementalStrokeDoodle extends Doodle implements IncrementalInputStrokeTessellator.Listener {
 	private static final String TAG = "LineDoodle";
-
-	private static final float MinStrokeThickness = 2;
-	private static final float MaxStrokeThickness = 16;
-	private static final float MaxStrokeVel = 700;
 
 	private InvalidationDelegate invalidationDelegate;
 	private Paint invalidationRectPaint, inputStrokePaint, strokePaint;
 	private RectF invalidationRect;
-	private IncrementalStrokeBuilder strokeBuilder;
+	private IncrementalInputStrokeTessellator incrementalInputStrokeTessellator;
 
 	public IncrementalStrokeDoodle() {
 		invalidationRectPaint = new Paint();
@@ -65,8 +59,8 @@ public class IncrementalStrokeDoodle extends Doodle implements IncrementalStroke
 
 	@Override
 	public RectF getBoundingRect() {
-		if (strokeBuilder != null) {
-			return strokeBuilder.getStroke().getBoundingRect();
+		if (incrementalInputStrokeTessellator != null) {
+			return incrementalInputStrokeTessellator.getBoundingRect();
 		}
 		return null;
 	}
@@ -80,24 +74,24 @@ public class IncrementalStrokeDoodle extends Doodle implements IncrementalStroke
 		// clear canvas
 		canvas.drawColor(0xFFFFFFFF);
 
-		if (strokeBuilder != null) {
+		if (incrementalInputStrokeTessellator != null) {
 
-			Stroke stroke = strokeBuilder.getStroke();
-			if (stroke != null) {
-				canvas.drawPath(stroke.getPath(),strokePaint);
-			}
+			Path path = incrementalInputStrokeTessellator.getPath();
+			if (path != null) {
+				canvas.drawPath(path, strokePaint);
+			} else {
+				InputStroke inputStroke = incrementalInputStrokeTessellator.getInputStroke();
+				if (inputStroke != null) {
+					path = new Path();
+					InputStroke.Point p = inputStroke.get(0);
+					path.moveTo(p.position.x, p.position.y);
+					for (int i = 1, N = inputStroke.size(); i < N; i++) {
+						p = inputStroke.get(i);
+						path.lineTo(p.position.x, p.position.y);
+					}
 
-			InputStroke inputStroke = strokeBuilder.getInputStroke();
-			if (inputStroke != null) {
-				Path path = new Path();
-				InputStroke.Point p = inputStroke.get(0);
-				path.moveTo(p.position.x, p.position.y);
-				for (int i = 1, N = inputStroke.size(); i < N; i++) {
-					p = inputStroke.get(i);
-					path.lineTo(p.position.x, p.position.y);
+					canvas.drawPath(path, inputStrokePaint);
 				}
-
-				canvas.drawPath(path,inputStrokePaint);
 			}
 		}
 
@@ -128,7 +122,7 @@ public class IncrementalStrokeDoodle extends Doodle implements IncrementalStroke
 	}
 
 	@Override
-	public void onStrokeModified(Stroke stroke, RectF rect) {
+	public void onPathAvailable(Path path, RectF rect) {
 		invalidationRect = rect;
 		getInvalidationDelegate().invalidate(rect);
 	}
@@ -154,16 +148,16 @@ public class IncrementalStrokeDoodle extends Doodle implements IncrementalStroke
 	}
 
 	void onTouchEventBegin(@NonNull MotionEvent event) {
-		strokeBuilder = new IncrementalStrokeBuilder(this);
-		strokeBuilder.add(event.getX(), event.getY());
+		incrementalInputStrokeTessellator = new IncrementalInputStrokeTessellator(this);
+		incrementalInputStrokeTessellator.add(event.getX(), event.getY());
 	}
 
 	void onTouchEventMove(@NonNull MotionEvent event) {
-		strokeBuilder.add(event.getX(), event.getY());
+		incrementalInputStrokeTessellator.add(event.getX(), event.getY());
 	}
 
 	void onTouchEventEnd() {
-		strokeBuilder.finish();
+		incrementalInputStrokeTessellator.finish();
 	}
 
 	private static class InputDelegate implements DoodleView.InputDelegate {

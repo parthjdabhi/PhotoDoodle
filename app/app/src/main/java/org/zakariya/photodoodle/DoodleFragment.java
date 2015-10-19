@@ -10,11 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.zakariya.photodoodle.model.Doodle;
-import org.zakariya.photodoodle.model.IncrementalStrokeDoodle;
+import org.zakariya.photodoodle.model.IncrementalInputStrokeDoodle;
 import org.zakariya.photodoodle.model.InputStrokeTessellationDoodle;
-import org.zakariya.photodoodle.model.LineDoodle;
-import org.zakariya.photodoodle.model.LineSmoothingDoodle;
-import org.zakariya.photodoodle.model.LineTessellationDoodle;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -37,9 +34,9 @@ public class DoodleFragment extends Fragment {
 
 		//doodle = new LineSmoothingDoodle(getActivity());
 		//doodle = new LineTessellationDoodle(getActivity());
-		doodle = new InputStrokeTessellationDoodle(getActivity());
+		//doodle = new InputStrokeTessellationDoodle(getActivity());
 		//doodle = new LineDoodle();
-		//doodle = new IncrementalStrokeDoodle();
+		doodle = new IncrementalInputStrokeDoodle();
 
 		if (savedInstanceState != null) {
 			doodle.onCreate(savedInstanceState);

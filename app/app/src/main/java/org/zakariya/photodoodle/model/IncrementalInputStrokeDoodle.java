@@ -19,7 +19,7 @@ import icepick.Icepick;
 /**
  * Created by shamyl on 10/14/15.
  */
-public class IncrementalStrokeDoodle extends Doodle implements IncrementalInputStrokeTessellator.Listener {
+public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalInputStrokeTessellator.Listener {
 	private static final String TAG = "LineDoodle";
 
 	private InvalidationDelegate invalidationDelegate;
@@ -27,7 +27,7 @@ public class IncrementalStrokeDoodle extends Doodle implements IncrementalInputS
 	private RectF invalidationRect;
 	private IncrementalInputStrokeTessellator incrementalInputStrokeTessellator;
 
-	public IncrementalStrokeDoodle() {
+	public IncrementalInputStrokeDoodle() {
 		invalidationRectPaint = new Paint();
 		invalidationRectPaint.setAntiAlias(true);
 		invalidationRectPaint.setColor(0xFFFF0000);
@@ -139,7 +139,7 @@ public class IncrementalStrokeDoodle extends Doodle implements IncrementalInputS
 
 	@Override
 	public float getStrokeMaxWidth() {
-		return 20;
+		return 40;
 	}
 
 	@Override
@@ -162,15 +162,15 @@ public class IncrementalStrokeDoodle extends Doodle implements IncrementalInputS
 
 	private static class InputDelegate implements DoodleView.InputDelegate {
 
-		private WeakReference<IncrementalStrokeDoodle> weakDoodle;
+		private WeakReference<IncrementalInputStrokeDoodle> weakDoodle;
 
-		public InputDelegate(IncrementalStrokeDoodle doodle) {
+		public InputDelegate(IncrementalInputStrokeDoodle doodle) {
 			this.weakDoodle = new WeakReference<>(doodle);
 		}
 
 		@Override
 		public boolean onTouchEvent(@NonNull MotionEvent event) {
-			IncrementalStrokeDoodle doodle = weakDoodle.get();
+			IncrementalInputStrokeDoodle doodle = weakDoodle.get();
 			if (doodle != null) {
 				switch (event.getAction()) {
 					case MotionEvent.ACTION_DOWN:

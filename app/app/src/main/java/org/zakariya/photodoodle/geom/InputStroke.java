@@ -22,7 +22,7 @@ public class InputStroke implements Serializable, Parcelable {
 
 	// as vertices are added, when a new segment represents a corner greater than this size,
 	// and autoOptimizationThreshold is > 0, the line will be optimized in-place.
-	private static final float AUTO_OPTIMIZE_CORNER_THRESHOLD = (float) Math.cos(15);
+	private static final float AUTO_OPTIMIZE_CORNER_THRESHOLD = (float) Math.cos(45);
 
 	private ArrayList<Point> points = new ArrayList<>();
 	private RectF boundingRect = new RectF();
@@ -115,18 +115,38 @@ public class InputStroke implements Serializable, Parcelable {
 	 * @param i index of point to query dp-per-second
 	 * @return rough dp-per-second of input point at requested index
 	 */
-	public float getDpPerSecond(int i) {
+	public final float getDpPerSecond(int i) {
 		if (i == 0) {
-			return 0;
-		} else if (i < points.size()) {
+			final Point a = points.get(i);
+			final Point b = points.get(i+1);
+			final float length = PointFUtil.distance(a.position, b.position);
+			final float seconds = (b.timestamp - a.timestamp) / 1000f;
+			return (length / seconds) * 0.5f;
+		} else if (i < points.size()-2) {
 			final Point a = points.get(i - 1);
 			final Point b = points.get(i);
+			final Point c = points.get(i + 1);
+
+			// get velocity of the preceding segment
+			final float abLength = PointFUtil.distance(a.position, b.position);
+			final float abSeconds = (b.timestamp - a.timestamp) / 1000f;
+			final float abVel = abLength / abSeconds;
+
+			// get velocity of the following segment
+			final float cbLength = PointFUtil.distance(b.position, c.position);
+			final float cbSeconds = (c.timestamp - b.timestamp) / 1000f;
+			final float cbVel = cbLength / cbSeconds;
+
+			return (abVel + cbVel) * 0.5f;
+
+		} else if (i == points.size()-1) {
+			final Point a = points.get(i-1);
+			final Point b = points.get(i);
 			final float length = PointFUtil.distance(a.position, b.position);
-			final long millis = b.timestamp - a.timestamp;
-			return length / (millis / 1000f);
-		} else if (i < 0) {
-			return getDpPerSecond(points.size() + i);
-		} else {
+			final float seconds = (b.timestamp - a.timestamp) / 1000f;
+			return (length / seconds) * 0.5f;
+		}
+		else {
 			return 0;
 		}
 	}
@@ -232,6 +252,10 @@ public class InputStroke implements Serializable, Parcelable {
 			InputStroke optimized = this.optimized(threshold);
 			this.points = optimized.points;
 			this.boundingRect = optimized.boundingRect;
+
+			if (optimized.size() < size) {
+				Log.i(TAG, "::optimize size: " + size + " new size: " + optimized.size());
+			}
 		}
 	}
 

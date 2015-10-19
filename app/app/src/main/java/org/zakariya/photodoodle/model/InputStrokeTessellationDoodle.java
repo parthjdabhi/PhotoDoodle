@@ -15,7 +15,6 @@ import org.zakariya.photodoodle.DoodleView;
 import org.zakariya.photodoodle.geom.InputStroke;
 import org.zakariya.photodoodle.geom.InputStrokeTessellator;
 import org.zakariya.photodoodle.geom.PointFUtil;
-import org.zakariya.photodoodle.geom.Stroke;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -37,7 +36,7 @@ public class InputStrokeTessellationDoodle extends Doodle {
 	private InputStrokeTessellator inputStrokeTessellator;
 	private Path inputStrokeTessellatedPath;
 	private InvalidationDelegate invalidationDelegate;
-	private Paint handlePaint, renderedStrokePaint;
+	private Paint handlePaint, tessellatedInputStrokePathFillPaint, tessellatedInputStrokePathStrokePaint;
 	private InputStroke.Point draggingPoint;
 	private Context context;
 
@@ -49,11 +48,18 @@ public class InputStrokeTessellationDoodle extends Doodle {
 		handlePaint.setColor(0xFF00FFFF);
 		handlePaint.setStyle(Paint.Style.STROKE);
 
-		renderedStrokePaint = new Paint();
-		renderedStrokePaint.setAntiAlias(true);
-		renderedStrokePaint.setColor(0xFFAAAAAA);
-		renderedStrokePaint.setStrokeWidth(1);
-		renderedStrokePaint.setStyle(Paint.Style.FILL);
+		tessellatedInputStrokePathFillPaint = new Paint();
+		tessellatedInputStrokePathFillPaint.setAntiAlias(true);
+		tessellatedInputStrokePathFillPaint.setColor(0xFFAAAAAA);
+		tessellatedInputStrokePathFillPaint.setStrokeWidth(1);
+		tessellatedInputStrokePathFillPaint.setStyle(Paint.Style.FILL);
+
+		tessellatedInputStrokePathStrokePaint = new Paint();
+		tessellatedInputStrokePathStrokePaint.setAntiAlias(true);
+		tessellatedInputStrokePathStrokePaint.setColor(0xFF000000);
+		tessellatedInputStrokePathStrokePaint.setStrokeWidth(1);
+		tessellatedInputStrokePathStrokePaint.setStyle(Paint.Style.STROKE);
+
 
 		if (!loadPoints()) {
 			long timestamp = 0;
@@ -97,7 +103,8 @@ public class InputStrokeTessellationDoodle extends Doodle {
 		canvas.drawColor(0xFFFFFFFF);
 
 		if (inputStrokeTessellatedPath != null) {
-			canvas.drawPath(inputStrokeTessellatedPath, renderedStrokePaint);
+			canvas.drawPath(inputStrokeTessellatedPath, tessellatedInputStrokePathFillPaint);
+			canvas.drawPath(inputStrokeTessellatedPath, tessellatedInputStrokePathStrokePaint);
 		}
 
 		if (inputStroke != null) {

@@ -57,6 +57,10 @@ public class InputStrokeTessellator {
 		}
 
 		ArrayList<InputStroke.Point> points = inputStroke.getPoints();
+		PointF aLeftAttachPoint = new PointF();
+		PointF aRightAttachPoint = new PointF();
+		PointF bLeftAttachPoint = new PointF();
+		PointF bRightAttachPoint = new PointF();
 		PointF aLeftControlPoint = new PointF();
 		PointF aRightControlPoint = new PointF();
 		PointF bLeftControlPoint = new PointF();
@@ -69,30 +73,27 @@ public class InputStrokeTessellator {
 		for (int i = startIndex; i < endIndex; i++) {
 			final InputStroke.Point a = points.get(i);
 			final InputStroke.Point b = points.get(i + 1);
-			final PointF aTangent = inputStroke.getTangent(i);
-			final PointF bTangent = inputStroke.getTangent(i + 1);
+			final PointF dir = PointFUtil.dir(a.position,b.position).first;
 			final float aRadius = getRadiusForInputStrokePoint(i);
 			final float bRadius = getRadiusForInputStrokePoint(i + 1);
 
-			// aLeft and aRight are the start points of the two bezier curves
-			PointF aLeft = PointFUtil.scale(PointFUtil.rotateCCW(aTangent), aRadius);
-			PointF aRight = PointFUtil.scale(aLeft, -1);
-			aLeft.x += a.position.x;
-			aLeft.y += a.position.y;
-			aRight.x += a.position.x;
-			aRight.y += a.position.y;
+			// aLeftAttachPoint and aRightAttachPoint are the start points of the two bezier curves
+			PointF aLeftAttachDir = PointFUtil.scale(PointFUtil.rotateCCW(dir), aRadius);
+			aLeftAttachPoint.x = a.position.x + aLeftAttachDir.x;
+			aLeftAttachPoint.y = a.position.y + aLeftAttachDir.y;
+			aRightAttachPoint.x = a.position.x - aLeftAttachDir.x;
+			aRightAttachPoint.y = a.position.y - aLeftAttachDir.y;
 
-			// bLeft and bRight are the end points of the two bezier curves
-			PointF bLeft = PointFUtil.scale(PointFUtil.rotateCCW(bTangent), bRadius);
-			PointF bRight = PointFUtil.scale(bLeft, -1);
-			bLeft.x += b.position.x;
-			bLeft.y += b.position.y;
-			bRight.x += b.position.x;
-			bRight.y += b.position.y;
+			// bLeftAttachPoint and bRightAttachPoint are the end points of the two bezier curves
+			PointF bLeftAttachDir = PointFUtil.scale(PointFUtil.rotateCCW(dir), bRadius);
+			bLeftAttachPoint.x = b.position.x + bLeftAttachDir.x;
+			bLeftAttachPoint.y = b.position.y + bLeftAttachDir.y;
+			bRightAttachPoint.x = b.position.x - bLeftAttachDir.x;
+			bRightAttachPoint.y = b.position.y - bLeftAttachDir.y;
 
 			// now compute the bezier control points
-			float leftControlPointLength = PointFUtil.distance(aLeft, bLeft) / 4;
-			float rightControlPointLength = PointFUtil.distance(aRight, bRight) / 4;
+			float leftControlPointLength = PointFUtil.distance(aLeftAttachPoint, bLeftAttachPoint) / 4;
+			float rightControlPointLength = PointFUtil.distance(aRightAttachPoint, bRightAttachPoint) / 4;
 			float aLeftControlPointLength = leftControlPointLength;
 			float bLeftControlPointLength = leftControlPointLength;
 			float aRightControlPointLength = rightControlPointLength;
@@ -107,10 +108,12 @@ public class InputStrokeTessellator {
 				aRightControlPointLength *= controlPointScale;
 			}
 
-			aLeftControlPoint.x = aLeft.x + aTangent.x * aLeftControlPointLength;
-			aLeftControlPoint.y = aLeft.y + aTangent.y * aLeftControlPointLength;
-			aRightControlPoint.x = aRight.x + aTangent.x * aRightControlPointLength;
-			aRightControlPoint.y = aRight.y + aTangent.y * aRightControlPointLength;
+			final PointF aTangent = inputStroke.getTangent(i);
+			final PointF bTangent = inputStroke.getTangent(i + 1);
+			aLeftControlPoint.x = aLeftAttachPoint.x + aTangent.x * aLeftControlPointLength;
+			aLeftControlPoint.y = aLeftAttachPoint.y + aTangent.y * aLeftControlPointLength;
+			aRightControlPoint.x = aRightAttachPoint.x + aTangent.x * aRightControlPointLength;
+			aRightControlPoint.y = aRightAttachPoint.y + aTangent.y * aRightControlPointLength;
 
 			nextSegmentDir = inputStroke.getSegmentDirection(i+1);
 			// scale down end bezier control points by acuteness of angle between current and next segments
@@ -122,16 +125,16 @@ public class InputStrokeTessellator {
 				bRightControlPointLength *= controlPointScale;
 			}
 
-			bLeftControlPoint.x = bLeft.x + bTangent.x * -bLeftControlPointLength;
-			bLeftControlPoint.y = bLeft.y + bTangent.y * -bLeftControlPointLength;
-			bRightControlPoint.x = bRight.x + bTangent.x * -bRightControlPointLength;
-			bRightControlPoint.y = bRight.y + bTangent.y * -bRightControlPointLength;
+			bLeftControlPoint.x = bLeftAttachPoint.x + bTangent.x * -bLeftControlPointLength;
+			bLeftControlPoint.y = bLeftAttachPoint.y + bTangent.y * -bLeftControlPointLength;
+			bRightControlPoint.x = bRightAttachPoint.x + bTangent.x * -bRightControlPointLength;
+			bRightControlPoint.y = bRightAttachPoint.y + bTangent.y * -bRightControlPointLength;
 
-			// perform bezier interpolation of left side from aLeft up to but not including bLeft since next step will add bLeft
-			cbi.set(aLeft,aLeftControlPoint,bLeftControlPoint,bLeft);
+			// perform bezier interpolation of left side from aLeftAttachPoint up to but not including bLeftAttachPoint since next step will add bLeftAttachPoint
+			cbi.set(aLeftAttachPoint,aLeftControlPoint,bLeftControlPoint,bLeftAttachPoint);
 			int subdivisions = cbi.getRecommendedSubdivisions(1);
-			leftCoordinates.add(aLeft.x);
-			leftCoordinates.add(aLeft.y);
+			leftCoordinates.add(aLeftAttachPoint.x);
+			leftCoordinates.add(aLeftAttachPoint.y);
 			if (subdivisions > 1) {
 				// time interpolator
 				final float dt = 1f / subdivisions;
@@ -145,15 +148,15 @@ public class InputStrokeTessellator {
 
 			// if we're at last step add last vertex
 			if (i == endIndex) {
-				leftCoordinates.add(bLeft.x);
-				leftCoordinates.add(bLeft.y);
+				leftCoordinates.add(bLeftAttachPoint.x);
+				leftCoordinates.add(bLeftAttachPoint.y);
 			}
 
-			// perform bezier interpolation of right side from aRight up to but not including bRight since next step will add bRight
-			cbi.set(aRight,aRightControlPoint,bRightControlPoint,bRight);
+			// perform bezier interpolation of right side from aRightAttachPoint up to but not including bRightAttachPoint since next step will add bRightAttachPoint
+			cbi.set(aRightAttachPoint,aRightControlPoint,bRightControlPoint,bRightAttachPoint);
 			subdivisions = cbi.getRecommendedSubdivisions(1);
-			rightCoordinates.add(aRight.x);
-			rightCoordinates.add(aRight.y);
+			rightCoordinates.add(aRightAttachPoint.x);
+			rightCoordinates.add(aRightAttachPoint.y);
 			if (subdivisions > 1) {
 				// time interpolator
 				final float dt = 1f / subdivisions;
@@ -167,8 +170,8 @@ public class InputStrokeTessellator {
 
 			// if we're at last step add last vertex
 			if (i == endIndex) {
-				rightCoordinates.add(bRight.x);
-				rightCoordinates.add(bRight.y);
+				rightCoordinates.add(bRightAttachPoint.x);
+				rightCoordinates.add(bRightAttachPoint.y);
 			}
 
 			// update segment directions for angle acuteness testing
@@ -208,11 +211,11 @@ public class InputStrokeTessellator {
 
 	public float getRadiusForInputStrokePoint(int index) {
 		// TODO: Implement meaningful radius measure
-		return maxWidth/2;
-//		// TODO: Apply gaussian smoothing by weighted-average of neighbor points?
-//		final float vel = inputStroke.getDpPerSecond(index);
-//		final float velScale = Math.min(vel / maxVelDPps, 1f);
-//		return minRadius + (velScale * velScale * deltaRadius);
+		//return maxWidth/2;
+		// TODO: Apply gaussian smoothing by weighted-average of neighbor points?
+		final float vel = inputStroke.getDpPerSecond(index);
+		final float velScale = Math.min(vel / maxVelDPps, 1f);
+		return minRadius + (velScale * velScale * deltaRadius);
 	}
 
 }

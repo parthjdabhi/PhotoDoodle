@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import org.zakariya.photodoodle.model.Doodle;
 import org.zakariya.photodoodle.model.IncrementalStrokeDoodle;
+import org.zakariya.photodoodle.model.InputStrokeTessellationDoodle;
 import org.zakariya.photodoodle.model.LineDoodle;
 import org.zakariya.photodoodle.model.LineSmoothingDoodle;
 import org.zakariya.photodoodle.model.LineTessellationDoodle;
@@ -35,8 +36,10 @@ public class DoodleFragment extends Fragment {
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
 		//doodle = new LineSmoothingDoodle(getActivity());
+		//doodle = new LineTessellationDoodle(getActivity());
+		doodle = new InputStrokeTessellationDoodle(getActivity());
 		//doodle = new LineDoodle();
-		doodle = new IncrementalStrokeDoodle();
+		//doodle = new IncrementalStrokeDoodle();
 
 		if (savedInstanceState != null) {
 			doodle.onCreate(savedInstanceState);

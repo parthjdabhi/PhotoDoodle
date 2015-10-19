@@ -289,6 +289,7 @@ public class Stroke implements Serializable, Parcelable {
 	public void invalidate() {
 		boundingRect = null;
 		needsTessellation = true;
+		path.reset();
 	}
 
 	/**
@@ -298,7 +299,6 @@ public class Stroke implements Serializable, Parcelable {
 	 */
 	public Path getPath() {
 		if (needsTessellation) {
-			path.reset();
 			tessellator.tessellate(this, path);
 		}
 

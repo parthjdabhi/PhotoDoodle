@@ -211,7 +211,7 @@ public class InputStrokeTessellator {
 
 	public float getRadiusForInputStrokePoint(int index) {
 		// TODO: Apply gaussian smoothing by weighted-average of neighbor points?
-		final float vel = inputStroke.getSmoothedDpPerSecond(index);
+		final float vel = inputStroke.get(index).velocity;
 		final float velScale = Math.min(vel / maxVelDPps, 1f);
 		return minRadius + (velScale * velScale * deltaRadius);
 	}

@@ -91,7 +91,7 @@ public class RawInputStrokeDoodle extends Doodle {
 	}
 
 	private float getRadiusForInputStrokePoint(InputStroke inputStroke, int index) {
-		final float vel = inputStroke.getDpPerSecond(index);
+		final float vel = inputStroke.get(index).velocity;
 		final float velScale = Math.min(vel / MAX_VEL_DP_PS, 1f);
 
 		Log.i(TAG, "i: " + index + " vel: " + vel + " velScale: " + velScale);

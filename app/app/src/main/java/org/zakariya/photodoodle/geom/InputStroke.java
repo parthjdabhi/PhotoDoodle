@@ -6,7 +6,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 
 import java.io.IOException;
@@ -23,6 +22,9 @@ public class InputStroke implements Serializable, Parcelable {
 	// as vertices are added, when a new segment represents a corner greater than this size,
 	// and autoOptimizationThreshold is > 0, the line will be optimized in-place.
 	private static final float AUTO_OPTIMIZE_CORNER_THRESHOLD = (float) Math.cos(45);
+
+	static final float POINT_VELOCITY_SMOOTHING_KERNEL[] = {0.5f / 5, 1 / 5, 2 / 5, 1 / 5, 0.5f / 5};
+	static final int POINT_VELOCITY_SMOOTHING_KERNEL_BACKTRACK = 2;
 
 	private ArrayList<Point> points = new ArrayList<>();
 	private RectF boundingRect = new RectF();
@@ -60,7 +62,7 @@ public class InputStroke implements Serializable, Parcelable {
 	}
 
 	public void setAutoOptimizationThreshold(float autoOptimizationThreshold) {
-		this.autoOptimizationThreshold = Math.max(autoOptimizationThreshold,0);
+		this.autoOptimizationThreshold = Math.max(autoOptimizationThreshold, 0);
 	}
 
 	/**
@@ -109,65 +111,6 @@ public class InputStroke implements Serializable, Parcelable {
 		}
 	}
 
-	public final float getSmoothedDpPerSecond(int i) {
-		final float kernel[] = {0.5f/5,1/5,2/5,1/5,0.5f/5};
-		float sum = 0;
-		for (int j = i - 2, k = 0; j < i + 3; j++, k++) {
-			sum += kernel[k] * getDpPerSecond(j);
-		}
-
-		return sum;
-	}
-
-	/**
-	 * Get rough estimate of the velocity, in dp-per-second, of the user's finger when drawing the point at index `i
-	 *
-	 * @param i index of point to query dp-per-second
-	 * @return rough dp-per-second of input point at requested index
-	 */
-	public final float getDpPerSecond(int i) {
-		// velocity is computed as average of velocity draiwng preceding and
-		// following segments joined by the point in question.
-		// first and last points are assume to have zero velocity for preceding and following
-		// segments, respectively.
-
-		if (i < 0) {
-			return 0;
-		} else if (i == 0) {
-			final Point a = points.get(i);
-			final Point b = points.get(i+1);
-			final float length = PointFUtil.distance(a.position, b.position);
-			final float seconds = (b.timestamp - a.timestamp) / 1000f;
-			return (length / seconds) * 0.5f;
-		} else if (i < points.size()-2) {
-			final Point a = points.get(i - 1);
-			final Point b = points.get(i);
-			final Point c = points.get(i + 1);
-
-			// get velocity of the preceding segment
-			final float abLength = PointFUtil.distance(a.position, b.position);
-			final float abSeconds = (b.timestamp - a.timestamp) / 1000f;
-			final float abVel = abLength / abSeconds;
-
-			// get velocity of the following segment
-			final float cbLength = PointFUtil.distance(b.position, c.position);
-			final float cbSeconds = (c.timestamp - b.timestamp) / 1000f;
-			final float cbVel = cbLength / cbSeconds;
-
-			return (abVel + cbVel) * 0.5f;
-
-		} else if (i == points.size()-1) {
-			final Point a = points.get(i-1);
-			final Point b = points.get(i);
-			final float length = PointFUtil.distance(a.position, b.position);
-			final float seconds = (b.timestamp - a.timestamp) / 1000f;
-			return (length / seconds) * 0.5f;
-		}
-		else {
-			return 0;
-		}
-	}
-
 	@Nullable
 	public Point firstPoint() {
 		return points.isEmpty() ? null : points.get(0);
@@ -182,6 +125,14 @@ public class InputStroke implements Serializable, Parcelable {
 		Point p = new Point(x, y, timestamp);
 		points.add(p);
 
+		final int size = points.size();
+
+		// since we use a smoothing kernel, each time we add a point, we need to recalculate
+		// the velocities of some number of points leading up to the newly added point
+		for (int i = Math.max(size - POINT_VELOCITY_SMOOTHING_KERNEL_BACKTRACK, 0); i < size; i++) {
+			updateVelocityOfPoint(i);
+		}
+
 		if (points.size() == 1) {
 			// give it a little space since a point has no area
 			boundingRect.set(x - 0.5f, y - 0.5f, x + 0.5f, y + 0.5f);
@@ -189,7 +140,6 @@ public class InputStroke implements Serializable, Parcelable {
 			boundingRect.union(x, y);
 		}
 
-		final int size = points.size();
 		if (autoOptimizationThreshold > 0 && size > 2) {
 
 			// look to see if the newly added segment represents a tight corner to the previous segment.
@@ -261,6 +211,7 @@ public class InputStroke implements Serializable, Parcelable {
 
 	/**
 	 * Optimizes this InputStroke to use fewer points
+	 *
 	 * @param threshold minimum linear deviation for a vertex to be included in optimized stroke
 	 */
 	public void optimize(float threshold) {
@@ -373,6 +324,73 @@ public class InputStroke implements Serializable, Parcelable {
 		return s;
 	}
 
+	/**
+	 * Compute and update the stored velocity of the point at index i
+	 *
+	 * @param i index of the point whose velocity needs to be recalculated
+	 */
+	private final void updateVelocityOfPoint(int i) {
+		float sum = 0;
+		for (int j = i - POINT_VELOCITY_SMOOTHING_KERNEL_BACKTRACK, k = 0, end = (i + POINT_VELOCITY_SMOOTHING_KERNEL_BACKTRACK + 1); j < end; j++, k++) {
+			sum += POINT_VELOCITY_SMOOTHING_KERNEL[k] * computeVelocityOfPoint(j);
+		}
+
+		points.get(i).velocity = sum;
+	}
+
+	/**
+	 * Get the velocity of the point at `i as the average of the velocity of the preceeding and following line segments
+	 *
+	 * @param i the index of the point to query velocity
+	 * @return velocity in Dp-per-second
+	 */
+	private final float computeVelocityOfPoint(int i) {
+		// velocity is computed as average of velocity draiwng preceding and
+		// following segments joined by the point in question.
+		// first and last points are assume to have zero velocity for preceding and following
+		// segments, respectively.
+
+		int size = points.size();
+		if (size < 3) {
+			return 0;
+		}
+
+		if (i < 0) {
+			return 0;
+		} else if (i == 0) {
+			final Point a = points.get(i);
+			final Point b = points.get(i + 1);
+			final float length = PointFUtil.distance(a.position, b.position);
+			final float seconds = (b.timestamp - a.timestamp) / 1000f;
+			return (length / seconds) * 0.5f;
+		} else if (i < size - 2) {
+			final Point a = points.get(i - 1);
+			final Point b = points.get(i);
+			final Point c = points.get(i + 1);
+
+			// get velocity of the preceding segment
+			final float abLength = PointFUtil.distance(a.position, b.position);
+			final float abSeconds = (b.timestamp - a.timestamp) / 1000f;
+			final float abVel = abLength / abSeconds;
+
+			// get velocity of the following segment
+			final float cbLength = PointFUtil.distance(b.position, c.position);
+			final float cbSeconds = (c.timestamp - b.timestamp) / 1000f;
+			final float cbVel = cbLength / cbSeconds;
+
+			return (abVel + cbVel) * 0.5f;
+
+		} else if (i == points.size() - 1) {
+			final Point a = points.get(i - 1);
+			final Point b = points.get(i);
+			final float length = PointFUtil.distance(a.position, b.position);
+			final float seconds = (b.timestamp - a.timestamp) / 1000f;
+			return (length / seconds) * 0.5f;
+		} else {
+			return 0;
+		}
+	}
+
 	// Serializable
 
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
@@ -438,6 +456,7 @@ public class InputStroke implements Serializable, Parcelable {
 	public static class Point implements Serializable, Parcelable {
 		public PointF position = new PointF();
 		public long timestamp;
+		public float velocity;
 
 		Point() {
 		}
@@ -446,12 +465,14 @@ public class InputStroke implements Serializable, Parcelable {
 			position.x = x;
 			position.y = y;
 			timestamp = System.currentTimeMillis();
+			velocity = 0;
 		}
 
 		public Point(float x, float y, long timestamp) {
 			position.x = x;
 			position.y = y;
 			this.timestamp = timestamp;
+			velocity = 0;
 		}
 
 		@Override
@@ -472,11 +493,13 @@ public class InputStroke implements Serializable, Parcelable {
 			out.writeFloat(position.x);
 			out.writeFloat(position.y);
 			out.writeLong(timestamp);
+			out.writeFloat(velocity);
 		}
 
 		private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 			position = new PointF(in.readFloat(), in.readFloat());
 			timestamp = in.readLong();
+			velocity = in.readFloat();
 		}
 
 		@Override
@@ -489,6 +512,7 @@ public class InputStroke implements Serializable, Parcelable {
 			dest.writeFloat(position.x);
 			dest.writeFloat(position.y);
 			dest.writeLong(timestamp);
+			dest.writeFloat(velocity);
 		}
 
 		public static final Creator<Point> CREATOR = new Creator<Point>() {
@@ -504,6 +528,7 @@ public class InputStroke implements Serializable, Parcelable {
 		private Point(Parcel in) {
 			position = new PointF(in.readFloat(), in.readFloat());
 			timestamp = in.readLong();
+			velocity = in.readFloat();
 		}
 	}
 }

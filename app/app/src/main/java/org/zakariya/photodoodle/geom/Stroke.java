@@ -87,8 +87,7 @@ public class Stroke implements Serializable, Parcelable {
 			controlPointB.y = b.position.y + bTangent.y * -bControlPointLength;
 
 			// compute radius of point for point A
-			final float aDpPerSecond = inputStroke.getDpPerSecond(i);
-			final float aVelScale = Math.min(aDpPerSecond / maxVel, 1f);
+			final float aVelScale = Math.min(a.velocity / maxVel, 1f);
 			final float aRadius = accumulator.add(minRadius + aVelScale * aVelScale * deltaRadius);
 
 			//Log.i(TAG, "i: " + i + " aDpPerSecond: " + aDpPerSecond + " aVelScale: " + aVelScale + " aRadius: " + aRadius);
@@ -102,8 +101,7 @@ public class Stroke implements Serializable, Parcelable {
 				add(new Point(a.position, aRadius));
 
 				// compute radius of point for point B
-				final float bDpPerSecond = inputStroke.getDpPerSecond(i + 1);
-				final float bVelScale = Math.min(bDpPerSecond / maxVel, 1f);
+				final float bVelScale = Math.min(b.velocity / maxVel, 1f);
 				final float bRadius = accumulator.add(minRadius + bVelScale * bVelScale * deltaRadius);
 
 				//Log.i(TAG, "i: " + i + " bDpPerSecond: " + bDpPerSecond + " bVelScale: " + bVelScale + " bRadius: " + bRadius);

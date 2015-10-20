@@ -7,12 +7,12 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
 import org.zakariya.photodoodle.geom.InputStroke;
 import org.zakariya.photodoodle.geom.RectFUtil;
-import org.zakariya.photodoodle.geom.Stroke;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -22,9 +22,9 @@ import icepick.Icepick;
 /**
  * Created by shamyl on 8/9/15.
  */
-public class LineDoodle extends Doodle {
+public class RawInputStrokeDoodle extends Doodle {
 
-	private static final String TAG = "LineDoodle";
+	private static final String TAG = "RawInputStrokeDoodle";
 
 	private static final float OptimizationThreshold = 2;
 	private static final float MinStrokeThickness = 2;
@@ -33,24 +33,17 @@ public class LineDoodle extends Doodle {
 
 	private InputStroke optimizingInputStroke = null;
 	private InputStroke rawInputStroke = null;
-	private Stroke currentStroke = null;
 	private RectF boundingRect = null;
 	private InvalidationDelegate invalidationDelegate;
 	private Paint inputStrokePaint, strokePaint;
 	private RectF invalidationRect;
 
-	public LineDoodle() {
+	public RawInputStrokeDoodle() {
 		inputStrokePaint = new Paint();
 		inputStrokePaint.setAntiAlias(true);
 		inputStrokePaint.setColor(0xFFFF0000);
 		inputStrokePaint.setStrokeWidth(1);
 		inputStrokePaint.setStyle(Paint.Style.STROKE);
-
-		strokePaint = new Paint();
-		strokePaint.setAntiAlias(true);
-		strokePaint.setColor(0xFF999999);
-		strokePaint.setStrokeWidth(1);
-		strokePaint.setStyle(Paint.Style.FILL);
 	}
 
 	@Override
@@ -82,16 +75,12 @@ public class LineDoodle extends Doodle {
 			invalidationRect = getInvalidationDelegate().getBounds();
 		}
 
-		if (currentStroke != null) {
-			canvas.drawPath(currentStroke.getPath(), strokePaint);
-		}
-
 		if (rawInputStroke != null) {
-			drawInputStroke(canvas, rawInputStroke, 0xFF0000FF, 3, 8);
+			drawInputStroke(canvas, rawInputStroke, 0xFF0000FF, 1);
 		}
 
 		if (optimizingInputStroke != null) {
-			drawInputStroke(canvas, optimizingInputStroke, 0xFFFF0000, 1, 4);
+			drawInputStroke(canvas, optimizingInputStroke, 0xFFFF9900, 1);
 		}
 
 		if (invalidationRect != null) {
@@ -101,7 +90,20 @@ public class LineDoodle extends Doodle {
 		invalidationRect = null;
 	}
 
-	private void drawInputStroke(Canvas canvas, InputStroke stroke, int color, float width, float radius) {
+	private float getRadiusForInputStrokePoint(InputStroke inputStroke, int index) {
+		final float vel = inputStroke.getDpPerSecond(index);
+		final float velScale = Math.min(vel / MAX_VEL_DP_PS, 1f);
+
+		Log.i(TAG, "i: " + index + " vel: " + vel + " velScale: " + velScale);
+
+		return MIN_RADIUS + (velScale * (MAX_RADIUS - MIN_RADIUS));
+	}
+
+	private static final float MIN_RADIUS = 2;
+	private static final float MAX_RADIUS = 20;
+	private static final float MAX_VEL_DP_PS = 500;
+
+	private void drawInputStroke(Canvas canvas, InputStroke stroke, int color, float width) {
 		inputStrokePaint.setColor(color);
 		inputStrokePaint.setStyle(Paint.Style.FILL);
 		inputStrokePaint.setStrokeWidth(width);
@@ -110,11 +112,14 @@ public class LineDoodle extends Doodle {
 		ArrayList<InputStroke.Point> points = stroke.getPoints();
 		InputStroke.Point firstPoint = points.get(0);
 		p.moveTo(firstPoint.position.x, firstPoint.position.y);
-		canvas.drawCircle(firstPoint.position.x, firstPoint.position.y,radius,inputStrokePaint);
+
+		float radius = getRadiusForInputStrokePoint(stroke, 0);
+		canvas.drawCircle(firstPoint.position.x, firstPoint.position.y, radius, inputStrokePaint);
 
 		for (int i = 1, N = points.size(); i < N; i++) {
 			PointF point = points.get(i).position;
 			p.lineTo(point.x, point.y);
+			radius = getRadiusForInputStrokePoint(stroke, i);
 
 			if (radius > 0) {
 				canvas.drawCircle(point.x, point.y, radius, inputStrokePaint);
@@ -141,21 +146,21 @@ public class LineDoodle extends Doodle {
 	}
 
 	void onTouchEventBegin(@NonNull MotionEvent event) {
-		currentStroke = null;
-
 		rawInputStroke = new InputStroke();
-		rawInputStroke.add(event.getX(),event.getY());
+		rawInputStroke.add(event.getX(), event.getY());
 
-		optimizingInputStroke = new InputStroke(OptimizationThreshold);
-		optimizingInputStroke.add(event.getX(), event.getY());
+//		optimizingInputStroke = new InputStroke(OptimizationThreshold);
+//		optimizingInputStroke.add(event.getX(), event.getY());
 	}
 
 	void onTouchEventMove(@NonNull MotionEvent event) {
 		InputStroke.Point lastPoint = rawInputStroke.lastPoint();
-		rawInputStroke.add(event.getX(),event.getY());
+		rawInputStroke.add(event.getX(), event.getY());
 		InputStroke.Point currentPoint = rawInputStroke.lastPoint();
 
-		optimizingInputStroke.add(event.getX(), event.getY());
+		if (optimizingInputStroke != null) {
+			optimizingInputStroke.add(event.getX(), event.getY());
+		}
 
 		if (lastPoint != null && currentPoint != null) {
 			// invalidate the region containing the last point plotted and the current one
@@ -164,13 +169,15 @@ public class LineDoodle extends Doodle {
 		}
 	}
 
-	void onTouchEventEnd(@NonNull MotionEvent event) {
+	void onTouchEventEnd() {
 		rawInputStroke.finish();
-		optimizingInputStroke.finish();
-		currentStroke = Stroke.smoothedStroke(optimizingInputStroke, MinStrokeThickness, MaxStrokeThickness, MaxStrokeVel);
+		invalidationRect = rawInputStroke.getBoundingRect();
 
-		// invalidate region containing the line we just generated
-		invalidationRect = currentStroke.getBoundingRect();
+		if (optimizingInputStroke != null) {
+			optimizingInputStroke.finish();
+			invalidationRect.union(optimizingInputStroke.getBoundingRect());
+		}
+
 		if (invalidationRect != null) {
 			getInvalidationDelegate().invalidate(invalidationRect);
 		} else {
@@ -180,25 +187,25 @@ public class LineDoodle extends Doodle {
 
 	private static class InputDelegate implements DoodleView.InputDelegate {
 
-		private WeakReference<LineDoodle> weakLineDoodle;
+		private WeakReference<RawInputStrokeDoodle> weakDoodle;
 
-		public InputDelegate(LineDoodle lineDoodle) {
-			this.weakLineDoodle = new WeakReference<>(lineDoodle);
+		public InputDelegate(RawInputStrokeDoodle rawInputStrokeDoodle) {
+			this.weakDoodle = new WeakReference<>(rawInputStrokeDoodle);
 		}
 
 		@Override
 		public boolean onTouchEvent(@NonNull MotionEvent event) {
-			LineDoodle lineDoodle = weakLineDoodle.get();
-			if (lineDoodle != null) {
+			RawInputStrokeDoodle rawInputStrokeDoodle = weakDoodle.get();
+			if (rawInputStrokeDoodle != null) {
 				switch (event.getAction()) {
 					case MotionEvent.ACTION_DOWN:
-						lineDoodle.onTouchEventBegin(event);
+						rawInputStrokeDoodle.onTouchEventBegin(event);
 						return true;
 					case MotionEvent.ACTION_UP:
-						lineDoodle.onTouchEventEnd(event);
+						rawInputStrokeDoodle.onTouchEventEnd();
 						return true;
 					case MotionEvent.ACTION_MOVE:
-						lineDoodle.onTouchEventMove(event);
+						rawInputStrokeDoodle.onTouchEventMove(event);
 						return true;
 				}
 			}

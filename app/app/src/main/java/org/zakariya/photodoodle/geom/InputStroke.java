@@ -109,6 +109,16 @@ public class InputStroke implements Serializable, Parcelable {
 		}
 	}
 
+	public final float getSmoothedDpPerSecond(int i) {
+		final float kernel[] = {0.5f/5,1/5,2/5,1/5,0.5f/5};
+		float sum = 0;
+		for (int j = i - 2, k = 0; j < i + 3; j++, k++) {
+			sum += kernel[k] * getDpPerSecond(j);
+		}
+
+		return sum;
+	}
+
 	/**
 	 * Get rough estimate of the velocity, in dp-per-second, of the user's finger when drawing the point at index `i
 	 *
@@ -116,7 +126,14 @@ public class InputStroke implements Serializable, Parcelable {
 	 * @return rough dp-per-second of input point at requested index
 	 */
 	public final float getDpPerSecond(int i) {
-		if (i == 0) {
+		// velocity is computed as average of velocity draiwng preceding and
+		// following segments joined by the point in question.
+		// first and last points are assume to have zero velocity for preceding and following
+		// segments, respectively.
+
+		if (i < 0) {
+			return 0;
+		} else if (i == 0) {
 			final Point a = points.get(i);
 			final Point b = points.get(i+1);
 			final float length = PointFUtil.distance(a.position, b.position);
@@ -252,10 +269,6 @@ public class InputStroke implements Serializable, Parcelable {
 			InputStroke optimized = this.optimized(threshold);
 			this.points = optimized.points;
 			this.boundingRect = optimized.boundingRect;
-
-			if (optimized.size() < size) {
-				Log.i(TAG, "::optimize size: " + size + " new size: " + optimized.size());
-			}
 		}
 	}
 

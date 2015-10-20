@@ -20,7 +20,7 @@ import icepick.Icepick;
  * Created by shamyl on 10/14/15.
  */
 public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalInputStrokeTessellator.Listener {
-	private static final String TAG = "LineDoodle";
+	private static final String TAG = "RawInputStrokeDoodle";
 
 	private InvalidationDelegate invalidationDelegate;
 	private Paint invalidationRectPaint, inputStrokePaint, strokePaint;
@@ -139,7 +139,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public float getStrokeMaxWidth() {
-		return 40;
+		return 16;
 	}
 
 	@Override

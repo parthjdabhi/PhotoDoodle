@@ -210,10 +210,8 @@ public class InputStrokeTessellator {
 	}
 
 	public float getRadiusForInputStrokePoint(int index) {
-		// TODO: Implement meaningful radius measure
-		//return maxWidth/2;
 		// TODO: Apply gaussian smoothing by weighted-average of neighbor points?
-		final float vel = inputStroke.getDpPerSecond(index);
+		final float vel = inputStroke.getSmoothedDpPerSecond(index);
 		final float velScale = Math.min(vel / maxVelDPps, 1f);
 		return minRadius + (velScale * velScale * deltaRadius);
 	}

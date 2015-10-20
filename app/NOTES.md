@@ -1,9 +1,6 @@
 # Currently
 
-InputStrokeTessellator handles zig-zags poorly. They get super-thin.
-
-- don't use tangent for cross brace. Use whatever vector is computed in the stroke tessellator - it doesn't exhibit this acute-angle artifact.
-- for smoothing, instead of computing speed at a vertex, compute speed at a segment! The speed at a vertex is the speed at the two joined segments, averaged. This might be more effective. Could also use weighted average of the 2 leading and 2 following segments.
+My per-vertex speed calculation is garbage. How to do it better????
 
 
 # Drawing

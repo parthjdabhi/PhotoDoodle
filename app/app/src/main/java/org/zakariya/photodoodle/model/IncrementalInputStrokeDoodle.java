@@ -1,6 +1,7 @@
 package org.zakariya.photodoodle.model;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -13,6 +14,8 @@ import org.zakariya.photodoodle.geom.IncrementalInputStrokeTessellator;
 import org.zakariya.photodoodle.geom.InputStroke;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Random;
 
 import icepick.Icepick;
 
@@ -74,11 +77,24 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		// clear canvas
 		canvas.drawColor(0xFFFFFFFF);
 
+
 		if (incrementalInputStrokeTessellator != null) {
 
-			Path path = incrementalInputStrokeTessellator.getPath();
-			if (path != null) {
+			// draw static paths in a repeatable random color sequence
+			Random colorGenerator = new Random(12345);
+			for (Path path : incrementalInputStrokeTessellator.getStaticPaths()) {
+				int color = Color.argb(255,64 + colorGenerator.nextInt(64),64 + colorGenerator.nextInt(64),64 + colorGenerator.nextInt(64));
+				strokePaint.setColor(color);
+				canvas.drawPath(path,strokePaint);
+			}
+
+
+			Path path = incrementalInputStrokeTessellator.getLivePath();
+			if (path != null && !path.isEmpty()) {
+
+				strokePaint.setColor(0xFF0000FF);
 				canvas.drawPath(path, strokePaint);
+
 			} else {
 				InputStroke inputStroke = incrementalInputStrokeTessellator.getInputStroke();
 				if (inputStroke != null) {
@@ -122,13 +138,19 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	}
 
 	@Override
-	public void onPathAvailable(Path path, RectF rect) {
+	public void onLivePathModified(Path path, RectF rect) {
 		invalidationRect = rect;
 		getInvalidationDelegate().invalidate(rect);
 	}
 
 	@Override
-	public float getInputStrokeAutoOptimizationThreshold() {
+	public void onNewStaticPathAvailable(Path path, RectF rect) {
+		invalidationRect = rect;
+		getInvalidationDelegate().invalidate(rect);
+	}
+
+	@Override
+	public float getInputStrokeOptimizationThreshold() {
 		return 2;
 	}
 

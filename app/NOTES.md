@@ -1,6 +1,10 @@
 # Currently
 
-My per-vertex speed calculation is garbage. How to do it better????
+Chunking results in lost "bridge" between chunks.
+- when clearing inputStroke after optimization, save last vertex and re-add it
+- mark that vertex as "frozen" so the next update velocity pass doesn't mess with its velocity
+
+this will still result in a small velocity error for the first new vertex added since the velocity update backtracks by 2, and the missing vertex will report a velocity of 0. This can be fixed by computing the amount to add from the n-2 vertex's velocity to the n-1 vertex such that the end result would be the same.
 
 
 # Drawing

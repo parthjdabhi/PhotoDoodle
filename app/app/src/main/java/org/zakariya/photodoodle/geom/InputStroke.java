@@ -121,7 +121,7 @@ public class InputStroke implements Serializable, Parcelable {
 		return points.isEmpty() ? null : points.get(points.size() - 1);
 	}
 
-	public void add(float x, float y, long timestamp) {
+	public boolean add(float x, float y, long timestamp) {
 		Point p = new Point(x, y, timestamp);
 		points.add(p);
 
@@ -140,6 +140,7 @@ public class InputStroke implements Serializable, Parcelable {
 			boundingRect.union(x, y);
 		}
 
+		boolean didOptimize = false;
 		if (autoOptimizationThreshold > 0 && size > 2) {
 
 			// look to see if the newly added segment represents a tight corner to the previous segment.
@@ -150,9 +151,15 @@ public class InputStroke implements Serializable, Parcelable {
 			float dot = PointFUtil.dot(previousSegmentDir, newSegmentDir);
 
 			if (dot < AUTO_OPTIMIZE_CORNER_THRESHOLD) {
-				optimize(autoOptimizationThreshold);
+				didOptimize = optimize(autoOptimizationThreshold) > 0;
 			}
 		}
+
+		return didOptimize;
+	}
+
+	public boolean add(float x, float y) {
+		return add(x, y, System.currentTimeMillis());
 	}
 
 	public void finish() {
@@ -161,12 +168,13 @@ public class InputStroke implements Serializable, Parcelable {
 		}
 	}
 
-	public void add(float x, float y) {
-		add(x, y, System.currentTimeMillis());
-	}
-
 	public void invalidate() {
 		computeBoundingRect();
+	}
+
+	public void clear() {
+		points.clear();
+		boundingRect = new RectF();
 	}
 
 	public RectF getBoundingRect() {
@@ -213,14 +221,19 @@ public class InputStroke implements Serializable, Parcelable {
 	 * Optimizes this InputStroke to use fewer points
 	 *
 	 * @param threshold minimum linear deviation for a vertex to be included in optimized stroke
+	 * @return number of points removed in optimization pass
 	 */
-	public void optimize(float threshold) {
-		final int size = points.size();
-		if (threshold > 0 && size > 2) {
+	public int optimize(float threshold) {
+		final int initialSize = points.size();
+		if (threshold > 0 && initialSize > 2) {
 			InputStroke optimized = this.optimized(threshold);
 			this.points = optimized.points;
 			this.boundingRect = optimized.boundingRect;
+
+			return initialSize - this.points.size();
 		}
+
+		return 0;
 	}
 
 	/**

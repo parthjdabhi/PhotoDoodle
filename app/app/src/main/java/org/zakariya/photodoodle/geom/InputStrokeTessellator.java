@@ -203,6 +203,21 @@ public class InputStrokeTessellator {
 		return path;
 	}
 
+	/**
+	 * Tessellate InputStroke from startIndex to end
+	 * @param startIndex index of point to start tessellation at
+	 * @return Path representing InputStroke tessellated from startIndex to end
+	 */
+	public Path tessellate(int startIndex) {
+		leftCoordinates.clear();
+		rightCoordinates.clear();
+		return tessellate(startIndex,inputStroke.size()-1);
+	}
+
+	/**
+	 * Tessellate entire InputStroke
+	 * @return Path representing entire InputStroke
+	 */
 	public Path tessellate() {
 		leftCoordinates.clear();
 		rightCoordinates.clear();

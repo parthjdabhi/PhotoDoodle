@@ -129,7 +129,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public float getInputStrokeAutoOptimizationThreshold() {
-		return 3;
+		return 2;
 	}
 
 	@Override

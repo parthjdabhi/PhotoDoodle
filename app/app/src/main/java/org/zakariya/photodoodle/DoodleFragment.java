@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 
 import org.zakariya.photodoodle.model.Doodle;
 import org.zakariya.photodoodle.model.IncrementalInputStrokeDoodle;
-import org.zakariya.photodoodle.model.RawInputStrokeDoodle;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -32,10 +31,8 @@ public class DoodleFragment extends Fragment {
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
-		//doodle = new LineSmoothingDoodle(getActivity());
 		//doodle = new LineTessellationDoodle(getActivity());
 		//doodle = new InputStrokeTessellationDoodle(getActivity());
-		//doodle = new RawInputStrokeDoodle();
 		doodle = new IncrementalInputStrokeDoodle();
 
 		if (savedInstanceState != null) {

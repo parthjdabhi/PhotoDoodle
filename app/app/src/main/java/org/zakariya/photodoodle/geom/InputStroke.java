@@ -23,6 +23,7 @@ public class InputStroke implements Serializable, Parcelable {
 	// and autoOptimizationThreshold is > 0, the line will be optimized in-place.
 	private static final float AUTO_OPTIMIZE_CORNER_THRESHOLD = (float) Math.cos(45);
 
+	static final int MIN_OPTIMIZATION_SIZE = 8;
 	static final float POINT_VELOCITY_SMOOTHING_KERNEL[] = {0.5f / 5, 1 / 5, 2 / 5, 1 / 5, 0.5f / 5};
 	static final int POINT_VELOCITY_SMOOTHING_KERNEL_BACKTRACK = 2;
 
@@ -141,7 +142,7 @@ public class InputStroke implements Serializable, Parcelable {
 		}
 
 		boolean didOptimize = false;
-		if (autoOptimizationThreshold > 0 && size > 2) {
+		if (autoOptimizationThreshold > 0 && size > MIN_OPTIMIZATION_SIZE) {
 
 			// look to see if the newly added segment represents a tight corner to the previous segment.
 			int newSegmentIndex = size - 2;
@@ -342,13 +343,16 @@ public class InputStroke implements Serializable, Parcelable {
 	 *
 	 * @param i index of the point whose velocity needs to be recalculated
 	 */
-	private final void updateVelocityOfPoint(int i) {
-		float sum = 0;
-		for (int j = i - POINT_VELOCITY_SMOOTHING_KERNEL_BACKTRACK, k = 0, end = (i + POINT_VELOCITY_SMOOTHING_KERNEL_BACKTRACK + 1); j < end; j++, k++) {
-			sum += POINT_VELOCITY_SMOOTHING_KERNEL[k] * computeVelocityOfPoint(j);
-		}
+	private void updateVelocityOfPoint(int i) {
+		Point p = get(i);
+		if (!p.freezeVelocity) {
+			float sum = 0;
+			for (int j = i - POINT_VELOCITY_SMOOTHING_KERNEL_BACKTRACK, k = 0, end = (i + POINT_VELOCITY_SMOOTHING_KERNEL_BACKTRACK + 1); j < end; j++, k++) {
+				sum += POINT_VELOCITY_SMOOTHING_KERNEL[k] * computeVelocityOfPoint(j);
+			}
 
-		points.get(i).velocity = sum;
+			p.velocity = sum;
+		}
 	}
 
 	/**
@@ -357,7 +361,7 @@ public class InputStroke implements Serializable, Parcelable {
 	 * @param i the index of the point to query velocity
 	 * @return velocity in Dp-per-second
 	 */
-	private final float computeVelocityOfPoint(int i) {
+	private float computeVelocityOfPoint(int i) {
 		// velocity is computed as average of velocity draiwng preceding and
 		// following segments joined by the point in question.
 		// first and last points are assume to have zero velocity for preceding and following
@@ -469,7 +473,8 @@ public class InputStroke implements Serializable, Parcelable {
 	public static class Point implements Serializable, Parcelable {
 		public PointF position = new PointF();
 		public long timestamp;
-		public float velocity;
+		public float velocity = 0;
+		public boolean freezeVelocity = false;
 
 		Point() {
 		}
@@ -478,14 +483,12 @@ public class InputStroke implements Serializable, Parcelable {
 			position.x = x;
 			position.y = y;
 			timestamp = System.currentTimeMillis();
-			velocity = 0;
 		}
 
 		public Point(float x, float y, long timestamp) {
 			position.x = x;
 			position.y = y;
 			this.timestamp = timestamp;
-			velocity = 0;
 		}
 
 		@Override
@@ -499,7 +502,10 @@ public class InputStroke implements Serializable, Parcelable {
 		}
 
 		public Point copy() {
-			return new Point(position.x, position.y, timestamp);
+			Point p = new Point(position.x, position.y, timestamp);
+			p.velocity = velocity;
+			p.freezeVelocity = freezeVelocity;
+			return p;
 		}
 
 		private void writeObject(java.io.ObjectOutputStream out) throws IOException {
@@ -507,12 +513,14 @@ public class InputStroke implements Serializable, Parcelable {
 			out.writeFloat(position.y);
 			out.writeLong(timestamp);
 			out.writeFloat(velocity);
+			out.writeBoolean(freezeVelocity);
 		}
 
 		private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 			position = new PointF(in.readFloat(), in.readFloat());
 			timestamp = in.readLong();
 			velocity = in.readFloat();
+			freezeVelocity = in.readBoolean();
 		}
 
 		@Override
@@ -526,6 +534,7 @@ public class InputStroke implements Serializable, Parcelable {
 			dest.writeFloat(position.y);
 			dest.writeLong(timestamp);
 			dest.writeFloat(velocity);
+			dest.writeInt(freezeVelocity ? 1 : 0);
 		}
 
 		public static final Creator<Point> CREATOR = new Creator<Point>() {
@@ -542,6 +551,7 @@ public class InputStroke implements Serializable, Parcelable {
 			position = new PointF(in.readFloat(), in.readFloat());
 			timestamp = in.readLong();
 			velocity = in.readFloat();
+			freezeVelocity = in.readInt() == 1;
 		}
 	}
 }

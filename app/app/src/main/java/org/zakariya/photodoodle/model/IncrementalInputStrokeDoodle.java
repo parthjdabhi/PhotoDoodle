@@ -83,7 +83,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 			// draw static paths in a repeatable random color sequence
 			Random colorGenerator = new Random(12345);
 			for (Path path : incrementalInputStrokeTessellator.getStaticPaths()) {
-				int color = Color.argb(255,64 + colorGenerator.nextInt(64),64 + colorGenerator.nextInt(64),64 + colorGenerator.nextInt(64));
+				int color = Color.argb(255,64 + colorGenerator.nextInt(128),64 + colorGenerator.nextInt(128),64 + colorGenerator.nextInt(128));
 				strokePaint.setColor(color);
 				canvas.drawPath(path,strokePaint);
 			}
@@ -112,7 +112,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		}
 
 		// draw the invalidation rect
-		canvas.drawRect(invalidationRect != null ? invalidationRect : getInvalidationDelegate().getBounds(), invalidationRectPaint);
+//		canvas.drawRect(invalidationRect != null ? invalidationRect : getInvalidationDelegate().getBounds(), invalidationRectPaint);
 		invalidationRect = null;
 	}
 
@@ -151,7 +151,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public float getInputStrokeOptimizationThreshold() {
-		return 2;
+		return 0;
 	}
 
 	@Override

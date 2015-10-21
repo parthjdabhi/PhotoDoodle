@@ -13,6 +13,7 @@ import java.util.ArrayList;
 public class IncrementalInputStrokeTessellator {
 
 	private static final String TAG = "IIST";
+	private static final int MIN_PARTITION_SIZE = 32;
 
 	public interface Listener {
 		/**
@@ -91,8 +92,13 @@ public class IncrementalInputStrokeTessellator {
 
 	public void add(float x, float y) {
 		InputStroke.Point lastPoint = inputStroke.lastPoint();
-		boolean didOptimize = inputStroke.add(x, y);
+		boolean shouldPartition = inputStroke.add(x, y);
 		InputStroke.Point currentPoint = inputStroke.lastPoint();
+
+		if (!shouldPartition && inputStroke.size() > MIN_PARTITION_SIZE) {
+			Log.i(TAG, "partitioning...");
+			shouldPartition = true;
+		}
 
 		Listener listener = listenerWeakReference.get();
 		if (listener != null) {
@@ -101,11 +107,22 @@ public class IncrementalInputStrokeTessellator {
 				listener.onInputStrokeModified(inputStroke, inputStroke.size() - 2, inputStroke.size() - 1, invalidationRect);
 			}
 
-			if (didOptimize) {
-				// adding the point triggered an optimization pass. tessellate to path, and reset inputStroke
-				Path newStaticPathChunk = inputStrokeTessellator.tessellate();
+			int firstPoint = staticPaths.isEmpty() ? 0 : 1;
+
+			if (shouldPartition) {
+				// adding the point triggered an optimization pass. tessellate to path
+				Path newStaticPathChunk = inputStrokeTessellator.tessellate(firstPoint);
 				staticPaths.add(newStaticPathChunk);
+
+				// grab last two points in path, freeze their velocity, clear stroke and re-add.
+				// we need them to compute velocity of next point, and we freeze their velocity for stability
+				InputStroke.Point a = inputStroke.get(-2);
+				InputStroke.Point b = inputStroke.get(-1);
+				a.freezeVelocity = true;
+				b.freezeVelocity = true;
 				inputStroke.clear();
+				inputStroke.getPoints().add(a);
+				inputStroke.getPoints().add(b);
 
 				if (!newStaticPathChunk.isEmpty()) {
 					newStaticPathChunk.computeBounds(staticPathBounds, true);
@@ -113,7 +130,7 @@ public class IncrementalInputStrokeTessellator {
 				}
 
 			} else {
-				livePath = inputStrokeTessellator.tessellate();
+				livePath = inputStrokeTessellator.tessellate(firstPoint);
 				if (!livePath.isEmpty()) {
 					livePath.computeBounds(livePathBounds, true);
 					listener.onLivePathModified(livePath, livePathBounds);

@@ -1,10 +1,13 @@
 package org.zakariya.photodoodle.model;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,13 +39,22 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	private static final String FILE = "RawInputStrokeDoodle.dat";
 
 	private InvalidationDelegate invalidationDelegate;
-	private Paint invalidationRectPaint, inputStrokePaint, strokePaint;
+	private Paint invalidationRectPaint, inputStrokePaint, strokePaint, bitmapPaint;
 	private RectF invalidationRect;
 	private IncrementalInputStrokeTessellator incrementalInputStrokeTessellator;
 	private Context context;
+	private Bitmap bitmap;
+	private Canvas bitmapCanvas;
+	Random colorGenerator = new Random(12345);
 
 	public IncrementalInputStrokeDoodle(Context context) {
 		this.context = context;
+
+		Bitmap.Config config = Bitmap.Config.ARGB_8888;
+		bitmap = Bitmap.createBitmap(1024,1024,config);
+		bitmap.eraseColor(0x0);
+		bitmapCanvas = new Canvas(bitmap);
+
 
 		invalidationRectPaint = new Paint();
 		invalidationRectPaint.setAntiAlias(true);
@@ -61,6 +73,9 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		strokePaint.setColor(0xFF666666);
 		strokePaint.setStrokeWidth(1);
 		strokePaint.setStyle(Paint.Style.FILL);
+
+		bitmapPaint = new Paint();
+		bitmapPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
 	}
 
 	@Override
@@ -88,19 +103,11 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	@Override
 	public void draw(Canvas canvas) {
 		// clear canvas
-		canvas.drawColor(0xFFFFFFFF);
+		canvas.drawColor(0xFFddddFF);
+		canvas.drawBitmap(bitmap,0,0,bitmapPaint);
 
 
 		if (incrementalInputStrokeTessellator != null) {
-
-			// draw static paths in a repeatable random color sequence
-			Random colorGenerator = new Random(12345);
-			for (Path path : incrementalInputStrokeTessellator.getStaticPaths()) {
-				int color = Color.argb(255,64 + colorGenerator.nextInt(128),64 + colorGenerator.nextInt(128),64 + colorGenerator.nextInt(128));
-				strokePaint.setColor(color);
-				canvas.drawPath(path,strokePaint);
-			}
-
 
 			Path path = incrementalInputStrokeTessellator.getLivePath();
 			if (path != null && !path.isEmpty()) {
@@ -125,7 +132,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		}
 
 		// draw the invalidation rect
-//		canvas.drawRect(invalidationRect != null ? invalidationRect : getInvalidationDelegate().getBounds(), invalidationRectPaint);
+		canvas.drawRect(invalidationRect != null ? invalidationRect : getInvalidationDelegate().getBounds(), invalidationRectPaint);
 		invalidationRect = null;
 	}
 
@@ -159,6 +166,12 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public void onNewStaticPathAvailable(Path path, RectF rect) {
+
+		// draw path into bitmapCanvas
+		int color = Color.argb(255,64 + colorGenerator.nextInt(128),64 + colorGenerator.nextInt(128),64 + colorGenerator.nextInt(128));
+		strokePaint.setColor(color);
+		bitmapCanvas.drawPath(path,strokePaint);
+
 		invalidationRect = rect;
 		getInvalidationDelegate().invalidate(rect);
 	}

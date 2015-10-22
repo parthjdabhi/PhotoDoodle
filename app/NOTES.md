@@ -1,9 +1,7 @@
 # Currently
 
-Chunking works, but appears as if breakages occur during optimization, as if FIRST point in new inputStroke is lost...
-**Disabling optimization confirms hypothesis. Chunks meet up correctly.**
-
-Probably want to generate an input stroke programmatically which triggers this bug.
+Render static paths into a bitmap in the onStaticPathAvailable callback using a Canvas 
+Render that bitmap in draw
 
 # Drawing
 

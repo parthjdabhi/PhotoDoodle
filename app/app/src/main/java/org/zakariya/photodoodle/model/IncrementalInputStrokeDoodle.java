@@ -6,7 +6,10 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
@@ -14,7 +17,6 @@ import org.zakariya.photodoodle.geom.IncrementalInputStrokeTessellator;
 import org.zakariya.photodoodle.geom.InputStroke;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Random;
 
 import icepick.Icepick;
@@ -151,7 +153,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public float getInputStrokeOptimizationThreshold() {
-		return 0;
+		return 3;
 	}
 
 	@Override
@@ -167,6 +169,23 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	@Override
 	public float getStrokeMaxVelDPps() {
 		return 700;
+	}
+
+	void renderTestStroke() {
+		Log.i(TAG, "renderTestStroke");
+		incrementalInputStrokeTessellator = new IncrementalInputStrokeTessellator(this);
+		float x = 10, y = 50;
+		for (; x < 310; x += 15, y += 10) {
+			incrementalInputStrokeTessellator.add(x,y);
+		}
+
+		for (; x > 10; x -= 15, y += 10) {
+			incrementalInputStrokeTessellator.add(x,y);
+		}
+
+		for (; x < 310; x += 15, y += 10) {
+			incrementalInputStrokeTessellator.add(x,y);
+		}
 	}
 
 	void onTouchEventBegin(@NonNull MotionEvent event) {

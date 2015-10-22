@@ -215,7 +215,7 @@ public class InputStrokeTessellationDoodle extends Doodle {
 
 	private void tessellate() {
 		inputStrokeTessellator = new InputStrokeTessellator(inputStroke,4,60,200);
-		inputStrokeTessellatedPath = inputStrokeTessellator.tessellate();
+		inputStrokeTessellatedPath = inputStrokeTessellator.tessellate(false);
 	}
 
 	private static class InputDelegate implements DoodleView.InputDelegate {

@@ -49,7 +49,7 @@ public class InputStrokeTessellator {
 		return path;
 	}
 
-	public Path tessellate(int startIndex, int endIndex) {
+	private Path tessellate(int startIndex, int endIndex) {
 		path = new Path();
 
 		if (inputStroke.size() < 2) {
@@ -73,7 +73,7 @@ public class InputStrokeTessellator {
 		for (int i = startIndex; i < endIndex; i++) {
 			final InputStroke.Point a = points.get(i);
 			final InputStroke.Point b = points.get(i + 1);
-			final PointF dir = PointFUtil.dir(a.position,b.position).first;
+			final PointF dir = PointFUtil.dir(a.position, b.position).first;
 			final float aRadius = getRadiusForInputStrokePoint(i);
 			final float bRadius = getRadiusForInputStrokePoint(i + 1);
 
@@ -101,9 +101,9 @@ public class InputStrokeTessellator {
 
 			// scale down start bezier control points by acuteness of angle between current and previous segments
 			if (previousSegmentDir != null) {
-				float dot = PointFUtil.dot(previousSegmentDir,currentSegmentDir);
+				float dot = PointFUtil.dot(previousSegmentDir, currentSegmentDir);
 				float acuteness = -1 * Math.min(dot, 0); // clamp dot from [-1,0] and invert so we have an acuteness from 0 to 1
-				float controlPointScale = 1-acuteness;
+				float controlPointScale = 1 - acuteness;
 				aLeftControlPointLength *= controlPointScale;
 				aRightControlPointLength *= controlPointScale;
 			}
@@ -115,12 +115,12 @@ public class InputStrokeTessellator {
 			aRightControlPoint.x = aRightAttachPoint.x + aTangent.x * aRightControlPointLength;
 			aRightControlPoint.y = aRightAttachPoint.y + aTangent.y * aRightControlPointLength;
 
-			nextSegmentDir = inputStroke.getSegmentDirection(i+1);
+			nextSegmentDir = inputStroke.getSegmentDirection(i + 1);
 			// scale down end bezier control points by acuteness of angle between current and next segments
 			if (nextSegmentDir != null) {
 				float dot = PointFUtil.dot(nextSegmentDir, currentSegmentDir);
-				float acuteness = -1 * Math.min(dot,0); // clamp dot from [-1,0] and invert so we have an acuteness from 0 to 1
-				float controlPointScale = 1-acuteness;
+				float acuteness = -1 * Math.min(dot, 0); // clamp dot from [-1,0] and invert so we have an acuteness from 0 to 1
+				float controlPointScale = 1 - acuteness;
 				bLeftControlPointLength *= controlPointScale;
 				bRightControlPointLength *= controlPointScale;
 			}
@@ -131,7 +131,7 @@ public class InputStrokeTessellator {
 			bRightControlPoint.y = bRightAttachPoint.y + bTangent.y * -bRightControlPointLength;
 
 			// perform bezier interpolation of left side from aLeftAttachPoint up to but not including bLeftAttachPoint since next step will add bLeftAttachPoint
-			cbi.set(aLeftAttachPoint,aLeftControlPoint,bLeftControlPoint,bLeftAttachPoint);
+			cbi.set(aLeftAttachPoint, aLeftControlPoint, bLeftControlPoint, bLeftAttachPoint);
 			int subdivisions = cbi.getRecommendedSubdivisions(1);
 			leftCoordinates.add(aLeftAttachPoint.x);
 			leftCoordinates.add(aLeftAttachPoint.y);
@@ -146,14 +146,8 @@ public class InputStrokeTessellator {
 				}
 			}
 
-			// if we're at last step add last vertex
-			if (i == endIndex) {
-				leftCoordinates.add(bLeftAttachPoint.x);
-				leftCoordinates.add(bLeftAttachPoint.y);
-			}
-
 			// perform bezier interpolation of right side from aRightAttachPoint up to but not including bRightAttachPoint since next step will add bRightAttachPoint
-			cbi.set(aRightAttachPoint,aRightControlPoint,bRightControlPoint,bRightAttachPoint);
+			cbi.set(aRightAttachPoint, aRightControlPoint, bRightControlPoint, bRightAttachPoint);
 			subdivisions = cbi.getRecommendedSubdivisions(1);
 			rightCoordinates.add(aRightAttachPoint.x);
 			rightCoordinates.add(aRightAttachPoint.y);
@@ -168,31 +162,29 @@ public class InputStrokeTessellator {
 				}
 			}
 
-			// if we're at last step add last vertex
-			if (i == endIndex) {
-				rightCoordinates.add(bRightAttachPoint.x);
-				rightCoordinates.add(bRightAttachPoint.y);
-			}
-
 			// update segment directions for angle acuteness testing
 			previousSegmentDir = currentSegmentDir;
 			currentSegmentDir = nextSegmentDir;
 		}
 
 		// now that we've populated the left and right coord buffers, stitch a path together
-		// TODO: This indexing is incompatible with incremental tessellation, it assumes complete path generation from complete buffers
-		float x = leftCoordinates.get(0);
-		float y = leftCoordinates.get(1);
+		int coordStartIndex = 2 * startIndex;
+		if (coordStartIndex >= leftCoordinates.size()) {
+			return path;
+		}
+
+		float x = leftCoordinates.get(coordStartIndex);
+		float y = leftCoordinates.get(coordStartIndex + 1);
 		path.moveTo(x, y);
 
-		for (int i = 2, N = leftCoordinates.size(); i < N; i += 2) {
+		for (int i = coordStartIndex + 2, N = leftCoordinates.size(); i < N; i += 2) {
 			x = leftCoordinates.get(i);
 			y = leftCoordinates.get(i + 1);
 			path.lineTo(x, y);
 		}
 
-		// right coords must be iterated backwards from end to start
-		for (int i = rightCoordinates.size() - 2; i >= 0; i -= 2) {
+		// right coordinates must be iterated backwards from end to start
+		for (int i = rightCoordinates.size() - 2; i >= coordStartIndex; i -= 2) {
 			x = rightCoordinates.get(i);
 			y = rightCoordinates.get(i + 1);
 			path.lineTo(x, y);
@@ -205,30 +197,50 @@ public class InputStrokeTessellator {
 
 	/**
 	 * Tessellate InputStroke from startIndex to end
+	 *
 	 * @param startIndex index of point to start tessellation at
 	 * @return Path representing InputStroke tessellated from startIndex to end
 	 */
-	public Path tessellate(int startIndex) {
-		leftCoordinates.clear();
-		rightCoordinates.clear();
-		return tessellate(startIndex,inputStroke.size()-1);
+	public Path tessellate(int startIndex, boolean isContinuation) {
+		clearCoordinateBuffers(isContinuation);
+		return tessellate(startIndex, inputStroke.size() - 1);
 	}
 
 	/**
 	 * Tessellate entire InputStroke
+	 *
 	 * @return Path representing entire InputStroke
 	 */
-	public Path tessellate() {
-		leftCoordinates.clear();
-		rightCoordinates.clear();
+	public Path tessellate(boolean isContinuation) {
+		clearCoordinateBuffers(isContinuation);
 		return tessellate(0, inputStroke.size() - 1);
 	}
 
 	public float getRadiusForInputStrokePoint(int index) {
-		// TODO: Apply gaussian smoothing by weighted-average of neighbor points?
 		final float vel = inputStroke.get(index).velocity;
 		final float velScale = Math.min(vel / maxVelDPps, 1f);
 		return minRadius + (velScale * velScale * deltaRadius);
+	}
+
+	private void clearCoordinateBuffers(boolean isContinuation) {
+		if (isContinuation) {
+			// TODO: This causes weird artifacting
+			float lx = leftCoordinates.get(-2),
+					ly = leftCoordinates.get(-1),
+					rx = rightCoordinates.get(-2),
+					ry = rightCoordinates.get(-1);
+
+			leftCoordinates.clear();
+			rightCoordinates.clear();
+
+			leftCoordinates.add(lx);
+			leftCoordinates.add(ly);
+			rightCoordinates.add(rx);
+			rightCoordinates.add(ry);
+		} else {
+			leftCoordinates.clear();
+			rightCoordinates.clear();
+		}
 	}
 
 }

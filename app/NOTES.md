@@ -3,9 +3,11 @@
 Chunking works, but appears as if breakages occur during optimization, as if FIRST point in new inputStroke is lost...
 **Disabling optimization confirms hypothesis. Chunks meet up correctly.**
 
+Probably want to generate an input stroke programmatically which triggers this bug.
+
 # Drawing
 
-Performance is an issue. We probably want to render strokes to start backing bitmap.
+Performance is an issue. Need to partition strokes as drawn, each "finished" stroke should be rendered to backing store bitmap.
  
 - Have start statically-sized backing store bitmap. Say, start square enclosing the view, centered.
 - When drawing, the bitmap is drawn, and the current stroke is drawn on top.
@@ -19,7 +21,3 @@ Performance is an issue. We probably want to render strokes to start backing bit
 	
 # Nota Bene
 Android hardware accelerated drawing does not pass the clip rect to the Canvas in onDraw when invalidate(Rect) is called. Can't use for pruning.
-
-# Currently
-
-The computed radius of each control point varies wildly. It should either get start max value, and/or have start smoothing applied to it

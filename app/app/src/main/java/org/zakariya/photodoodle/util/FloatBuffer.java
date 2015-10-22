@@ -32,6 +32,10 @@ public class FloatBuffer {
 		if (i < 0) {
 			return buffer[size + i];
 		} else {
+			if (i > size - 1) {
+				throw new ArrayIndexOutOfBoundsException(i);
+			}
+
 			return buffer[i];
 		}
 	}

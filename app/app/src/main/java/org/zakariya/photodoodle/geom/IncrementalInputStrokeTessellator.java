@@ -102,27 +102,29 @@ public class IncrementalInputStrokeTessellator {
 
 		Listener listener = listenerWeakReference.get();
 		if (listener != null) {
+
 			if (lastPoint != null && currentPoint != null) {
 				RectF invalidationRect = RectFUtil.containing(lastPoint.position, currentPoint.position);
 				listener.onInputStrokeModified(inputStroke, inputStroke.size() - 2, inputStroke.size() - 1, invalidationRect);
 			}
 
-			int firstPoint = staticPaths.isEmpty() ? 0 : 1;
+
+			// TODO: this works, but I need to understand why using the continuation fails
+			boolean isContinuation = false;
+			int tessellationStartIndex = 0;
+
+//			boolean isContinuation = !staticPaths.isEmpty();
+//			int tessellationStartIndex = isContinuation ? 1 : 0;
 
 			if (shouldPartition) {
 				// adding the point triggered an optimization pass. tessellate to path
-				Path newStaticPathChunk = inputStrokeTessellator.tessellate(firstPoint);
+				Path newStaticPathChunk = inputStrokeTessellator.tessellate(tessellationStartIndex, isContinuation);
 				staticPaths.add(newStaticPathChunk);
 
-				// grab last two points in path, freeze their velocity, clear stroke and re-add.
-				// we need them to compute velocity of next point, and we freeze their velocity for stability
-				InputStroke.Point a = inputStroke.get(-2);
-				InputStroke.Point b = inputStroke.get(-1);
-				a.freezeVelocity = true;
-				b.freezeVelocity = true;
+				InputStroke.Point lastPointInStroke = inputStroke.get(-1);
+				lastPointInStroke.freezeVelocity = true;
 				inputStroke.clear();
-				inputStroke.getPoints().add(a);
-				inputStroke.getPoints().add(b);
+				inputStroke.getPoints().add(lastPointInStroke);
 
 				if (!newStaticPathChunk.isEmpty()) {
 					newStaticPathChunk.computeBounds(staticPathBounds, true);
@@ -130,7 +132,7 @@ public class IncrementalInputStrokeTessellator {
 				}
 
 			} else {
-				livePath = inputStrokeTessellator.tessellate(firstPoint);
+				livePath = inputStrokeTessellator.tessellate(tessellationStartIndex, isContinuation);
 				if (!livePath.isEmpty()) {
 					livePath.computeBounds(livePathBounds, true);
 					listener.onLivePathModified(livePath, livePathBounds);

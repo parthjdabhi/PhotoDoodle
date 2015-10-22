@@ -33,7 +33,7 @@ public class DoodleFragment extends Fragment {
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
 		//doodle = new InputStrokeTessellationDoodle(getActivity());
-		doodle = new IncrementalInputStrokeDoodle();
+		doodle = new IncrementalInputStrokeDoodle(getActivity());
 
 		if (savedInstanceState != null) {
 			doodle.onCreate(savedInstanceState);

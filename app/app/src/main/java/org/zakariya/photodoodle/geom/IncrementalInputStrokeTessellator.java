@@ -91,8 +91,12 @@ public class IncrementalInputStrokeTessellator {
 	}
 
 	public void add(float x, float y) {
+		add(x,y,System.currentTimeMillis());
+	}
+
+	public void add(float x, float y, long timestamp) {
 		InputStroke.Point lastPoint = inputStroke.lastPoint();
-		boolean shouldPartition = inputStroke.add(x, y);
+		boolean shouldPartition = inputStroke.add(x, y, timestamp);
 		InputStroke.Point currentPoint = inputStroke.lastPoint();
 
 		if (!shouldPartition && inputStroke.size() > MIN_PARTITION_SIZE) {

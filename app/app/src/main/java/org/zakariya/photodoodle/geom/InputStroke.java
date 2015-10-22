@@ -24,7 +24,7 @@ public class InputStroke implements Serializable, Parcelable {
 	private static final float AUTO_OPTIMIZE_CORNER_THRESHOLD = (float) Math.cos(45);
 
 	static final int MIN_OPTIMIZATION_SIZE = 8;
-	static final float POINT_VELOCITY_SMOOTHING_KERNEL[] = {0.5f / 5, 1 / 5, 2 / 5, 1 / 5, 0.5f / 5};
+	static final float POINT_VELOCITY_SMOOTHING_KERNEL[] = {0.5f / 5f, 1f / 5f, 2f / 5f, 1f / 5f, 0.5f / 5f};
 	static final int POINT_VELOCITY_SMOOTHING_KERNEL_BACKTRACK = 2;
 
 	private ArrayList<Point> points = new ArrayList<>();

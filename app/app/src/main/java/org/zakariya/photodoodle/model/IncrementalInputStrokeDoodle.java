@@ -1,5 +1,6 @@
 package org.zakariya.photodoodle.model;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -16,6 +17,12 @@ import org.zakariya.photodoodle.DoodleView;
 import org.zakariya.photodoodle.geom.IncrementalInputStrokeTessellator;
 import org.zakariya.photodoodle.geom.InputStroke;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.ref.WeakReference;
 import java.util.Random;
 
@@ -26,13 +33,17 @@ import icepick.Icepick;
  */
 public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalInputStrokeTessellator.Listener {
 	private static final String TAG = "RawInputStrokeDoodle";
+	private static final String FILE = "RawInputStrokeDoodle.dat";
 
 	private InvalidationDelegate invalidationDelegate;
 	private Paint invalidationRectPaint, inputStrokePaint, strokePaint;
 	private RectF invalidationRect;
 	private IncrementalInputStrokeTessellator incrementalInputStrokeTessellator;
+	private Context context;
 
-	public IncrementalInputStrokeDoodle() {
+	public IncrementalInputStrokeDoodle(Context context) {
+		this.context = context;
+
 		invalidationRectPaint = new Paint();
 		invalidationRectPaint.setAntiAlias(true);
 		invalidationRectPaint.setColor(0xFFFF0000);
@@ -126,6 +137,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	@Override
 	public void setInvalidationDelegate(InvalidationDelegate invalidationDelegate) {
 		this.invalidationDelegate = invalidationDelegate;
+		loadPoints();
 	}
 
 	@Override
@@ -153,7 +165,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public float getInputStrokeOptimizationThreshold() {
-		return 3;
+		return 7;
 	}
 
 	@Override
@@ -171,34 +183,56 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		return 700;
 	}
 
-	void renderTestStroke() {
-		Log.i(TAG, "renderTestStroke");
-		incrementalInputStrokeTessellator = new IncrementalInputStrokeTessellator(this);
-		float x = 10, y = 50;
-		for (; x < 310; x += 15, y += 10) {
-			incrementalInputStrokeTessellator.add(x,y);
-		}
+	private void save() {
+		try {
+			context.deleteFile(FILE);
+			FileOutputStream fos = context.openFileOutput(FILE, Context.MODE_PRIVATE);
+			BufferedOutputStream bos = new BufferedOutputStream(fos);
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
 
-		for (; x > 10; x -= 15, y += 10) {
-			incrementalInputStrokeTessellator.add(x,y);
-		}
+			oos.writeObject(incrementalInputStrokeTessellator.getInputStroke());
+			oos.close();
 
-		for (; x < 310; x += 15, y += 10) {
-			incrementalInputStrokeTessellator.add(x,y);
+			Log.i(TAG, "Saved to " + FILE);
+		} catch (Exception e) {
+			Log.e(TAG, "Unable to write to file: " + FILE + " e: " + e);
 		}
 	}
 
-	void onTouchEventBegin(@NonNull MotionEvent event) {
+	private boolean loadPoints() {
+		try {
+			FileInputStream fis = context.openFileInput(FILE);
+			BufferedInputStream bis = new BufferedInputStream(fis);
+			ObjectInputStream ois = new ObjectInputStream(bis);
+
+			InputStroke inputStroke = (InputStroke) ois.readObject();
+			if (inputStroke.size() > 0) {
+				incrementalInputStrokeTessellator = new IncrementalInputStrokeTessellator(this);
+				for (InputStroke.Point point : inputStroke.getPoints()) {
+					incrementalInputStrokeTessellator.add(point.position.x, point.position.y, point.timestamp);
+				}
+
+			}
+			Log.i(TAG, "Loaded " + inputStroke.size() + " points from " + FILE);
+			return inputStroke.size() > 0;
+		} catch (Exception e) {
+			Log.e(TAG, "Error opening file: " + FILE + " e: " + e);
+			return false;
+		}
+	}
+
+	private void onTouchEventBegin(@NonNull MotionEvent event) {
 		incrementalInputStrokeTessellator = new IncrementalInputStrokeTessellator(this);
 		incrementalInputStrokeTessellator.add(event.getX(), event.getY());
 	}
 
-	void onTouchEventMove(@NonNull MotionEvent event) {
+	private void onTouchEventMove(@NonNull MotionEvent event) {
 		incrementalInputStrokeTessellator.add(event.getX(), event.getY());
 	}
 
-	void onTouchEventEnd() {
+	private void onTouchEventEnd() {
 		incrementalInputStrokeTessellator.finish();
+		save();
 	}
 
 	private static class InputDelegate implements DoodleView.InputDelegate {

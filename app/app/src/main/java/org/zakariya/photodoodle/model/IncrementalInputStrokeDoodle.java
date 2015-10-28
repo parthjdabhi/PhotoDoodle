@@ -36,16 +36,17 @@ import icepick.Icepick;
  */
 public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalInputStrokeTessellator.Listener {
 	private static final String TAG = "RawInputStrokeDoodle";
-	private static final String FILE = "RawInputStrokeDoodle.dat";
+
+	private static boolean DRAW_INVALIDATION_RECT = false;
 
 	private InvalidationDelegate invalidationDelegate;
-	private Paint invalidationRectPaint, inputStrokePaint, strokePaint, bitmapPaint;
+	private Paint invalidationRectPaint, bitmapPaint;
 	private RectF invalidationRect;
 	private IncrementalInputStrokeTessellator incrementalInputStrokeTessellator;
 	private Context context;
 	private Bitmap bitmap;
 	private Canvas bitmapCanvas;
-	Random colorGenerator = new Random(12345);
+	private Brush brush;
 
 	public IncrementalInputStrokeDoodle(Context context) {
 		this.context = context;
@@ -55,27 +56,16 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		bitmap.eraseColor(0x0);
 		bitmapCanvas = new Canvas(bitmap);
 
-
 		invalidationRectPaint = new Paint();
 		invalidationRectPaint.setAntiAlias(true);
 		invalidationRectPaint.setColor(0xFFFF0000);
 		invalidationRectPaint.setStrokeWidth(1);
 		invalidationRectPaint.setStyle(Paint.Style.STROKE);
 
-		inputStrokePaint = new Paint();
-		inputStrokePaint.setAntiAlias(true);
-		inputStrokePaint.setColor(0xFF00FF00);
-		inputStrokePaint.setStrokeWidth(1);
-		inputStrokePaint.setStyle(Paint.Style.STROKE);
-
-		strokePaint = new Paint();
-		strokePaint.setAntiAlias(true);
-		strokePaint.setColor(0xFF666666);
-		strokePaint.setStrokeWidth(1);
-		strokePaint.setStyle(Paint.Style.FILL);
-
 		bitmapPaint = new Paint();
 		bitmapPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+
+		brush = new Brush(0xFF000000, 1, 1, 100, false);
 	}
 
 	@Override
@@ -104,35 +94,21 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	public void draw(Canvas canvas) {
 		// clear canvas
 		canvas.drawColor(0xFFddddFF);
-		canvas.drawBitmap(bitmap,0,0,bitmapPaint);
+		canvas.drawBitmap(bitmap, 0, 0, bitmapPaint);
 
 
-		if (incrementalInputStrokeTessellator != null) {
-
+		if (incrementalInputStrokeTessellator != null && !brush.isEraser()) {
 			Path path = incrementalInputStrokeTessellator.getLivePath();
 			if (path != null && !path.isEmpty()) {
-
-				strokePaint.setColor(0xFF0000FF);
-				canvas.drawPath(path, strokePaint);
-
-			} else {
-				InputStroke inputStroke = incrementalInputStrokeTessellator.getInputStroke();
-				if (inputStroke != null) {
-					path = new Path();
-					InputStroke.Point p = inputStroke.get(0);
-					path.moveTo(p.position.x, p.position.y);
-					for (int i = 1, N = inputStroke.size(); i < N; i++) {
-						p = inputStroke.get(i);
-						path.lineTo(p.position.x, p.position.y);
-					}
-
-					canvas.drawPath(path, inputStrokePaint);
-				}
+				canvas.drawPath(path, brush.getPaint());
 			}
 		}
 
 		// draw the invalidation rect
-		canvas.drawRect(invalidationRect != null ? invalidationRect : getInvalidationDelegate().getBounds(), invalidationRectPaint);
+		if (DRAW_INVALIDATION_RECT) {
+			canvas.drawRect(invalidationRect != null ? invalidationRect : getInvalidationDelegate().getBounds(), invalidationRectPaint);
+		}
+
 		invalidationRect = null;
 	}
 
@@ -144,7 +120,6 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	@Override
 	public void setInvalidationDelegate(InvalidationDelegate invalidationDelegate) {
 		this.invalidationDelegate = invalidationDelegate;
-		loadPoints();
 	}
 
 	@Override
@@ -160,6 +135,10 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public void onLivePathModified(Path path, RectF rect) {
+		if (brush.isEraser()) {
+			bitmapCanvas.drawPath(path,brush.getPaint());
+		}
+
 		invalidationRect = rect;
 		getInvalidationDelegate().invalidate(rect);
 	}
@@ -168,9 +147,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	public void onNewStaticPathAvailable(Path path, RectF rect) {
 
 		// draw path into bitmapCanvas
-		int color = Color.argb(255,64 + colorGenerator.nextInt(128),64 + colorGenerator.nextInt(128),64 + colorGenerator.nextInt(128));
-		strokePaint.setColor(color);
-		bitmapCanvas.drawPath(path,strokePaint);
+		bitmapCanvas.drawPath(path,brush.getPaint());
 
 		invalidationRect = rect;
 		getInvalidationDelegate().invalidate(rect);
@@ -183,55 +160,25 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public float getStrokeMinWidth() {
-		return 1;
+		return brush.getMinWidth();
 	}
 
 	@Override
 	public float getStrokeMaxWidth() {
-		return 16;
+		return brush.getMaxWidth();
 	}
 
 	@Override
 	public float getStrokeMaxVelDPps() {
-		return 700;
+		return brush.getMaxWidthDpPs();
 	}
 
-	private void save() {
-		try {
-			context.deleteFile(FILE);
-			FileOutputStream fos = context.openFileOutput(FILE, Context.MODE_PRIVATE);
-			BufferedOutputStream bos = new BufferedOutputStream(fos);
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-
-			oos.writeObject(incrementalInputStrokeTessellator.getInputStroke());
-			oos.close();
-
-			Log.i(TAG, "Saved to " + FILE);
-		} catch (Exception e) {
-			Log.e(TAG, "Unable to write to file: " + FILE + " e: " + e);
-		}
+	public Brush getBrush() {
+		return brush;
 	}
 
-	private boolean loadPoints() {
-		try {
-			FileInputStream fis = context.openFileInput(FILE);
-			BufferedInputStream bis = new BufferedInputStream(fis);
-			ObjectInputStream ois = new ObjectInputStream(bis);
-
-			InputStroke inputStroke = (InputStroke) ois.readObject();
-			if (inputStroke.size() > 0) {
-				incrementalInputStrokeTessellator = new IncrementalInputStrokeTessellator(this);
-				for (InputStroke.Point point : inputStroke.getPoints()) {
-					incrementalInputStrokeTessellator.add(point.position.x, point.position.y, point.timestamp);
-				}
-
-			}
-			Log.i(TAG, "Loaded " + inputStroke.size() + " points from " + FILE);
-			return inputStroke.size() > 0;
-		} catch (Exception e) {
-			Log.e(TAG, "Error opening file: " + FILE + " e: " + e);
-			return false;
-		}
+	public void setBrush(Brush brush) {
+		this.brush = brush;
 	}
 
 	private void onTouchEventBegin(@NonNull MotionEvent event) {
@@ -245,7 +192,6 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	private void onTouchEventEnd() {
 		incrementalInputStrokeTessellator.finish();
-		save();
 	}
 
 	private static class InputDelegate implements DoodleView.InputDelegate {

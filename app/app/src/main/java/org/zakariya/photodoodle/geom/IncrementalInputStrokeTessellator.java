@@ -122,7 +122,7 @@ public class IncrementalInputStrokeTessellator {
 
 			if (shouldPartition) {
 				// adding the point triggered an optimization pass. tessellate to path
-				Path newStaticPathChunk = inputStrokeTessellator.tessellate(tessellationStartIndex, isContinuation);
+				Path newStaticPathChunk = inputStrokeTessellator.tessellate(tessellationStartIndex, isContinuation, true, true);
 				staticPaths.add(newStaticPathChunk);
 
 				InputStroke.Point lastPointInStroke = inputStroke.get(-1);
@@ -136,7 +136,7 @@ public class IncrementalInputStrokeTessellator {
 				}
 
 			} else {
-				livePath = inputStrokeTessellator.tessellate(tessellationStartIndex, isContinuation);
+				livePath = inputStrokeTessellator.tessellate(tessellationStartIndex, isContinuation, true, true);
 				if (!livePath.isEmpty()) {
 					livePath.computeBounds(livePathBounds, true);
 					listener.onLivePathModified(livePath, livePathBounds);

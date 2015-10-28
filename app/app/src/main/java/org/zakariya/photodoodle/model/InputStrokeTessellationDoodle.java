@@ -112,7 +112,7 @@ public class InputStrokeTessellationDoodle extends Doodle {
 			for (int i = 0, N = inputStroke.size(); i < N; i++) {
 				InputStroke.Point point = inputStroke.get(i);
 				PointF tangent = inputStroke.getTangent(i);
-				float radius = inputStrokeTessellator.getRadiusForInputStrokePoint(i);
+				float radius = inputStrokeTessellator.getRadiusForInputStrokePoint(point);
 				canvas.drawCircle(point.position.x, point.position.y, radius, handlePaint);
 
 				PointF t = new PointF(point.position.x + tangent.x * 2 * radius, point.position.y + tangent.y * 2 * radius);
@@ -154,7 +154,7 @@ public class InputStrokeTessellationDoodle extends Doodle {
 
 		// now, confirm closest match was close enough
 		if (index >= 0 ){
-			float radius = inputStrokeTessellator.getRadiusForInputStrokePoint(index);
+			float radius = inputStrokeTessellator.getRadiusForInputStrokePoint(draggingPoint);
 			if (minDist2 > (radius*radius)) {
 				draggingPoint = null;
 			}
@@ -215,7 +215,7 @@ public class InputStrokeTessellationDoodle extends Doodle {
 
 	private void tessellate() {
 		inputStrokeTessellator = new InputStrokeTessellator(inputStroke,4,60,200);
-		inputStrokeTessellatedPath = inputStrokeTessellator.tessellate(false);
+		inputStrokeTessellatedPath = inputStrokeTessellator.tessellate(false, true, true);
 	}
 
 	private static class InputDelegate implements DoodleView.InputDelegate {

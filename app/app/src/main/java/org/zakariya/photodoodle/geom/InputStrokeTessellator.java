@@ -49,14 +49,22 @@ public class InputStrokeTessellator {
 		return path;
 	}
 
-	private Path tessellate(int startIndex, int endIndex) {
+	private Path tessellate(int startIndex, int endIndex, boolean startCap, boolean endCap) {
 		path = new Path();
+		path.setFillType(Path.FillType.WINDING);
 
 		if (inputStroke.size() < 2) {
 			return path;
 		}
 
 		ArrayList<InputStroke.Point> points = inputStroke.getPoints();
+
+		if (startCap) {
+			final InputStroke.Point firstPoint = points.get(startIndex);
+			final float radius = getRadiusForInputStrokePoint(firstPoint);
+			path.addCircle(firstPoint.position.x, firstPoint.position.y, radius, Path.Direction.CCW);
+		}
+
 		PointF aLeftAttachPoint = new PointF();
 		PointF aRightAttachPoint = new PointF();
 		PointF bLeftAttachPoint = new PointF();
@@ -74,8 +82,8 @@ public class InputStrokeTessellator {
 			final InputStroke.Point a = points.get(i);
 			final InputStroke.Point b = points.get(i + 1);
 			final PointF dir = PointFUtil.dir(a.position, b.position).first;
-			final float aRadius = getRadiusForInputStrokePoint(i);
-			final float bRadius = getRadiusForInputStrokePoint(i + 1);
+			final float aRadius = getRadiusForInputStrokePoint(a);
+			final float bRadius = getRadiusForInputStrokePoint(b);
 
 			// aLeftAttachPoint and aRightAttachPoint are the start points of the two bezier curves
 			PointF aLeftAttachDir = PointFUtil.scale(PointFUtil.rotateCCW(dir), aRadius);
@@ -192,6 +200,13 @@ public class InputStrokeTessellator {
 
 		path.close();
 
+		if (endCap) {
+			final InputStroke.Point endPoint = points.get(endIndex);
+			final float radius = getRadiusForInputStrokePoint(endPoint);
+			path.addCircle(endPoint.position.x, endPoint.position.y, radius, Path.Direction.CCW);
+		}
+
+
 		return path;
 	}
 
@@ -201,9 +216,9 @@ public class InputStrokeTessellator {
 	 * @param startIndex index of point to start tessellation at
 	 * @return Path representing InputStroke tessellated from startIndex to end
 	 */
-	public Path tessellate(int startIndex, boolean isContinuation) {
+	public Path tessellate(int startIndex, boolean isContinuation, boolean startCap, boolean endCap) {
 		clearCoordinateBuffers(isContinuation);
-		return tessellate(startIndex, inputStroke.size() - 1);
+		return tessellate(startIndex, inputStroke.size() - 1, startCap, endCap);
 	}
 
 	/**
@@ -211,14 +226,13 @@ public class InputStrokeTessellator {
 	 *
 	 * @return Path representing entire InputStroke
 	 */
-	public Path tessellate(boolean isContinuation) {
+	public Path tessellate(boolean isContinuation, boolean startCap, boolean endCap) {
 		clearCoordinateBuffers(isContinuation);
-		return tessellate(0, inputStroke.size() - 1);
+		return tessellate(0, inputStroke.size() - 1, startCap, endCap);
 	}
 
-	public float getRadiusForInputStrokePoint(int index) {
-		final float vel = inputStroke.get(index).velocity;
-		final float velScale = Math.min(vel / maxVelDPps, 1f);
+	public float getRadiusForInputStrokePoint(InputStroke.Point point) {
+		final float velScale = Math.min(point.velocity / maxVelDPps, 1f);
 		return minRadius + (velScale * velScale * deltaRadius);
 	}
 

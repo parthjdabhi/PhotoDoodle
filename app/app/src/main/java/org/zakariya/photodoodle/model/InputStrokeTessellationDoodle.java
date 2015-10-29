@@ -176,6 +176,8 @@ public class InputStrokeTessellationDoodle extends Doodle {
 	}
 
 	void onTouchEventEnd(@NonNull MotionEvent event) {
+
+
 		draggingPoint = null;
 		getInvalidationDelegate().invalidate(getBoundingRect());
 		save();

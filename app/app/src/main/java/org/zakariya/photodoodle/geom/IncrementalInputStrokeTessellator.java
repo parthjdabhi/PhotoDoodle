@@ -123,14 +123,14 @@ public class IncrementalInputStrokeTessellator {
 			if (shouldPartition) {
 				// adding the point triggered an optimization pass. tessellate to path
 				Path newStaticPathChunk = inputStrokeTessellator.tessellate(tessellationStartIndex, isContinuation, true, true);
-				staticPaths.add(newStaticPathChunk);
 
-				InputStroke.Point lastPointInStroke = inputStroke.get(-1);
-				lastPointInStroke.freezeVelocity = true;
-				inputStroke.clear();
-				inputStroke.getPoints().add(lastPointInStroke);
+				if (newStaticPathChunk != null && !newStaticPathChunk.isEmpty()) {
+					InputStroke.Point lastPointInStroke = inputStroke.get(-1);
+					lastPointInStroke.freezeVelocity = true;
+					inputStroke.clear();
+					inputStroke.getPoints().add(lastPointInStroke);
 
-				if (!newStaticPathChunk.isEmpty()) {
+					staticPaths.add(newStaticPathChunk);
 					newStaticPathChunk.computeBounds(staticPathBounds, true);
 					listener.onNewStaticPathAvailable(newStaticPathChunk,staticPathBounds);
 				}
@@ -163,5 +163,17 @@ public class IncrementalInputStrokeTessellator {
 
 	public void finish() {
 		inputStroke.finish();
+
+		// in case the stroke was finished before growing long enough to chunk, we need to commit it
+		Listener listener = listenerWeakReference.get();
+		if (listener != null && !inputStroke.isEmpty()) {
+			Path newStaticPathChunk = inputStrokeTessellator.tessellate(false, true, true);
+
+			if (!newStaticPathChunk.isEmpty()) {
+				staticPaths.add(newStaticPathChunk);
+				newStaticPathChunk.computeBounds(staticPathBounds, true);
+				listener.onNewStaticPathAvailable(newStaticPathChunk,staticPathBounds);
+			}
+		}
 	}
 }

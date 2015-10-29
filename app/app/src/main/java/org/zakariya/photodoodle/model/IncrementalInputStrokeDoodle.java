@@ -3,31 +3,20 @@ package org.zakariya.photodoodle.model;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
 import org.zakariya.photodoodle.geom.IncrementalInputStrokeTessellator;
 import org.zakariya.photodoodle.geom.InputStroke;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.lang.ref.WeakReference;
-import java.util.Random;
 
 import icepick.Icepick;
 
@@ -39,14 +28,12 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	private static boolean DRAW_INVALIDATION_RECT = false;
 
-	private InvalidationDelegate invalidationDelegate;
 	private Paint invalidationRectPaint, bitmapPaint;
 	private RectF invalidationRect;
 	private IncrementalInputStrokeTessellator incrementalInputStrokeTessellator;
 	private Context context;
 	private Bitmap bitmap;
 	private Canvas bitmapCanvas;
-	private Brush brush;
 
 	public IncrementalInputStrokeDoodle(Context context) {
 		this.context = context;
@@ -65,7 +52,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		bitmapPaint = new Paint();
 		bitmapPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
 
-		brush = new Brush(0xFF000000, 1, 1, 100, false);
+		setBrush(new Brush(0xFF000000, 1, 1, 100, false));
 	}
 
 	@Override
@@ -88,6 +75,9 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public void clear() {
+		incrementalInputStrokeTessellator = null;
+		bitmap.eraseColor(0x0);
+		getInvalidationDelegate().invalidate();
 	}
 
 	@Override
@@ -97,10 +87,10 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		canvas.drawBitmap(bitmap, 0, 0, bitmapPaint);
 
 
-		if (incrementalInputStrokeTessellator != null && !brush.isEraser()) {
+		if (incrementalInputStrokeTessellator != null && !getBrush().isEraser()) {
 			Path path = incrementalInputStrokeTessellator.getLivePath();
 			if (path != null && !path.isEmpty()) {
-				canvas.drawPath(path, brush.getPaint());
+				canvas.drawPath(path, getBrush().getPaint());
 			}
 		}
 
@@ -118,16 +108,6 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	}
 
 	@Override
-	public void setInvalidationDelegate(InvalidationDelegate invalidationDelegate) {
-		this.invalidationDelegate = invalidationDelegate;
-	}
-
-	@Override
-	public InvalidationDelegate getInvalidationDelegate() {
-		return invalidationDelegate;
-	}
-
-	@Override
 	public void onInputStrokeModified(InputStroke inputStroke, int startIndex, int endIndex, RectF rect) {
 		invalidationRect = rect;
 		getInvalidationDelegate().invalidate(rect);
@@ -135,8 +115,8 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public void onLivePathModified(Path path, RectF rect) {
-		if (brush.isEraser()) {
-			bitmapCanvas.drawPath(path,brush.getPaint());
+		if (getBrush().isEraser()) {
+			bitmapCanvas.drawPath(path,getBrush().getPaint());
 		}
 
 		invalidationRect = rect;
@@ -147,7 +127,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	public void onNewStaticPathAvailable(Path path, RectF rect) {
 
 		// draw path into bitmapCanvas
-		bitmapCanvas.drawPath(path,brush.getPaint());
+		bitmapCanvas.drawPath(path,getBrush().getPaint());
 
 		invalidationRect = rect;
 		getInvalidationDelegate().invalidate(rect);
@@ -160,25 +140,17 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public float getStrokeMinWidth() {
-		return brush.getMinWidth();
+		return getBrush().getMinWidth();
 	}
 
 	@Override
 	public float getStrokeMaxWidth() {
-		return brush.getMaxWidth();
+		return getBrush().getMaxWidth();
 	}
 
 	@Override
 	public float getStrokeMaxVelDPps() {
-		return brush.getMaxWidthDpPs();
-	}
-
-	public Brush getBrush() {
-		return brush;
-	}
-
-	public void setBrush(Brush brush) {
-		this.brush = brush;
+		return getBrush().getMaxWidthDpPs();
 	}
 
 	private void onTouchEventBegin(@NonNull MotionEvent event) {

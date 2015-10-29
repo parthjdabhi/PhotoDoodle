@@ -1,9 +1,6 @@
 package org.zakariya.photodoodle;
 
 import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,7 +14,7 @@ import android.widget.Spinner;
 
 import org.zakariya.photodoodle.model.Brush;
 import org.zakariya.photodoodle.model.Doodle;
-import org.zakariya.photodoodle.model.IncrementalInputStrokeDoodle;
+import org.zakariya.photodoodle.model.InputStrokeTessellationDoodle;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -38,7 +35,7 @@ public class DoodleFragment extends Fragment {
 	@Bind(R.id.toolSelector)
 	Spinner toolSelector;
 
-	IncrementalInputStrokeDoodle doodle;
+	Doodle doodle;
 
 	@State
 	int selectedTool = 0;
@@ -48,7 +45,8 @@ public class DoodleFragment extends Fragment {
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
-		doodle = new IncrementalInputStrokeDoodle(getActivity());
+		//doodle = new IncrementalInputStrokeDoodle(getActivity());
+		doodle = new InputStrokeTessellationDoodle(getActivity());
 
 		if (savedInstanceState != null) {
 			doodle.onCreate(savedInstanceState);

@@ -6,7 +6,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -35,7 +34,6 @@ public class InputStrokeTessellationDoodle extends Doodle {
 	private InputStroke inputStroke = new InputStroke();
 	private InputStrokeTessellator inputStrokeTessellator;
 	private Path inputStrokeTessellatedPath;
-	private InvalidationDelegate invalidationDelegate;
 	private Paint handlePaint, tessellatedInputStrokePathFillPaint, tessellatedInputStrokePathStrokePaint;
 	private InputStroke.Point draggingPoint;
 	private Context context;
@@ -80,14 +78,6 @@ public class InputStrokeTessellationDoodle extends Doodle {
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle outState) {
-	}
-
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-	}
-
-	@Override
 	public RectF getBoundingRect() {
 		return inputStroke.getBoundingRect();
 	}
@@ -125,16 +115,6 @@ public class InputStrokeTessellationDoodle extends Doodle {
 	@Override
 	public DoodleView.InputDelegate inputDelegate() {
 		return new InputDelegate(this);
-	}
-
-	@Override
-	public void setInvalidationDelegate(InvalidationDelegate invalidationDelegate) {
-		this.invalidationDelegate = invalidationDelegate;
-	}
-
-	@Override
-	public InvalidationDelegate getInvalidationDelegate() {
-		return invalidationDelegate;
 	}
 
 	void onTouchEventBegin(@NonNull MotionEvent event) {

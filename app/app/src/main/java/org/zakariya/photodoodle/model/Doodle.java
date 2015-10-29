@@ -11,6 +11,9 @@ import org.zakariya.photodoodle.DoodleView;
  */
 public abstract class Doodle {
 
+	private Brush brush;
+	private InvalidationDelegate invalidationDelegate;
+
 	public interface InvalidationDelegate {
 		/**
 		 * Queue a complete redraw of the doodle
@@ -32,6 +35,12 @@ public abstract class Doodle {
 		RectF getBounds();
 	}
 
+	public void onSaveInstanceState(Bundle outState) {
+	}
+
+	public void onCreate(Bundle savedInstanceState) {
+	}
+
 	public abstract DoodleView.InputDelegate inputDelegate();
 
 	public abstract RectF getBoundingRect();
@@ -40,12 +49,20 @@ public abstract class Doodle {
 
 	public abstract void draw(Canvas canvas);
 
-	public abstract void setInvalidationDelegate(InvalidationDelegate invalidationDelegate);
+	public void setInvalidationDelegate(InvalidationDelegate invalidationDelegate) {
+		this.invalidationDelegate = invalidationDelegate;
+	}
 
-	public abstract InvalidationDelegate getInvalidationDelegate();
+	public InvalidationDelegate getInvalidationDelegate() {
+		return this.invalidationDelegate;
+	}
 
-	public abstract void onSaveInstanceState(Bundle outState);
+	public void setBrush(Brush brush) {
+		this.brush = brush;
+	}
 
-	public abstract void onCreate(Bundle savedInstanceState);
+	public Brush getBrush() {
+		return brush;
+	}
 
 }

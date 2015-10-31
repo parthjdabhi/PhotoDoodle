@@ -35,12 +35,6 @@ public abstract class Doodle {
 		RectF getBounds();
 	}
 
-	public void onSaveInstanceState(Bundle outState) {
-	}
-
-	public void onCreate(Bundle savedInstanceState) {
-	}
-
 	public abstract DoodleView.InputDelegate inputDelegate();
 
 	public abstract RectF getBoundingRect();
@@ -66,5 +60,8 @@ public abstract class Doodle {
 	public Brush getBrush() {
 		return brush;
 	}
+
+	public void onSaveInstanceState(Bundle outState){}
+	public void onCreate(Bundle savedInstanceState){}
 
 }

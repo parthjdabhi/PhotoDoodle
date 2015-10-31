@@ -20,12 +20,13 @@ import org.zakariya.photodoodle.geom.InputStroke;
 import java.lang.ref.WeakReference;
 
 import icepick.Icepick;
+import icepick.State;
 
 /**
  * Created by shamyl on 10/14/15.
  */
 public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalInputStrokeTessellator.Listener {
-	private static final String TAG = "RawInputStrokeDoodle";
+	private static final String TAG = "IncInptStrokeDoodle";
 
 	private static boolean DRAW_INVALIDATION_RECT = false;
 
@@ -33,8 +34,11 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	private RectF invalidationRect;
 	private IncrementalInputStrokeTessellator incrementalInputStrokeTessellator;
 	private Context context;
-	private Bitmap bitmap;
 	private Canvas bitmapCanvas;
+
+	@State
+	Bitmap bitmap;
+
 
 	public IncrementalInputStrokeDoodle(Context context) {
 		this.context = context;
@@ -52,13 +56,13 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		Icepick.saveInstanceState(this, outState);
+	public void onCreate(Bundle savedInstanceState) {
+		Icepick.restoreInstanceState(this, savedInstanceState);
 	}
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		Icepick.restoreInstanceState(this, savedInstanceState);
+	public void onSaveInstanceState(Bundle outState) {
+		Icepick.saveInstanceState(this, outState);
 	}
 
 	@Override
@@ -100,12 +104,12 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public void resize(int newWidth, int newHeight) {
-		Log.i(TAG, "resize w: " + newWidth + " h: " + newHeight);
 
 		if (bitmap != null && newWidth == bitmap.getWidth() && newHeight == bitmap.getHeight()) {
 			return;
 		}
 
+		Log.i(TAG, "resize w: " + newWidth + " h: " + newHeight);
 
 		Bitmap previousBitmap = bitmap;
 

@@ -7,6 +7,8 @@ import android.view.MenuItem;
 
 public class MainActivity extends SingleFragmentActivity {
 
+	static final String TAG = "MainActivity";
+
 	@Override
 	protected Fragment createFragment() {
 		return new DoodleFragment();

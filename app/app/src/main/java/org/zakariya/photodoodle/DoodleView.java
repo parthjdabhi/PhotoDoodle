@@ -45,11 +45,7 @@ public class DoodleView extends View {
 
 	@Override
 	public boolean onTouchEvent(@NonNull MotionEvent event) {
-		if (inputDelegate != null) {
-			return inputDelegate.onTouchEvent(event);
-		}
-
-		return false;
+		return inputDelegate != null && inputDelegate.onTouchEvent(event);
 	}
 
 	public InputDelegate getInputDelegate() {

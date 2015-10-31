@@ -30,6 +30,7 @@ import icepick.State;
 public class DoodleFragment extends Fragment {
 
 	private static final String TAG = "DoodleFragment";
+	private static final String DOODLE_STATE = "DOODLE_STATE";
 	static final String[] DRAWING_TOOLS = {"Pen", "Brush", "Eraser"};
 
 	@Bind(R.id.doodleView)
@@ -52,11 +53,23 @@ public class DoodleFragment extends Fragment {
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
 		doodle = new IncrementalInputStrokeDoodle(getActivity());
-		//doodle = new InputStrokeTessellationDoodle(getActivity());
 
 		if (savedInstanceState != null) {
-			doodle.onCreate(savedInstanceState);
+			Bundle doodleState = savedInstanceState.getBundle(DOODLE_STATE);
+			if (doodleState != null) {
+				doodle.onCreate(doodleState);
+			}
 		}
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		Icepick.saveInstanceState(this, outState);
+
+		Bundle doodleState = new Bundle();
+		doodle.onSaveInstanceState(doodleState);
+		outState.putBundle(DOODLE_STATE, doodleState);
 	}
 
 	@Nullable
@@ -135,13 +148,6 @@ public class DoodleFragment extends Fragment {
 		toolSelector.setSelection(selectedTool);
 
 		return v;
-	}
-
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		doodle.onSaveInstanceState(outState);
-		Icepick.saveInstanceState(this, outState);
 	}
 
 	@OnClick(R.id.clearButton)

@@ -49,6 +49,8 @@ public abstract class Doodle {
 
 	public abstract void draw(Canvas canvas);
 
+	public abstract void resize(int newWidth, int newHeight);
+
 	public void setInvalidationDelegate(InvalidationDelegate invalidationDelegate) {
 		this.invalidationDelegate = invalidationDelegate;
 	}

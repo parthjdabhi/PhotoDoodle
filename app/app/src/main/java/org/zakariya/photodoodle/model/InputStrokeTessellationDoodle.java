@@ -113,6 +113,11 @@ public class InputStrokeTessellationDoodle extends Doodle {
 	}
 
 	@Override
+	public void resize(int newWidth, int newHeight) {
+		// nothing
+	}
+
+	@Override
 	public DoodleView.InputDelegate inputDelegate() {
 		return new InputDelegate(this);
 	}

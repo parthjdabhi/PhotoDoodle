@@ -10,6 +10,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
@@ -37,11 +38,6 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	public IncrementalInputStrokeDoodle(Context context) {
 		this.context = context;
-
-		Bitmap.Config config = Bitmap.Config.ARGB_8888;
-		bitmap = Bitmap.createBitmap(1024,1024,config);
-		bitmap.eraseColor(0x0);
-		bitmapCanvas = new Canvas(bitmap);
 
 		invalidationRectPaint = new Paint();
 		invalidationRectPaint.setAntiAlias(true);
@@ -100,6 +96,26 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		}
 
 		invalidationRect = null;
+	}
+
+	@Override
+	public void resize(int newWidth, int newHeight) {
+		Log.i(TAG, "resize w: " + newWidth + " h: " + newHeight);
+
+		if (bitmap != null && newWidth == bitmap.getWidth() && newHeight == bitmap.getHeight()) {
+			return;
+		}
+
+
+		Bitmap previousBitmap = bitmap;
+
+		bitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
+		bitmap.eraseColor(0x0);
+		bitmapCanvas = new Canvas(bitmap);
+
+		if (previousBitmap != null) {
+			bitmapCanvas.drawBitmap(previousBitmap, 0, 0, bitmapPaint);
+		}
 	}
 
 	@Override

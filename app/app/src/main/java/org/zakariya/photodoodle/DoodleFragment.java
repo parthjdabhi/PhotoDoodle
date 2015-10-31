@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -63,6 +64,13 @@ public class DoodleFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_doodle, container, false);
 		ButterKnife.bind(this, v);
+
+		doodleView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				doodle.resize(doodleView.getWidth(),doodleView.getHeight());
+			}
+		});
 
 		// this makes doodle consume touch input from doodleView
 		doodleView.setInputDelegate(doodle.inputDelegate());

@@ -2,7 +2,6 @@ package org.zakariya.photodoodle.geom;
 
 import android.graphics.Path;
 import android.graphics.RectF;
-import android.util.Log;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -100,7 +99,6 @@ public class IncrementalInputStrokeTessellator {
 		InputStroke.Point currentPoint = inputStroke.lastPoint();
 
 		if (!shouldPartition && inputStroke.size() > MIN_PARTITION_SIZE) {
-			Log.i(TAG, "partitioning...");
 			shouldPartition = true;
 		}
 
@@ -121,7 +119,7 @@ public class IncrementalInputStrokeTessellator {
 //			int tessellationStartIndex = isContinuation ? 1 : 0;
 
 			if (shouldPartition) {
-				// adding the point triggered an optimization pass. tessellate to path
+				// adding the point triggered a partition
 				Path newStaticPathChunk = inputStrokeTessellator.tessellate(tessellationStartIndex, isContinuation, true, true);
 
 				if (newStaticPathChunk != null && !newStaticPathChunk.isEmpty()) {

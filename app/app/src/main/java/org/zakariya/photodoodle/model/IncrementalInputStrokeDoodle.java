@@ -120,8 +120,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		}
 
 		invalidationRect = rect;
-		//getInvalidationDelegate().invalidate(rect);
-		getInvalidationDelegate().invalidate();
+		getInvalidationDelegate().invalidate(rect);
 	}
 
 	@Override
@@ -131,8 +130,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		bitmapCanvas.drawPath(path,getBrush().getPaint());
 
 		invalidationRect = rect;
-		//getInvalidationDelegate().invalidate(rect);
-		getInvalidationDelegate().invalidate();
+		getInvalidationDelegate().invalidate(rect);
 	}
 
 	@Override

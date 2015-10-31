@@ -10,14 +10,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 
 import org.zakariya.photodoodle.model.Brush;
 import org.zakariya.photodoodle.model.Doodle;
-import org.zakariya.photodoodle.model.InputStrokeTessellationDoodle;
+import org.zakariya.photodoodle.model.IncrementalInputStrokeDoodle;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import icepick.Icepick;
 import icepick.State;
 
@@ -35,6 +37,9 @@ public class DoodleFragment extends Fragment {
 	@Bind(R.id.toolSelector)
 	Spinner toolSelector;
 
+	@Bind(R.id.clearButton)
+	Button clearButton;
+
 	Doodle doodle;
 
 	@State
@@ -45,8 +50,8 @@ public class DoodleFragment extends Fragment {
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
-		//doodle = new IncrementalInputStrokeDoodle(getActivity());
-		doodle = new InputStrokeTessellationDoodle(getActivity());
+		doodle = new IncrementalInputStrokeDoodle(getActivity());
+		//doodle = new InputStrokeTessellationDoodle(getActivity());
 
 		if (savedInstanceState != null) {
 			doodle.onCreate(savedInstanceState);
@@ -129,6 +134,11 @@ public class DoodleFragment extends Fragment {
 		super.onSaveInstanceState(outState);
 		doodle.onSaveInstanceState(outState);
 		Icepick.saveInstanceState(this, outState);
+	}
+
+	@OnClick(R.id.clearButton)
+	public void onClearButtonTap(View view) {
+		doodle.clear();
 	}
 
 }

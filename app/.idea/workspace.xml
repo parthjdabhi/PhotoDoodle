@@ -23,10 +23,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7fde0eb8-423e-4c88-926f-eb3a8950460c" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/Doodle.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/Doodle.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/DoodleFragment.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/DoodleFragment.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/IncrementalInputStrokeDoodle.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/IncrementalInputStrokeDoodle.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/InputStrokeTessellationDoodle.java" afterPath="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/InputStrokeTessellationDoodle.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_doodle.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_doodle.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="app.iws" />
@@ -72,62 +72,50 @@
         <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/IncrementalInputStrokeDoodle.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="34" column="26" selection-start-line="34" selection-start-column="26" selection-end-line="34" selection-end-column="26" />
+              <caret line="79" column="47" selection-start-line="79" selection-start-column="47" selection-end-line="79" selection-end-column="47" />
               <folding>
                 <element signature="e#1855#1856#0" expanded="true" />
                 <element signature="e#1903#1904#0" expanded="true" />
                 <element signature="e#3039#3040#0" expanded="true" />
                 <element signature="e#3076#3077#0" expanded="true" />
-                <element signature="e#3808#3809#0" expanded="true" />
-                <element signature="e#3823#3824#0" expanded="true" />
-                <element signature="e#3871#3872#0" expanded="true" />
-                <element signature="e#3909#3910#0" expanded="true" />
-                <element signature="e#3957#3958#0" expanded="true" />
-                <element signature="e#3995#3996#0" expanded="true" />
+                <element signature="e#3896#3897#0" expanded="true" />
+                <element signature="e#3911#3912#0" expanded="true" />
+                <element signature="e#3959#3960#0" expanded="true" />
+                <element signature="e#3997#3998#0" expanded="true" />
                 <element signature="e#4045#4046#0" expanded="true" />
-                <element signature="e#4087#4088#0" expanded="true" />
-                <element signature="e#4474#4475#0" expanded="true" />
-                <element signature="e#4523#4524#0" expanded="true" />
+                <element signature="e#4083#4084#0" expanded="true" />
+                <element signature="e#4133#4134#0" expanded="true" />
+                <element signature="e#4175#4176#0" expanded="true" />
+                <element signature="e#4562#4563#0" expanded="true" />
+                <element signature="e#4611#4612#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="InputStrokeTessellationDoodle.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/InputStrokeTessellationDoodle.java">
+      <file leaf-file-name="fragment_doodle.xml" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_doodle.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="118" column="0" selection-start-line="118" selection-start-column="0" selection-end-line="118" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.4311377">
+              <caret line="16" column="47" selection-start-line="16" selection-start-column="47" selection-end-line="16" selection-end-column="47" />
               <folding>
-                <element signature="e#3709#3710#0" expanded="true" />
-                <element signature="e#3746#3747#0" expanded="true" />
+                <element signature="e#771#786#0" expanded="true" />
               </folding>
             </state>
           </provider>
+          <provider editor-type-id="android-designer">
+            <state />
+          </provider>
         </entry>
       </file>
-      <file leaf-file-name="DoodleFragment.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="DoodleFragment.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/DoodleFragment.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5202312">
-              <caret line="41" column="0" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Doodle.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/Doodle.java">
-          <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="46" column="0" selection-start-line="46" selection-start-column="0" selection-end-line="46" selection-end-column="0" />
+              <caret line="140" column="23" selection-start-line="140" selection-start-column="23" selection-end-line="140" selection-end-column="23" />
               <folding>
-                <element signature="e#1242#1243#0" expanded="true" />
-                <element signature="e#1281#1282#0" expanded="true" />
-                <element signature="e#1319#1320#0" expanded="true" />
-                <element signature="e#1344#1345#0" expanded="true" />
-                <element signature="e#1372#1373#0" expanded="true" />
-                <element signature="e#1391#1392#0" expanded="true" />
+                <element signature="e#3744#3745#0" expanded="true" />
+                <element signature="e#3765#3766#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -1602,7 +1590,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_single_fragment.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/values-v21/styles.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/MainActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/SingleFragmentActivity.java" />
@@ -1644,15 +1631,16 @@
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/util/FloatBuffer.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/InputStroke.java" />
         <option value="$PROJECT_DIR$/app/build.gradle" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_doodle.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/Brush.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/InputStrokeTessellator.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/IncrementalInputStrokeTessellator.java" />
         <option value="$PROJECT_DIR$/NOTES.md" />
-        <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/IncrementalInputStrokeDoodle.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/Doodle.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/InputStrokeTessellationDoodle.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/IncrementalInputStrokeDoodle.java" />
+        <option value="$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/DoodleFragment.java" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/fragment_doodle.xml" />
       </list>
     </option>
   </component>
@@ -1754,6 +1742,28 @@
               <option name="myItemId" value="app-app" />
               <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidModuleNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidResFolderNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app-app" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidModuleNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidResFolderNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="layout" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidResFolderTypeNode" />
+            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -1831,6 +1841,16 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app-app" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidModuleNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
       <pane id="Scratches" />
@@ -1855,12 +1875,12 @@
     <property name="restartRequiresConfirmation" value="true" />
     <property name="OverrideImplement.combined" value="true" />
     <property name="OverrideImplement.overriding.sorted" value="false" />
-    <property name="SearchEverywhereHistoryKey" value="Brush&#9;FILE&#9;file:///Users/shamyl/Code/Projects/PhotoDoodle/app/app/src/main/java/org/zakariya/photodoodle/model/Brush.java&#10;InputStroke&#9;FILE&#9;file:///Users/shamyl/Code/Projects/PhotoDoodle/app/app/src/main/java/org/zakariya/photodoodle/geom/InputStroke.java&#10;inputstroke&#9;FILE&#9;file:///Users/shamyl/Code/Projects/PhotoDoodle/app/app/src/main/java/org/zakariya/photodoodle/geom/InputStroke.java&#10;InputStr&#9;FILE&#9;file:///Users/shamyl/Code/Projects/PhotoDoodle/app/app/src/main/java/org/zakariya/photodoodle/geom/InputStroke.java&#10;Circle&#9;FILE&#9;file:///Users/shamyl/Code/Projects/PhotoDoodle/app/app/src/main/java/org/zakariya/photodoodle/geom/Circle.java&#10;canvas&#9;PSI&#9;JAVA://android.graphics.Canvas" />
+    <property name="SearchEverywhereHistoryKey" value="strings&#9;FILE&#9;file:///Users/shamyl/Code/Projects/PhotoDoodle/app/app/src/main/res/values/strings.xml&#10;Brush&#9;FILE&#9;file:///Users/shamyl/Code/Projects/PhotoDoodle/app/app/src/main/java/org/zakariya/photodoodle/model/Brush.java&#10;InputStroke&#9;FILE&#9;file:///Users/shamyl/Code/Projects/PhotoDoodle/app/app/src/main/java/org/zakariya/photodoodle/geom/InputStroke.java&#10;inputstroke&#9;FILE&#9;file:///Users/shamyl/Code/Projects/PhotoDoodle/app/app/src/main/java/org/zakariya/photodoodle/geom/InputStroke.java&#10;InputStr&#9;FILE&#9;file:///Users/shamyl/Code/Projects/PhotoDoodle/app/app/src/main/java/org/zakariya/photodoodle/geom/InputStroke.java&#10;Circle&#9;FILE&#9;file:///Users/shamyl/Code/Projects/PhotoDoodle/app/app/src/main/java/org/zakariya/photodoodle/geom/Circle.java&#10;canvas&#9;PSI&#9;JAVA://android.graphics.Canvas" />
     <property name="FullScreen" value="false" />
     <property name="last_opened_file_path" value="$USER_HOME$/Downloads/MVVM_Hacker_News-master" />
     <property name="last_directory_selection" value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/util" />
   </component>
-  <component name="RunManager" selected="Android Application.PhotoDoodle (Emulator)">
+  <component name="RunManager" selected="Android Application.PhotoDoodle (USB)">
     <configuration default="true" type="AndroidRunConfigurationType" factoryName="Android Application">
       <module name="" />
       <option name="ACTIVITY_CLASS" value="" />
@@ -2078,7 +2098,8 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3296582" sideWeight="0.5" order="9" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Android Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3969129" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Android Monitor" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.20066153" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.22954823" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3296582" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3296582" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3296582" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -2086,10 +2107,10 @@
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="13" side_tool="true" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.22771673" sideWeight="0.5155393" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.22771673" sideWeight="0.51724136" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3296582" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.22771673" sideWeight="0.48446068" order="3" side_tool="true" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.22771673" sideWeight="0.4827586" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="Android Model" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32967034" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24035281" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -2099,7 +2120,6 @@
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.22954823" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="14" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -2121,57 +2141,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/util/FloatBuffer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="38" column="29" selection-start-line="38" selection-start-column="29" selection-end-line="38" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/geom/InputStroke.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="144" column="74" selection-start-line="144" selection-start-column="74" selection-end-line="144" selection-end-column="74" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#1304#1305#0" expanded="false" />
-            <element signature="e#1324#1325#0" expanded="false" />
-            <element signature="e#1346#1347#0" expanded="false" />
-            <element signature="e#1373#1374#0" expanded="false" />
-            <element signature="e#1402#1403#0" expanded="false" />
-            <element signature="e#1432#1433#0" expanded="false" />
-            <element signature="e#1600#1601#0" expanded="false" />
-            <element signature="e#1639#1640#0" expanded="false" />
-            <element signature="e#3188#3189#0" expanded="false" />
-            <element signature="e#3241#3242#0" expanded="false" />
-            <element signature="e#3281#3282#0" expanded="false" />
-            <element signature="e#3350#3351#0" expanded="false" />
-            <element signature="e#4647#4648#0" expanded="false" />
-            <element signature="e#4698#4699#0" expanded="false" />
-            <element signature="e#4859#4860#0" expanded="false" />
-            <element signature="e#4887#4888#0" expanded="false" />
-            <element signature="e#4997#4998#0" expanded="false" />
-            <element signature="e#5023#5024#0" expanded="false" />
-            <element signature="e#5447#5448#0" expanded="false" />
-            <element signature="e#5488#5489#0" expanded="false" />
-            <element signature="e#12316#12317#0" expanded="false" />
-            <element signature="e#12331#12332#0" expanded="false" />
-            <element signature="e#12649#12650#0" expanded="false" />
-            <element signature="e#12684#12685#0" expanded="false" />
-            <element signature="e#12729#12730#0" expanded="false" />
-            <element signature="e#12766#12767#0" expanded="false" />
-            <element signature="e#13756#13757#0" expanded="false" />
-            <element signature="e#13813#13814#0" expanded="false" />
-            <element signature="e#14627#14628#0" expanded="false" />
-            <element signature="e#14644#14645#0" expanded="false" />
-            <element signature="e#14998#14999#0" expanded="false" />
-            <element signature="e#15029#15030#0" expanded="false" />
-            <element signature="e#15069#15070#0" expanded="false" />
-            <element signature="e#15102#15103#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/values/styles.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.06825939">
@@ -2184,16 +2153,6 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
         </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_single_fragment.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-13.793103">
-          <caret line="20" column="49" selection-start-line="20" selection-start-column="49" selection-end-line="20" selection-end-column="49" />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/SingleFragmentActivity.java">
@@ -2434,17 +2393,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_doodle.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-8.068966">
-          <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-      <provider editor-type-id="android-designer">
-        <state />
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Library/Android/sdk/sources/android-23/android/graphics/PorterDuff.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -2500,17 +2448,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/NOTES.md">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-4.965517">
-          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-      <provider editor-type-id="MarkdownPreviewEditor">
-        <state />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/Doodle.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -2526,46 +2463,97 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/NOTES.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-4.965517">
+          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+      <provider editor-type-id="MarkdownPreviewEditor">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/InputStrokeTessellationDoodle.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33572453">
+          <caret line="34" column="28" selection-start-line="34" selection-start-column="28" selection-end-line="34" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.7.0_06.jdk/Contents/Home/jre/lib/JObjC.jar!/com/apple/jobjc/Utils.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.34626865">
+          <caret line="86" column="24" selection-start-line="86" selection-start-column="24" selection-end-line="86" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.13432837">
+          <caret line="5" column="30" selection-start-line="5" selection-start-column="30" selection-end-line="5" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_single_fragment.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.53892213">
+          <caret line="20" column="49" selection-start-line="20" selection-start-column="49" selection-end-line="20" selection-end-column="49" />
+          <folding />
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer">
+        <state />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/IncrementalInputStrokeDoodle.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="34" column="26" selection-start-line="34" selection-start-column="26" selection-end-line="34" selection-end-column="26" />
+          <caret line="79" column="47" selection-start-line="79" selection-start-column="47" selection-end-line="79" selection-end-column="47" />
           <folding>
             <element signature="e#1855#1856#0" expanded="true" />
             <element signature="e#1903#1904#0" expanded="true" />
             <element signature="e#3039#3040#0" expanded="true" />
             <element signature="e#3076#3077#0" expanded="true" />
-            <element signature="e#3808#3809#0" expanded="true" />
-            <element signature="e#3823#3824#0" expanded="true" />
-            <element signature="e#3871#3872#0" expanded="true" />
-            <element signature="e#3909#3910#0" expanded="true" />
-            <element signature="e#3957#3958#0" expanded="true" />
-            <element signature="e#3995#3996#0" expanded="true" />
+            <element signature="e#3896#3897#0" expanded="true" />
+            <element signature="e#3911#3912#0" expanded="true" />
+            <element signature="e#3959#3960#0" expanded="true" />
+            <element signature="e#3997#3998#0" expanded="true" />
             <element signature="e#4045#4046#0" expanded="true" />
-            <element signature="e#4087#4088#0" expanded="true" />
-            <element signature="e#4474#4475#0" expanded="true" />
-            <element signature="e#4523#4524#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/model/InputStrokeTessellationDoodle.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="118" column="0" selection-start-line="118" selection-start-column="0" selection-end-line="118" selection-end-column="0" />
-          <folding>
-            <element signature="e#3709#3710#0" expanded="true" />
-            <element signature="e#3746#3747#0" expanded="true" />
+            <element signature="e#4083#4084#0" expanded="true" />
+            <element signature="e#4133#4134#0" expanded="true" />
+            <element signature="e#4175#4176#0" expanded="true" />
+            <element signature="e#4562#4563#0" expanded="true" />
+            <element signature="e#4611#4612#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/DoodleFragment.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5202312">
-          <caret line="41" column="0" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
-          <folding />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="140" column="23" selection-start-line="140" selection-start-column="23" selection-end-line="140" selection-end-column="23" />
+          <folding>
+            <element signature="e#3744#3745#0" expanded="true" />
+            <element signature="e#3765#3766#0" expanded="true" />
+          </folding>
         </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_doodle.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.4311377">
+          <caret line="16" column="47" selection-start-line="16" selection-start-column="47" selection-end-line="16" selection-end-column="47" />
+          <folding>
+            <element signature="e#771#786#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+      <provider editor-type-id="android-designer">
+        <state />
       </provider>
     </entry>
   </component>

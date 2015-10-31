@@ -13,6 +13,7 @@ public abstract class Doodle {
 
 	private Brush brush;
 	private InvalidationDelegate invalidationDelegate;
+	private int width, height;
 
 	public interface InvalidationDelegate {
 		/**
@@ -43,7 +44,18 @@ public abstract class Doodle {
 
 	public abstract void draw(Canvas canvas);
 
-	public abstract void resize(int newWidth, int newHeight);
+	public void resize(int newWidth, int newHeight) {
+		width = newWidth;
+		height = newHeight;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
 
 	public void setInvalidationDelegate(InvalidationDelegate invalidationDelegate) {
 		this.invalidationDelegate = invalidationDelegate;

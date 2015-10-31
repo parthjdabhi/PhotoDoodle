@@ -84,7 +84,11 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	public void draw(Canvas canvas) {
 		// clear canvas
 		canvas.drawColor(0xFFddddFF);
-		canvas.drawBitmap(bitmap, 0, 0, bitmapPaint);
+
+		// draw bitmap centered
+		int left = getWidth()/2 - bitmap.getWidth()/2;
+		int top = getHeight()/2 - bitmap.getHeight()/2;
+		canvas.drawBitmap(bitmap, left, top, bitmapPaint);
 
 
 		if (incrementalInputStrokeTessellator != null && !getBrush().isEraser()) {
@@ -104,21 +108,27 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public void resize(int newWidth, int newHeight) {
+		super.resize(newWidth,newHeight);
 
-		if (bitmap != null && newWidth == bitmap.getWidth() && newHeight == bitmap.getHeight()) {
+		int size = Math.max(newWidth, newHeight);
+
+		if (bitmap != null && size == bitmap.getWidth() && size == bitmap.getHeight()) {
 			return;
 		}
 
-		Log.i(TAG, "resize w: " + newWidth + " h: " + newHeight);
+		Log.i(TAG, "resize w: " + newWidth + " h: " + newHeight + " size: " + size);
 
 		Bitmap previousBitmap = bitmap;
 
-		bitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
+		bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
 		bitmap.eraseColor(0x0);
 		bitmapCanvas = new Canvas(bitmap);
 
 		if (previousBitmap != null) {
-			bitmapCanvas.drawBitmap(previousBitmap, 0, 0, bitmapPaint);
+			// draw previous bitmap centered
+			int left = bitmap.getWidth()/2 - previousBitmap.getWidth()/2;
+			int top = bitmap.getHeight()/2 - previousBitmap.getHeight()/2;
+			bitmapCanvas.drawBitmap(previousBitmap, left, top, bitmapPaint);
 		}
 	}
 
@@ -136,7 +146,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	@Override
 	public void onLivePathModified(Path path, RectF rect) {
 		if (getBrush().isEraser()) {
-			bitmapCanvas.drawPath(path,getBrush().getPaint());
+			onNewStaticPathAvailable(path, rect);
 		}
 
 		invalidationRect = rect;
@@ -145,9 +155,16 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public void onNewStaticPathAvailable(Path path, RectF rect) {
+		bitmapCanvas.save();
+
+		int left = getWidth()/2 - bitmap.getWidth()/2;
+		int top = getHeight()/2 - bitmap.getHeight()/2;
+		bitmapCanvas.translate(-left, -top);
 
 		// draw path into bitmapCanvas
 		bitmapCanvas.drawPath(path,getBrush().getPaint());
+
+		bitmapCanvas.restore();
 
 		invalidationRect = rect;
 		getInvalidationDelegate().invalidate(rect);

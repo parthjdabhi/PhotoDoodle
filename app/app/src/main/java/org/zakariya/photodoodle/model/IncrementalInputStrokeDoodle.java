@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
@@ -40,6 +39,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	private IncrementalInputStrokeTessellator incrementalInputStrokeTessellator;
 	private Context context;
 	private Canvas bitmapCanvas;
+	private Matrix screenToCanvasMatrix;
 	private Matrix canvasToScreenMatrix;
 	private boolean renderInvalidationRect = false;
 
@@ -128,6 +128,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		bitmapCanvas = new Canvas(bitmap);
 
 		// apply canvas to screen matrix
+		screenToCanvasMatrix = computeScreenToCanvasMatrix();
 		canvasToScreenMatrix = computeCanvasToScreenMatrix();
 		bitmapCanvas.setMatrix(canvasToScreenMatrix);
 
@@ -207,13 +208,17 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	private void onTouchEventBegin(@NonNull MotionEvent event) {
 		incrementalInputStrokeTessellator = new IncrementalInputStrokeTessellator(this);
 
-		PointF canvasPoint = screenToCanvas(event.getX(), event.getY());
-		incrementalInputStrokeTessellator.add(canvasPoint.x, canvasPoint.y);
+		float []canvasPoint = { event.getX(), event.getY() };
+		screenToCanvasMatrix.mapPoints(canvasPoint);
+
+		incrementalInputStrokeTessellator.add(canvasPoint[0], canvasPoint[1]);
 	}
 
 	private void onTouchEventMove(@NonNull MotionEvent event) {
-		PointF canvasPoint = screenToCanvas(event.getX(), event.getY());
-		incrementalInputStrokeTessellator.add(canvasPoint.x, canvasPoint.y);
+		float []canvasPoint = { event.getX(), event.getY() };
+		screenToCanvasMatrix.mapPoints(canvasPoint);
+
+		incrementalInputStrokeTessellator.add(canvasPoint[0], canvasPoint[1]);
 	}
 
 	private void onTouchEventEnd() {
@@ -223,21 +228,16 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		}
 	}
 
-	/**
-	 * Convert a screen coordinate to the virtual canvas coordinate system
-	 * @param x screen x
-	 * @param y screen y
-	 * @return a coordinate in the virtual canvas coordinate system
-	 */
-	private PointF screenToCanvas(float x, float y) {
+	private Matrix computeScreenToCanvasMatrix() {
 		final float midX = getWidth() * 0.5f;
 		final float midY = getHeight() * 0.5f;
 		final float maxHalfDim = Math.max(getWidth(),getHeight()) * 0.5f;
-		final float normalizedX = (x - midX) / maxHalfDim;
-		final float normalizedY = (y - midY) / maxHalfDim;
-		final float canvasX = normalizedX * CANVAS_SIZE;
-		final float canvasY = normalizedY * CANVAS_SIZE;
-		return new PointF(canvasX, canvasY);
+
+		Matrix matrix = new Matrix();
+		matrix.preScale(CANVAS_SIZE/maxHalfDim, CANVAS_SIZE/maxHalfDim);
+		matrix.preTranslate(-midX, -midY);
+
+		return matrix;
 	}
 
 	private Matrix computeCanvasToScreenMatrix() {

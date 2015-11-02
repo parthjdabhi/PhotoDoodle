@@ -6,10 +6,15 @@ import android.graphics.PorterDuffXfermode;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoSerializable;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+
 /**
  * Created by shamyl on 10/28/15.
  */
-public class Brush implements Parcelable {
+public class Brush implements Parcelable, KryoSerializable {
 
 	private int color;
 	private float minWidth;
@@ -17,6 +22,9 @@ public class Brush implements Parcelable {
 	private float maxWidthDpPs;
 	private boolean eraser;
 	private Paint paint;
+
+	public Brush() {
+	}
 
 	public Brush(int color, float minWidth, float maxWidth, float maxWidthDpPs, boolean eraser) {
 		this.color = color;
@@ -61,6 +69,8 @@ public class Brush implements Parcelable {
 		return new Brush(color, minWidth, maxWidth, maxWidthDpPs, eraser);
 	}
 
+	// Parcelable
+
 	@Override
 	public int describeContents() {
 		return 0;
@@ -91,5 +101,25 @@ public class Brush implements Parcelable {
 		maxWidth = in.readFloat();
 		maxWidthDpPs = in.readFloat();
 		eraser = in.readInt() == 1;
+	}
+
+	// KryoSerializable
+
+	@Override
+	public void write(Kryo kryo, Output output) {
+		output.writeInt(color);
+		output.writeFloat(minWidth);
+		output.writeFloat(maxWidth);
+		output.writeFloat(maxWidthDpPs);
+		output.writeBoolean(eraser);
+	}
+
+	@Override
+	public void read(Kryo kryo, Input input) {
+		color = input.readInt();
+		minWidth = input.readFloat();
+		maxWidth = input.readFloat();
+		maxWidthDpPs = input.readFloat();
+		eraser = input.readBoolean();
 	}
 }

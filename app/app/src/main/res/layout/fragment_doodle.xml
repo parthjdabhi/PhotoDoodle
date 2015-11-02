@@ -29,6 +29,11 @@
 			android:layout_height="wrap_content"
 			android:text="@string/undo"/>
 
+		<Button
+			android:id="@+id/saveAndReloadButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/saveAndReload"/>
 
 		<Spinner
 			android:id="@+id/toolSelector"

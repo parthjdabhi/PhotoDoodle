@@ -1,9 +1,6 @@
-#Rotation, and spatial persistence
-I need a coordinate system centered on the current doodle size, such that on rotation, the drawing remains centered. 
-This was possible when using bitmaps by making a square bitmap (size = max(width,height)) setting a translation on the bitmapCanvas, but since we're not persisting the bitmap this is no longer meaningful.
-
-Define a scaled/offsetted coordinate system, where 0,0 is center of screen, and -1024->+1024 is the major axis (height/width). Convert user input coords to this coordinate system. When rendering generated paths, create a matrix on the bitmapCanvas that converts from unit coords back to screen space. 
-
+#Persistence
+- Kryo
+- BSON
 
 #Chunking
 

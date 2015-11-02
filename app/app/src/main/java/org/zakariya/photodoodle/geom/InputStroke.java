@@ -8,14 +8,17 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import java.io.IOException;
-import java.io.Serializable;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoSerializable;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+
 import java.util.ArrayList;
 
 /**
  * Created by shamyl on 9/28/15.
  */
-public class InputStroke implements Serializable, Parcelable {
+public class InputStroke implements Parcelable, KryoSerializable {
 
 	private static final String TAG = "InputStroke";
 
@@ -408,27 +411,6 @@ public class InputStroke implements Serializable, Parcelable {
 		}
 	}
 
-	// Serializable
-
-	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		int count = size();
-		out.writeInt(count);
-		for (int i = 0; i < count; i++) {
-			out.writeObject(points.get(i));
-		}
-	}
-
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		points = new ArrayList<>();
-		int count = in.readInt();
-		for (int i = 0; i < count; i++) {
-			Point p = (Point) in.readObject();
-			points.add(p);
-		}
-
-		invalidate();
-	}
-
 	// Parcelable
 
 	@Override
@@ -465,12 +447,31 @@ public class InputStroke implements Serializable, Parcelable {
 		invalidate();
 	}
 
+	// KryoSerializable
+
+	@Override
+	public void write(Kryo kryo, Output output) {
+		output.writeInt(size());
+		for (Point point : points) {
+			kryo.writeObject(output,point);
+		}
+	}
+
+	@Override
+	public void read(Kryo kryo, Input input) {
+		points = new ArrayList<>();
+		int count = input.readInt();
+		for (int i = 0; i < count; i++) {
+			points.add(kryo.readObject(input, Point.class));
+		}
+	}
+
 	/**
 	 * Represents user input. As user drags across screen, each location is recorded along with its timestamp.
 	 * The timestamps can be compared across an array of Point to determine the velocity of the touch,
 	 * which will be used to determine line thickness.
 	 */
-	public static class Point implements Serializable, Parcelable {
+	public static class Point implements Parcelable, KryoSerializable {
 		public PointF position = new PointF();
 		public long timestamp;
 		public float velocity = 0;
@@ -508,20 +509,7 @@ public class InputStroke implements Serializable, Parcelable {
 			return p;
 		}
 
-		private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-			out.writeFloat(position.x);
-			out.writeFloat(position.y);
-			out.writeLong(timestamp);
-			out.writeFloat(velocity);
-			out.writeBoolean(freezeVelocity);
-		}
-
-		private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-			position = new PointF(in.readFloat(), in.readFloat());
-			timestamp = in.readLong();
-			velocity = in.readFloat();
-			freezeVelocity = in.readBoolean();
-		}
+		// Parcelable
 
 		@Override
 		public int describeContents() {
@@ -552,6 +540,25 @@ public class InputStroke implements Serializable, Parcelable {
 			timestamp = in.readLong();
 			velocity = in.readFloat();
 			freezeVelocity = in.readInt() == 1;
+		}
+
+		// KryoSerializable
+
+		@Override
+		public void write(Kryo kryo, Output output) {
+			output.writeFloat(position.x);
+			output.writeFloat(position.y);
+			output.writeLong(timestamp);
+			output.writeFloat(velocity);
+			output.writeBoolean(freezeVelocity);
+		}
+
+		@Override
+		public void read(Kryo kryo, Input input) {
+			position = new PointF(input.readFloat(),input.readFloat());
+			timestamp = input.readLong();
+			velocity = input.readFloat();
+			freezeVelocity = input.readBoolean();
 		}
 	}
 }

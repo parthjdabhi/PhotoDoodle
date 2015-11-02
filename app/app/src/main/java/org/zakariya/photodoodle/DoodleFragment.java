@@ -159,4 +159,12 @@ public class DoodleFragment extends Fragment {
 		}
 	}
 
+	@OnClick(R.id.saveAndReloadButton)
+	public void onSaveAndReloadTap() {
+		if (doodle instanceof IncrementalInputStrokeDoodle) {
+			IncrementalInputStrokeDoodle incrementalInputStrokeDoodle = (IncrementalInputStrokeDoodle) doodle;
+			incrementalInputStrokeDoodle.TEST_saveAndReload();
+		}
+	}
+
 }

@@ -3,8 +3,10 @@ package org.zakariya.photodoodle.model;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
@@ -12,7 +14,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import org.zakariya.photodoodle.DoodleView;
@@ -32,13 +33,15 @@ import icepick.State;
 public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalInputStrokeTessellator.Listener {
 	private static final String TAG = "IncInptStrokeDoodle";
 
-	private static boolean DRAW_INVALIDATION_RECT = true;
+	private static final float CANVAS_SIZE = 1024f;
 
 	private Paint invalidationRectPaint, bitmapPaint;
 	private RectF invalidationRect;
 	private IncrementalInputStrokeTessellator incrementalInputStrokeTessellator;
 	private Context context;
 	private Canvas bitmapCanvas;
+	private Matrix canvasToScreenMatrix;
+	private boolean renderInvalidationRect = false;
 
 	Bitmap bitmap;
 
@@ -97,12 +100,15 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		if (incrementalInputStrokeTessellator != null && !getBrush().isEraser()) {
 			Path path = incrementalInputStrokeTessellator.getLivePath();
 			if (path != null && !path.isEmpty()) {
+				canvas.save();
+				canvas.concat(canvasToScreenMatrix);
 				canvas.drawPath(path, getBrush().getPaint());
+				canvas.restore();
 			}
 		}
 
 		// draw the invalidation rect
-		if (DRAW_INVALIDATION_RECT) {
+		if (renderInvalidationRect) {
 			canvas.drawRect(invalidationRect != null ? invalidationRect : getInvalidationDelegate().getBounds(), invalidationRectPaint);
 		}
 
@@ -117,16 +123,13 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 			return;
 		}
 
-		Log.i(TAG, "resize w: " + newWidth + " h: " + newHeight);
-
 		bitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
 		bitmap.eraseColor(0x0);
 		bitmapCanvas = new Canvas(bitmap);
 
-		// now set up a transform for incoming paths
-		int left = getWidth()/2 - bitmap.getWidth()/2;
-		int top = getHeight()/2 - bitmap.getHeight()/2;
-		bitmapCanvas.translate(-left, -top);
+		// apply canvas to screen matrix
+		canvasToScreenMatrix = computeCanvasToScreenMatrix();
+		bitmapCanvas.setMatrix(canvasToScreenMatrix);
 
 		// redraw our drawing into the new bitmap
 		renderDrawingSteps();
@@ -139,6 +142,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public void onInputStrokeModified(InputStroke inputStroke, int startIndex, int endIndex, RectF rect) {
+		canvasToScreenMatrix.mapRect(rect);
 		invalidationRect = rect;
 		getInvalidationDelegate().invalidate(rect);
 	}
@@ -147,10 +151,11 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	public void onLivePathModified(Path path, RectF rect) {
 		if (getBrush().isEraser()) {
 			onNewStaticPathAvailable(path, rect);
+		} else {
+			canvasToScreenMatrix.mapRect(rect);
+			invalidationRect = rect;
+			getInvalidationDelegate().invalidate(rect);
 		}
-
-		invalidationRect = rect;
-		getInvalidationDelegate().invalidate(rect);
 	}
 
 	@Override
@@ -158,6 +163,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		// draw path into bitmapCanvas
 		bitmapCanvas.drawPath(path, getBrush().getPaint());
 
+		canvasToScreenMatrix.mapRect(rect);
 		invalidationRect = rect;
 		getInvalidationDelegate().invalidate(rect);
 	}
@@ -182,21 +188,32 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		return getBrush().getMaxWidthDpPs();
 	}
 
+	public boolean isRenderInvalidationRect() {
+		return renderInvalidationRect;
+	}
+
+	public void setRenderInvalidationRect(boolean renderInvalidationRect) {
+		this.renderInvalidationRect = renderInvalidationRect;
+	}
+
 	public void undo() {
 		if (!drawingSteps.isEmpty()) {
 			drawingSteps.remove(drawingSteps.size() - 1);
 		}
-		
+
 		renderDrawingSteps();
 	}
 
 	private void onTouchEventBegin(@NonNull MotionEvent event) {
 		incrementalInputStrokeTessellator = new IncrementalInputStrokeTessellator(this);
-		incrementalInputStrokeTessellator.add(event.getX(), event.getY());
+
+		PointF canvasPoint = screenToCanvas(event.getX(), event.getY());
+		incrementalInputStrokeTessellator.add(canvasPoint.x, canvasPoint.y);
 	}
 
 	private void onTouchEventMove(@NonNull MotionEvent event) {
-		incrementalInputStrokeTessellator.add(event.getX(), event.getY());
+		PointF canvasPoint = screenToCanvas(event.getX(), event.getY());
+		incrementalInputStrokeTessellator.add(canvasPoint.x, canvasPoint.y);
 	}
 
 	private void onTouchEventEnd() {
@@ -204,6 +221,35 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		if (!incrementalInputStrokeTessellator.getStaticPaths().isEmpty()) {
 			drawingSteps.add(new IntermediateDrawingStep(getBrush().copy(), incrementalInputStrokeTessellator.getInputStrokes()));
 		}
+	}
+
+	/**
+	 * Convert a screen coordinate to the virtual canvas coordinate system
+	 * @param x screen x
+	 * @param y screen y
+	 * @return a coordinate in the virtual canvas coordinate system
+	 */
+	private PointF screenToCanvas(float x, float y) {
+		final float midX = getWidth() * 0.5f;
+		final float midY = getHeight() * 0.5f;
+		final float maxHalfDim = Math.max(getWidth(),getHeight()) * 0.5f;
+		final float normalizedX = (x - midX) / maxHalfDim;
+		final float normalizedY = (y - midY) / maxHalfDim;
+		final float canvasX = normalizedX * CANVAS_SIZE;
+		final float canvasY = normalizedY * CANVAS_SIZE;
+		return new PointF(canvasX, canvasY);
+	}
+
+	private Matrix computeCanvasToScreenMatrix() {
+		final float midX = getWidth() * 0.5f;
+		final float midY = getHeight() * 0.5f;
+		final float maxHalfDim = Math.max(getWidth(),getHeight()) * 0.5f;
+
+		Matrix matrix = new Matrix();
+		matrix.preTranslate(midX, midY);
+		matrix.preScale(maxHalfDim / CANVAS_SIZE, maxHalfDim/CANVAS_SIZE);
+
+		return matrix;
 	}
 
 	private void renderDrawingSteps() {

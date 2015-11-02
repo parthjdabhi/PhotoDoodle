@@ -23,12 +23,20 @@
 			android:layout_height="wrap_content"
 			android:text="@string/clear"/>
 
+		<Button
+			android:id="@+id/undoButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/undo"/>
+
+
 		<Spinner
 			android:id="@+id/toolSelector"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 		    android:layout_marginStart="8dp"
 			/>
+
 
 	</LinearLayout>
 

@@ -9,6 +9,8 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -16,8 +18,10 @@ import android.view.MotionEvent;
 import org.zakariya.photodoodle.DoodleView;
 import org.zakariya.photodoodle.geom.IncrementalInputStrokeTessellator;
 import org.zakariya.photodoodle.geom.InputStroke;
+import org.zakariya.photodoodle.geom.InputStrokeTessellator;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 import icepick.Icepick;
 import icepick.State;
@@ -28,7 +32,7 @@ import icepick.State;
 public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalInputStrokeTessellator.Listener {
 	private static final String TAG = "IncInptStrokeDoodle";
 
-	private static boolean DRAW_INVALIDATION_RECT = false;
+	private static boolean DRAW_INVALIDATION_RECT = true;
 
 	private Paint invalidationRectPaint, bitmapPaint;
 	private RectF invalidationRect;
@@ -36,9 +40,10 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	private Context context;
 	private Canvas bitmapCanvas;
 
-	@State
 	Bitmap bitmap;
 
+	@State
+	ArrayList<IntermediateDrawingStep> drawingSteps = new ArrayList<>();
 
 	public IncrementalInputStrokeDoodle(Context context) {
 		this.context = context;
@@ -58,6 +63,12 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Icepick.restoreInstanceState(this, savedInstanceState);
+
+		if (drawingSteps != null) {
+			Log.i(TAG, "onCreate - drawingSteps.size: " + drawingSteps.size());
+		} else {
+			Log.i(TAG, "onCreate - drawingSteps is NULL");
+		}
 	}
 
 	@Override
@@ -76,6 +87,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	@Override
 	public void clear() {
 		incrementalInputStrokeTessellator = null;
+		drawingSteps.clear();
 		bitmap.eraseColor(0x0);
 		getInvalidationDelegate().invalidate();
 	}
@@ -110,26 +122,23 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	public void resize(int newWidth, int newHeight) {
 		super.resize(newWidth,newHeight);
 
-		int size = Math.max(newWidth, newHeight);
-
-		if (bitmap != null && size == bitmap.getWidth() && size == bitmap.getHeight()) {
+		if (bitmap != null && newWidth == bitmap.getWidth() && newHeight == bitmap.getHeight()) {
 			return;
 		}
 
-		Log.i(TAG, "resize w: " + newWidth + " h: " + newHeight + " size: " + size);
+		Log.i(TAG, "resize w: " + newWidth + " h: " + newHeight);
 
-		Bitmap previousBitmap = bitmap;
-
-		bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+		bitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
 		bitmap.eraseColor(0x0);
 		bitmapCanvas = new Canvas(bitmap);
 
-		if (previousBitmap != null) {
-			// draw previous bitmap centered
-			int left = bitmap.getWidth()/2 - previousBitmap.getWidth()/2;
-			int top = bitmap.getHeight()/2 - previousBitmap.getHeight()/2;
-			bitmapCanvas.drawBitmap(previousBitmap, left, top, bitmapPaint);
-		}
+		// now set up a transform for incoming paths
+		int left = getWidth()/2 - bitmap.getWidth()/2;
+		int top = getHeight()/2 - bitmap.getHeight()/2;
+		bitmapCanvas.translate(-left, -top);
+
+		// redraw our drawing into the new bitmap
+		renderDrawingSteps();
 	}
 
 	@Override
@@ -155,16 +164,8 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public void onNewStaticPathAvailable(Path path, RectF rect) {
-		bitmapCanvas.save();
-
-		int left = getWidth()/2 - bitmap.getWidth()/2;
-		int top = getHeight()/2 - bitmap.getHeight()/2;
-		bitmapCanvas.translate(-left, -top);
-
 		// draw path into bitmapCanvas
-		bitmapCanvas.drawPath(path,getBrush().getPaint());
-
-		bitmapCanvas.restore();
+		bitmapCanvas.drawPath(path, getBrush().getPaint());
 
 		invalidationRect = rect;
 		getInvalidationDelegate().invalidate(rect);
@@ -190,6 +191,14 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		return getBrush().getMaxWidthDpPs();
 	}
 
+	public void undo() {
+		if (!drawingSteps.isEmpty()) {
+			drawingSteps.remove(drawingSteps.size() - 1);
+			renderDrawingSteps();
+			getInvalidationDelegate().invalidate();
+		}
+	}
+
 	private void onTouchEventBegin(@NonNull MotionEvent event) {
 		incrementalInputStrokeTessellator = new IncrementalInputStrokeTessellator(this);
 		incrementalInputStrokeTessellator.add(event.getX(), event.getY());
@@ -201,6 +210,72 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	private void onTouchEventEnd() {
 		incrementalInputStrokeTessellator.finish();
+		if (!incrementalInputStrokeTessellator.getStaticPaths().isEmpty()) {
+			drawingSteps.add(new IntermediateDrawingStep(getBrush().copy(), incrementalInputStrokeTessellator.getInputStrokes()));
+		}
+	}
+
+	private void renderDrawingSteps() {
+		if (bitmap != null) {
+			bitmap.eraseColor(0x0);
+
+			InputStrokeTessellator tess = new InputStrokeTessellator();
+			for (IntermediateDrawingStep step : drawingSteps) {
+				tess.setMinWidth(step.brush.getMinWidth());
+				tess.setMaxWidth(step.brush.getMaxWidth());
+				tess.setMaxVelDPps(step.brush.getMaxWidthDpPs());
+
+				for (InputStroke stroke : step.inputStrokes) {
+					tess.setInputStroke(stroke);
+					Path path = tess.tessellate(false, true, true);
+					bitmapCanvas.drawPath(path, step.brush.getPaint());
+				}
+			}
+		}
+	}
+
+	private static final class IntermediateDrawingStep implements Parcelable {
+		Brush brush;
+		ArrayList<InputStroke> inputStrokes;
+
+		public IntermediateDrawingStep(Brush brush, ArrayList<InputStroke> inputStrokes) {
+			this.brush = brush;
+			this.inputStrokes = inputStrokes;
+		}
+
+		@Override
+		public int describeContents() {
+			return 0;
+		}
+
+		@Override
+		public void writeToParcel(Parcel dest, int flags) {
+			dest.writeParcelable(brush, 0);
+			dest.writeInt(inputStrokes.size());
+			for (InputStroke stroke: inputStrokes) {
+				dest.writeParcelable(stroke, 0);
+			}
+		}
+
+		public static final Parcelable.Creator<IntermediateDrawingStep> CREATOR = new Parcelable.Creator<IntermediateDrawingStep>() {
+			public IntermediateDrawingStep createFromParcel(Parcel in) {
+				return new IntermediateDrawingStep(in);
+			}
+
+			public IntermediateDrawingStep[] newArray(int size) {
+				return new IntermediateDrawingStep[size];
+			}
+		};
+
+		private IntermediateDrawingStep(Parcel in) {
+			brush = in.readParcelable(null);
+			int count = in.readInt();
+			inputStrokes = new ArrayList<>();
+			for (int i = 0; i < count; i++) {
+				InputStroke s = in.readParcelable(null);
+				inputStrokes.add(s);
+			}
+		}
 	}
 
 	private static class InputDelegate implements DoodleView.InputDelegate {

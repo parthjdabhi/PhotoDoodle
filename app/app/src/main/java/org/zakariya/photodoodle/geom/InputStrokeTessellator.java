@@ -13,36 +13,52 @@ import java.util.ArrayList;
 public class InputStrokeTessellator {
 
 	private InputStroke inputStroke;
-	private float minWidth, maxWidth, maxVelDPps, minRadius, deltaRadius;
+	private float minWidth, maxWidth, maxVelDPps;
 	private Path path;
 	private FloatBuffer leftCoordinates = new FloatBuffer();
 	private FloatBuffer rightCoordinates = new FloatBuffer();
 	private CubicBezierInterpolator cbi = new CubicBezierInterpolator();
+
+	public InputStrokeTessellator() {
+	}
 
 	public InputStrokeTessellator(InputStroke inputStroke, float minWidth, float maxWidth, float maxVelDPps) {
 		this.inputStroke = inputStroke;
 		this.minWidth = minWidth;
 		this.maxWidth = maxWidth;
 		this.maxVelDPps = maxVelDPps;
-		minRadius = minWidth / 2;
-		float maxRadius = maxWidth / 2;
-		deltaRadius = maxRadius - minRadius;
 	}
 
 	public InputStroke getInputStroke() {
 		return inputStroke;
 	}
 
+	public void setInputStroke(InputStroke inputStroke) {
+		this.inputStroke = inputStroke;
+	}
+
 	public float getMinWidth() {
 		return minWidth;
+	}
+
+	public void setMinWidth(float minWidth) {
+		this.minWidth = minWidth;
 	}
 
 	public float getMaxWidth() {
 		return maxWidth;
 	}
 
+	public void setMaxWidth(float maxWidth) {
+		this.maxWidth = maxWidth;
+	}
+
 	public float getMaxVelDPps() {
 		return maxVelDPps;
+	}
+
+	public void setMaxVelDPps(float maxVelDPps) {
+		this.maxVelDPps = maxVelDPps;
 	}
 
 	public Path getPath() {
@@ -232,7 +248,10 @@ public class InputStrokeTessellator {
 	}
 
 	public float getRadiusForInputStrokePoint(InputStroke.Point point) {
-		final float velScale = Math.min(point.velocity / maxVelDPps, 1f);
+		float velScale = Math.min(point.velocity / maxVelDPps, 1f);
+		float minRadius = minWidth * 0.5f;
+		float maxRadius = maxWidth * 0.5f;
+		float deltaRadius = maxRadius - minRadius;
 		return minRadius + (velScale * velScale * deltaRadius);
 	}
 

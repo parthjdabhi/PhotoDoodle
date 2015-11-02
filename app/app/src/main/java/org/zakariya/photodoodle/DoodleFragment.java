@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.Spinner;
 
 import org.zakariya.photodoodle.model.Brush;
@@ -38,9 +37,6 @@ public class DoodleFragment extends Fragment {
 
 	@Bind(R.id.toolSelector)
 	Spinner toolSelector;
-
-	@Bind(R.id.clearButton)
-	Button clearButton;
 
 	Doodle doodle;
 
@@ -151,8 +147,16 @@ public class DoodleFragment extends Fragment {
 	}
 
 	@OnClick(R.id.clearButton)
-	public void onClearButtonTap(View view) {
+	public void onClearButtonTap() {
 		doodle.clear();
+	}
+
+	@OnClick(R.id.undoButton)
+	public void onUndoTap(){
+		if (doodle instanceof IncrementalInputStrokeDoodle) {
+			IncrementalInputStrokeDoodle incrementalInputStrokeDoodle = (IncrementalInputStrokeDoodle) doodle;
+			incrementalInputStrokeDoodle.undo();
+		}
 	}
 
 }

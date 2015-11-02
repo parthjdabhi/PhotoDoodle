@@ -34,5 +34,6 @@ dependencies {
 	compile 'com.jakewharton:butterknife:7.0.1'
 	compile 'frankiesardo:icepick:3.1.0'
 	provided 'frankiesardo:icepick-processor:3.1.0'
+	compile 'com.google.code.gson:gson:2.4'
 }
 

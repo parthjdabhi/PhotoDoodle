@@ -4,4 +4,6 @@
 	<string name="hello_world">Hello world!</string>
 	<string name="action_settings">Settings</string>
 	<string name="clear">Clear</string>
+	<string name="redraw">Redraw</string>
+	<string name="undo">Undo</string>
 </resources>

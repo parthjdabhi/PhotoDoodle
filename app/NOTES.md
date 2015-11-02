@@ -1,3 +1,7 @@
+#Persistence
+
+Have the incremental tessellator record input strokes. When tesselating a chunk, push the inputstroke into an array such that it is not lost. To save a document, perisst the strokes and the brush used. A whole document can be a storage of these pairings Pair<Array<InputStroke>,Brush> 
+
 # Currently
 
 Line caps cause overlap-darkening at chunk intersections when drawing in partial alpha. this should not be a surprise.

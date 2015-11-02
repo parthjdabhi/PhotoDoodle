@@ -65,6 +65,7 @@ public class IncrementalInputStrokeTessellator {
 	}
 
 	private InputStroke inputStroke;
+	private ArrayList<InputStroke> inputStrokes = new ArrayList<>();
 	private InputStrokeTessellator inputStrokeTessellator;
 	private WeakReference<Listener> listenerWeakReference;
 	private float optimizationThreshold;
@@ -87,6 +88,10 @@ public class IncrementalInputStrokeTessellator {
 
 	public InputStroke getInputStroke() {
 		return inputStroke;
+	}
+
+	public ArrayList<InputStroke> getInputStrokes() {
+		return inputStrokes;
 	}
 
 	public void add(float x, float y) {
@@ -123,6 +128,10 @@ public class IncrementalInputStrokeTessellator {
 				Path newStaticPathChunk = inputStrokeTessellator.tessellate(tessellationStartIndex, isContinuation, true, true);
 
 				if (newStaticPathChunk != null && !newStaticPathChunk.isEmpty()) {
+
+					// save this input stroke since we're starting a new one
+					inputStrokes.add(inputStroke.copy());
+
 					InputStroke.Point lastPointInStroke = inputStroke.get(-1);
 					lastPointInStroke.freezeVelocity = true;
 					inputStroke.clear();
@@ -161,6 +170,8 @@ public class IncrementalInputStrokeTessellator {
 
 	public void finish() {
 		inputStroke.finish();
+
+		inputStrokes.add(inputStroke.copy());
 
 		// in case the stroke was finished before growing long enough to chunk, we need to commit it
 		Listener listener = listenerWeakReference.get();

@@ -170,8 +170,9 @@ public class IncrementalInputStrokeTessellator {
 
 	public void finish() {
 		inputStroke.finish();
-
 		inputStrokes.add(inputStroke.copy());
+
+		livePath = null;
 
 		// in case the stroke was finished before growing long enough to chunk, we need to commit it
 		Listener listener = listenerWeakReference.get();

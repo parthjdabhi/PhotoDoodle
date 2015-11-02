@@ -63,12 +63,6 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Icepick.restoreInstanceState(this, savedInstanceState);
-
-		if (drawingSteps != null) {
-			Log.i(TAG, "onCreate - drawingSteps.size: " + drawingSteps.size());
-		} else {
-			Log.i(TAG, "onCreate - drawingSteps is NULL");
-		}
 	}
 
 	@Override
@@ -97,11 +91,8 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		// clear canvas
 		canvas.drawColor(0xFFddddFF);
 
-		// draw bitmap centered
-		int left = getWidth()/2 - bitmap.getWidth()/2;
-		int top = getHeight()/2 - bitmap.getHeight()/2;
-		canvas.drawBitmap(bitmap, left, top, bitmapPaint);
-
+		// render backing store
+		canvas.drawBitmap(bitmap, 0, 0, bitmapPaint);
 
 		if (incrementalInputStrokeTessellator != null && !getBrush().isEraser()) {
 			Path path = incrementalInputStrokeTessellator.getLivePath();
@@ -194,9 +185,9 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	public void undo() {
 		if (!drawingSteps.isEmpty()) {
 			drawingSteps.remove(drawingSteps.size() - 1);
-			renderDrawingSteps();
-			getInvalidationDelegate().invalidate();
 		}
+		
+		renderDrawingSteps();
 	}
 
 	private void onTouchEventBegin(@NonNull MotionEvent event) {
@@ -231,6 +222,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 					bitmapCanvas.drawPath(path, step.brush.getPaint());
 				}
 			}
+			getInvalidationDelegate().invalidate();
 		}
 	}
 

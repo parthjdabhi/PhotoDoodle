@@ -105,8 +105,11 @@ public class Brush implements Parcelable, KryoSerializable {
 
 	// KryoSerializable
 
+	static final int SERIALIZATION_VERSION = 0;
+
 	@Override
 	public void write(Kryo kryo, Output output) {
+		output.writeInt(SERIALIZATION_VERSION);
 		output.writeInt(color);
 		output.writeFloat(minWidth);
 		output.writeFloat(maxWidth);
@@ -116,10 +119,17 @@ public class Brush implements Parcelable, KryoSerializable {
 
 	@Override
 	public void read(Kryo kryo, Input input) {
-		color = input.readInt();
-		minWidth = input.readFloat();
-		maxWidth = input.readFloat();
-		maxWidthDpPs = input.readFloat();
-		eraser = input.readBoolean();
+		int serializationVersion = input.readInt();
+		switch(serializationVersion) {
+			case 0:
+				color = input.readInt();
+				minWidth = input.readFloat();
+				maxWidth = input.readFloat();
+				maxWidthDpPs = input.readFloat();
+				eraser = input.readBoolean();
+				break;
+			default:
+				throw new IllegalArgumentException("Unsupported " + this.getClass().getName() + " serialization version: " + serializationVersion);
+		}
 	}
 }

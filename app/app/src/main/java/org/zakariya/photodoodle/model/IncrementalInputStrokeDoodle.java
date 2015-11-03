@@ -364,8 +364,11 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 		// KryoSerializable
 
+		static final int SERIALIZATION_VERSION = 0;
+
 		@Override
 		public void write(Kryo kryo, Output output) {
+			output.writeInt(SERIALIZATION_VERSION);
 			kryo.writeObject(output, brush);
 			kryo.writeObject(output, inputStrokes);
 		}
@@ -373,8 +376,16 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		@Override
 		@SuppressWarnings("unchecked")
 		public void read(Kryo kryo, Input input) {
-			brush = kryo.readObject(input, Brush.class);
-			inputStrokes = kryo.readObject(input, ArrayList.class);
+			int serializationVersion = input.readInt();
+			switch(serializationVersion) {
+				case 0:
+					brush = kryo.readObject(input, Brush.class);
+					inputStrokes = kryo.readObject(input, ArrayList.class);
+					break;
+
+				default:
+					throw new IllegalArgumentException("Unsupported " + this.getClass().getName() + " serialization version: " + serializationVersion);
+			}
 		}
 	}
 

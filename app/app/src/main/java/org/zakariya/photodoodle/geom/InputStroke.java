@@ -448,21 +448,30 @@ public class InputStroke implements Parcelable, KryoSerializable {
 	}
 
 	// KryoSerializable
+	static final int SERIALIZATION_VERSION = 0;
 
 	@Override
 	public void write(Kryo kryo, Output output) {
+		output.writeInt(SERIALIZATION_VERSION);
 		output.writeInt(size());
 		for (Point point : points) {
-			kryo.writeObject(output,point);
+			kryo.writeObject(output, point);
 		}
 	}
 
 	@Override
 	public void read(Kryo kryo, Input input) {
-		points = new ArrayList<>();
-		int count = input.readInt();
-		for (int i = 0; i < count; i++) {
-			points.add(kryo.readObject(input, Point.class));
+		int serializationVersion = input.readInt();
+		switch (serializationVersion) {
+			case 0:
+				points = new ArrayList<>();
+				int count = input.readInt();
+				for (int i = 0; i < count; i++) {
+					points.add(kryo.readObject(input, Point.class));
+				}
+				break;
+			default:
+				throw new IllegalArgumentException("Unsupported " + this.getClass().getName() + " serialization version: " + serializationVersion);
 		}
 	}
 
@@ -544,8 +553,11 @@ public class InputStroke implements Parcelable, KryoSerializable {
 
 		// KryoSerializable
 
+		static final int SERIALIZATION_VERSION = 0;
+
 		@Override
 		public void write(Kryo kryo, Output output) {
+			output.writeInt(SERIALIZATION_VERSION);
 			output.writeFloat(position.x);
 			output.writeFloat(position.y);
 			output.writeLong(timestamp);
@@ -555,10 +567,17 @@ public class InputStroke implements Parcelable, KryoSerializable {
 
 		@Override
 		public void read(Kryo kryo, Input input) {
-			position = new PointF(input.readFloat(),input.readFloat());
-			timestamp = input.readLong();
-			velocity = input.readFloat();
-			freezeVelocity = input.readBoolean();
+			int serializationVersion = input.readInt();
+			switch (serializationVersion) {
+				case 0:
+					position = new PointF(input.readFloat(), input.readFloat());
+					timestamp = input.readLong();
+					velocity = input.readFloat();
+					freezeVelocity = input.readBoolean();
+					break;
+				default:
+					throw new IllegalArgumentException("Unsupported " + this.getClass().getName() + " serialization version: " + serializationVersion);
+			}
 		}
 	}
 }

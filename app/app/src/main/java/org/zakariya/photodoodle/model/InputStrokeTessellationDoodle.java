@@ -10,7 +10,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import org.zakariya.photodoodle.DoodleView;
 import org.zakariya.photodoodle.geom.InputStroke;
 import org.zakariya.photodoodle.geom.InputStrokeTessellator;
 import org.zakariya.photodoodle.geom.PointFUtil;
@@ -21,7 +20,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.ref.WeakReference;
 
 /**
  * Created by shamyl on 10/18/15.
@@ -118,11 +116,7 @@ public class InputStrokeTessellationDoodle extends Doodle {
 	}
 
 	@Override
-	public DoodleView.InputDelegate inputDelegate() {
-		return new InputDelegate(this);
-	}
-
-	void onTouchEventBegin(@NonNull MotionEvent event) {
+	protected void onTouchEventBegin(@NonNull MotionEvent event) {
 
 		PointF point = new PointF(event.getX(), event.getY());
 		float minDist2 = Float.MAX_VALUE;
@@ -146,7 +140,8 @@ public class InputStrokeTessellationDoodle extends Doodle {
 		}
 	}
 
-	void onTouchEventMove(@NonNull MotionEvent event) {
+	@Override
+	protected void onTouchEventMove(@NonNull MotionEvent event) {
 		if (draggingPoint != null) {
 
 			// update line
@@ -157,14 +152,13 @@ public class InputStrokeTessellationDoodle extends Doodle {
 		}
 
 		// trigger redraw
-		getInvalidationDelegate().invalidate(getBoundingRect());
+		invalidate(getBoundingRect());
 	}
 
-	void onTouchEventEnd(@NonNull MotionEvent event) {
-
-
+	@Override
+	protected void onTouchEventEnd(@NonNull MotionEvent event) {
 		draggingPoint = null;
-		getInvalidationDelegate().invalidate(getBoundingRect());
+		invalidate(getBoundingRect());
 		save();
 	}
 
@@ -204,34 +198,4 @@ public class InputStrokeTessellationDoodle extends Doodle {
 		inputStrokeTessellator = new InputStrokeTessellator(inputStroke,4,60,200);
 		inputStrokeTessellatedPath = inputStrokeTessellator.tessellate(false, true, true);
 	}
-
-	private static class InputDelegate implements DoodleView.InputDelegate {
-
-		private WeakReference<InputStrokeTessellationDoodle> weakDoodle;
-
-		public InputDelegate(InputStrokeTessellationDoodle lineDoodle) {
-			this.weakDoodle = new WeakReference<>(lineDoodle);
-		}
-
-		@Override
-		public boolean onTouchEvent(@NonNull MotionEvent event) {
-			InputStrokeTessellationDoodle doodle = weakDoodle.get();
-			if (doodle != null) {
-				switch (event.getAction()) {
-					case MotionEvent.ACTION_DOWN:
-						doodle.onTouchEventBegin(event);
-						return true;
-					case MotionEvent.ACTION_UP:
-						doodle.onTouchEventEnd(event);
-						return true;
-					case MotionEvent.ACTION_MOVE:
-						doodle.onTouchEventMove(event);
-						return true;
-				}
-			}
-
-			return false;
-		}
-	}
-
 }

@@ -21,13 +21,11 @@ import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-import org.zakariya.photodoodle.DoodleView;
 import org.zakariya.photodoodle.geom.IncrementalInputStrokeTessellator;
 import org.zakariya.photodoodle.geom.InputStroke;
 import org.zakariya.photodoodle.geom.InputStrokeTessellator;
 
 import java.io.FileNotFoundException;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import icepick.Icepick;
@@ -93,7 +91,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		incrementalInputStrokeTessellator = null;
 		drawingSteps.clear();
 		bitmap.eraseColor(0x0);
-		getInvalidationDelegate().invalidate();
+		invalidate();
 	}
 
 	@Override
@@ -116,7 +114,8 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 		// draw the invalidation rect
 		if (renderInvalidationRect) {
-			canvas.drawRect(invalidationRect != null ? invalidationRect : getInvalidationDelegate().getBounds(), invalidationRectPaint);
+			RectF r = invalidationRect != null ? invalidationRect : new RectF(0,0,getWidth(),getHeight());
+			canvas.drawRect(r, invalidationRectPaint);
 		}
 
 		invalidationRect = null;
@@ -144,15 +143,10 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	}
 
 	@Override
-	public DoodleView.InputDelegate inputDelegate() {
-		return new InputDelegate(this);
-	}
-
-	@Override
 	public void onInputStrokeModified(InputStroke inputStroke, int startIndex, int endIndex, RectF rect) {
 		canvasToScreenMatrix.mapRect(rect);
 		invalidationRect = rect;
-		getInvalidationDelegate().invalidate(rect);
+		invalidate(rect);
 	}
 
 	@Override
@@ -162,7 +156,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		} else {
 			canvasToScreenMatrix.mapRect(rect);
 			invalidationRect = rect;
-			getInvalidationDelegate().invalidate(rect);
+			invalidate(rect);
 		}
 	}
 
@@ -173,7 +167,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 		canvasToScreenMatrix.mapRect(rect);
 		invalidationRect = rect;
-		getInvalidationDelegate().invalidate(rect);
+		invalidate(rect);
 	}
 
 	@Override
@@ -247,7 +241,8 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	}
 
-	private void onTouchEventBegin(@NonNull MotionEvent event) {
+	@Override
+	protected void onTouchEventBegin(@NonNull MotionEvent event) {
 		incrementalInputStrokeTessellator = new IncrementalInputStrokeTessellator(this);
 
 		float[] canvasPoint = {event.getX(), event.getY()};
@@ -256,14 +251,16 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		incrementalInputStrokeTessellator.add(canvasPoint[0], canvasPoint[1]);
 	}
 
-	private void onTouchEventMove(@NonNull MotionEvent event) {
+
+	protected void onTouchEventMove(@NonNull MotionEvent event) {
 		float[] canvasPoint = {event.getX(), event.getY()};
 		screenToCanvasMatrix.mapPoints(canvasPoint);
 
 		incrementalInputStrokeTessellator.add(canvasPoint[0], canvasPoint[1]);
 	}
 
-	private void onTouchEventEnd() {
+
+	protected void onTouchEventEnd(@NonNull MotionEvent event) {
 		incrementalInputStrokeTessellator.finish();
 		if (!incrementalInputStrokeTessellator.getStaticPaths().isEmpty()) {
 			drawingSteps.add(new IntermediateDrawingStep(getBrush().copy(), incrementalInputStrokeTessellator.getInputStrokes()));
@@ -310,7 +307,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 					bitmapCanvas.drawPath(path, step.brush.getPaint());
 				}
 			}
-			getInvalidationDelegate().invalidate();
+			invalidate();
 		}
 	}
 
@@ -386,35 +383,6 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 				default:
 					throw new IllegalArgumentException("Unsupported " + this.getClass().getName() + " serialization version: " + serializationVersion);
 			}
-		}
-	}
-
-	private static class InputDelegate implements DoodleView.InputDelegate {
-
-		private WeakReference<IncrementalInputStrokeDoodle> weakDoodle;
-
-		public InputDelegate(IncrementalInputStrokeDoodle doodle) {
-			this.weakDoodle = new WeakReference<>(doodle);
-		}
-
-		@Override
-		public boolean onTouchEvent(@NonNull MotionEvent event) {
-			IncrementalInputStrokeDoodle doodle = weakDoodle.get();
-			if (doodle != null) {
-				switch (event.getAction()) {
-					case MotionEvent.ACTION_DOWN:
-						doodle.onTouchEventBegin(event);
-						return true;
-					case MotionEvent.ACTION_UP:
-						doodle.onTouchEventEnd();
-						return true;
-					case MotionEvent.ACTION_MOVE:
-						doodle.onTouchEventMove(event);
-						return true;
-				}
-			}
-
-			return false;
 		}
 	}
 }

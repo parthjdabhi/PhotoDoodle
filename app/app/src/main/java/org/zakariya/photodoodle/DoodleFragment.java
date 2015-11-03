@@ -1,14 +1,11 @@
 package org.zakariya.photodoodle;
 
-import android.graphics.Canvas;
-import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
@@ -74,42 +71,7 @@ public class DoodleFragment extends Fragment {
 		View v = inflater.inflate(R.layout.fragment_doodle, container, false);
 		ButterKnife.bind(this, v);
 
-		doodleView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-			@Override
-			public void onGlobalLayout() {
-				doodle.resize(doodleView.getWidth(),doodleView.getHeight());
-			}
-		});
-
-		// this makes doodle consume touch input from doodleView
-		doodleView.setInputDelegate(doodle.inputDelegate());
-
-		// this forwards doodleView's draw() calls to doodle
-		doodleView.setDrawDelegate(new DoodleView.DrawDelegate() {
-			@Override
-			public void draw(Canvas canvas) {
-				doodle.draw(canvas);
-			}
-		});
-
-		// this allows doodle to invalidate doodleView, queueing a draw
-		doodle.setInvalidationDelegate(new Doodle.InvalidationDelegate() {
-
-			@Override
-			public void invalidate() {
-				doodleView.invalidate();
-			}
-
-			@Override
-			public void invalidate(RectF rect) {
-				doodleView.invalidate((int) rect.left, (int) rect.top, (int) rect.right, (int) rect.bottom);
-			}
-
-			@Override
-			public RectF getBounds() {
-				return new RectF(0, 0, doodleView.getWidth(), doodleView.getHeight());
-			}
-		});
+		doodleView.setDoodle(doodle);
 
 		ArrayAdapter<String> toolOptionsAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, DRAWING_TOOLS);
 		toolOptionsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

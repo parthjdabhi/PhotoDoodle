@@ -6,26 +6,17 @@ import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
+
+import org.zakariya.photodoodle.model.Doodle;
 
 /**
  * Created by shamyl on 8/9/15.
  */
 public class DoodleView extends View {
 
-	/**
-	 * DoodleView forwards touch events to a delegate which translates them into appropriate drawing commands for the current drawing operation.
-	 */
-	public interface InputDelegate {
-		boolean onTouchEvent(@NonNull MotionEvent event);
-	}
-
-	public interface DrawDelegate {
-		void draw(Canvas canvas);
-	}
-
 	private static final String TAG = "DoodleView";
-	private InputDelegate inputDelegate;
-	private DrawDelegate drawDelegate;
+	private Doodle doodle;
 
 	public DoodleView(Context context) {
 		super(context);
@@ -35,32 +26,38 @@ public class DoodleView extends View {
 		super(context, attrs);
 	}
 
+	public Doodle getDoodle() {
+		return doodle;
+	}
+
+	public void setDoodle(Doodle doodle) {
+		this.doodle = doodle;
+		doodle.setDoodleView(this);
+	}
+
+	@Override
+	protected void onAttachedToWindow() {
+		super.onAttachedToWindow();
+
+		getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				doodle.resize(getWidth(), getHeight());
+			}
+		});
+	}
+
 	@Override
 	public void draw(Canvas canvas) {
 		super.draw(canvas);
-		if (drawDelegate != null) {
-			drawDelegate.draw(canvas);
+		if (doodle != null) {
+			doodle.draw(canvas);
 		}
 	}
 
 	@Override
 	public boolean onTouchEvent(@NonNull MotionEvent event) {
-		return inputDelegate != null && inputDelegate.onTouchEvent(event);
+		return doodle != null && doodle.onTouchEvent(event);
 	}
 
-	public InputDelegate getInputDelegate() {
-		return inputDelegate;
-	}
-
-	public void setInputDelegate(InputDelegate inputDelegate) {
-		this.inputDelegate = inputDelegate;
-	}
-
-	public DrawDelegate getDrawDelegate() {
-		return drawDelegate;
-	}
-
-	public void setDrawDelegate(DrawDelegate drawDelegate) {
-		this.drawDelegate = drawDelegate;
-	}
 }

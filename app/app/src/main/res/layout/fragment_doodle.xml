@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="match_parent"
              android:layout_height="match_parent">
 
@@ -12,38 +12,41 @@
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
 		android:orientation="horizontal"
-		android:gravity="center_vertical|start"
-		android:padding="8dp">
+		android:layout_gravity="bottom"
+		android:gravity="center_vertical|center_horizontal"
+		android:background="#ffffff">
 
-		<Button
-			android:id="@+id/clearButton"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/clear"/>
+		<ImageButton
+			android:id="@+id/pencilToolButton"
+			style="@style/DrawingToolButtonStyle"
+			android:src="@drawable/doodle_tool_pencil_inactive"
+			android:contentDescription="@string/tool_name_pencil"
+			/>
 
-		<Button
-			android:id="@+id/undoButton"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/undo"/>
+		<ImageButton
+			android:id="@+id/brushToolButton"
+			style="@style/DrawingToolButtonStyle"
+			android:src="@drawable/doodle_tool_brush_inactive"
+			android:contentDescription="@string/tool_name_brush"
+			/>
 
-		<Button
-			android:id="@+id/saveAndReloadButton"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:text="@string/saveAndReload"/>
+		<ImageButton
+			android:id="@+id/largeEraserToolButton"
+			style="@style/DrawingToolButtonStyle"
+			android:src="@drawable/doodle_tool_large_eraser_inactive"
+			android:contentDescription="@string/tool_name_large_eraser"
+			/>
 
-		<Spinner
-			android:id="@+id/toolSelector"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-		    android:layout_marginStart="8dp"
+		<ImageButton
+			android:id="@+id/smallEraserToolButton"
+			style="@style/DrawingToolButtonStyle"
+			android:src="@drawable/doodle_tool_small_eraser_inactive"
+		    android:contentDescription="@string/tool_name_small_eraser"
 			/>
 
 
 	</LinearLayout>
 
 
-</RelativeLayout>
+</FrameLayout>

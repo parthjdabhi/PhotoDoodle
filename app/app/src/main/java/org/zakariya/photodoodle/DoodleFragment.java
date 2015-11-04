@@ -4,11 +4,12 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
+import android.widget.ImageButton;
 
 import org.zakariya.photodoodle.model.Brush;
 import org.zakariya.photodoodle.model.Doodle;
@@ -27,18 +28,54 @@ public class DoodleFragment extends Fragment {
 
 	private static final String TAG = "DoodleFragment";
 	private static final String DOODLE_STATE = "DOODLE_STATE";
-	static final String[] DRAWING_TOOLS = {"Pen", "Brush", "Eraser"};
+
+	enum ToolType { PENCIL, BRUSH, LARGE_ERASER, SMALL_ERASER };
 
 	@Bind(R.id.doodleView)
 	DoodleView doodleView;
 
-	@Bind(R.id.toolSelector)
-	Spinner toolSelector;
+	@Bind(R.id.pencilToolButton)
+	ImageButton pencilToolButton;
+
+	@Bind(R.id.brushToolButton)
+	ImageButton brushToolButton;
+
+	@Bind(R.id.largeEraserToolButton)
+	ImageButton largeEraserToolButton;
+
+	@Bind(R.id.smallEraserToolButton)
+	ImageButton smallEraserToolButton;
+
 
 	Doodle doodle;
 
 	@State
-	int selectedTool = 0;
+	int selectedTool = ToolType.PENCIL.ordinal();
+
+	public DoodleFragment() {
+		setHasOptionsMenu(true);
+	}
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		inflater.inflate(R.menu.menu_doodle, menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()) {
+			case R.id.menuItemUndo:
+				performUndo();
+				return true;
+
+			case R.id.menuItemClear:
+				performClear();
+				return true;
+
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
 
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -73,60 +110,78 @@ public class DoodleFragment extends Fragment {
 
 		doodleView.setDoodle(doodle);
 
-		ArrayAdapter<String> toolOptionsAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, DRAWING_TOOLS);
-		toolOptionsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		toolSelector.setAdapter(toolOptionsAdapter);
-		toolSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-				switch (position) {
-					case 0:
-						doodle.setBrush(new Brush(0xFF222222, 1, 4, 800, false));
-						break;
-
-					case 1:
-						doodle.setBrush(new Brush(0xFF222222, 12, 12, 800, false));
-						break;
-
-					case 2:
-						doodle.setBrush(new Brush(0x0, 12, 12, 800, true));
-						break;
-
-					default:
-						break;
-				}
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> parent) {
-			}
-		});
-
-		toolSelector.setSelection(selectedTool);
+		switch(ToolType.values()[selectedTool]) {
+			case PENCIL: onPencilToolSelected(); break;
+			case BRUSH: onBrushToolSelected(); break;
+			case LARGE_ERASER: onLargeEraserToolSelected(); break;
+			case SMALL_ERASER: onSmallEraserToolSelected(); break;
+		}
 
 		return v;
 	}
 
-	@OnClick(R.id.clearButton)
-	public void onClearButtonTap() {
-		doodle.clear();
+	@OnClick(R.id.pencilToolButton)
+	public void onPencilToolSelected(){
+		doodle.setBrush(new Brush(0xFF222222, 1, 4, 600, false));
+		selectedTool = ToolType.PENCIL.ordinal();
+		updateToolIcons();
 	}
 
-	@OnClick(R.id.undoButton)
-	public void onUndoTap(){
+	@OnClick(R.id.brushToolButton)
+	public void onBrushToolSelected(){
+		doodle.setBrush(new Brush(0xFF222222, 12, 16, 800, false));
+		selectedTool = ToolType.BRUSH.ordinal();
+		updateToolIcons();
+	}
+
+	@OnClick(R.id.largeEraserToolButton)
+	public void onLargeEraserToolSelected() {
+		doodle.setBrush(new Brush(0x0, 24,38,800,true));
+		selectedTool = ToolType.LARGE_ERASER.ordinal();
+		updateToolIcons();
+	}
+
+	@OnClick(R.id.smallEraserToolButton)
+	public void onSmallEraserToolSelected() {
+		doodle.setBrush(new Brush(0x0, 12,16,800,true));
+		selectedTool = ToolType.SMALL_ERASER.ordinal();
+		updateToolIcons();
+	}
+
+	public void onSaveAndReloadTap() {
+		if (doodle instanceof IncrementalInputStrokeDoodle) {
+			IncrementalInputStrokeDoodle incrementalInputStrokeDoodle = (IncrementalInputStrokeDoodle) doodle;
+			incrementalInputStrokeDoodle.TEST_saveAndReload();
+		}
+	}
+
+	private void updateToolIcons() {
+		pencilToolButton.setImageResource( selectedTool == ToolType.PENCIL.ordinal()
+				? R.drawable.doodle_tool_pencil_active
+				: R.drawable.doodle_tool_pencil_inactive);
+
+		brushToolButton.setImageResource( selectedTool == ToolType.BRUSH.ordinal()
+				? R.drawable.doodle_tool_brush_active
+				: R.drawable.doodle_tool_brush_inactive);
+
+		largeEraserToolButton.setImageResource( selectedTool == ToolType.LARGE_ERASER.ordinal()
+				? R.drawable.doodle_tool_large_eraser_active
+				: R.drawable.doodle_tool_large_eraser_inactive);
+
+		smallEraserToolButton.setImageResource( selectedTool == ToolType.SMALL_ERASER.ordinal()
+				? R.drawable.doodle_tool_small_eraser_active
+				: R.drawable.doodle_tool_small_eraser_inactive);
+	}
+
+	private void performUndo() {
 		if (doodle instanceof IncrementalInputStrokeDoodle) {
 			IncrementalInputStrokeDoodle incrementalInputStrokeDoodle = (IncrementalInputStrokeDoodle) doodle;
 			incrementalInputStrokeDoodle.undo();
 		}
 	}
 
-	@OnClick(R.id.saveAndReloadButton)
-	public void onSaveAndReloadTap() {
-		if (doodle instanceof IncrementalInputStrokeDoodle) {
-			IncrementalInputStrokeDoodle incrementalInputStrokeDoodle = (IncrementalInputStrokeDoodle) doodle;
-			incrementalInputStrokeDoodle.TEST_saveAndReload();
-		}
+	private void performClear() {
+		doodle.clear();
 	}
 
 }

@@ -1,6 +1,14 @@
-#Persistence
-- Kryo
-- BSON
+#Currently
+Try making a much larger smoothing kernel. Instead of manually computing the weights, fill it algorithmically. Instead of size 5, make it size 30 or something. 
+
+#Alpha Blending
+Will require 3 new full-screen bitmaps. 
+Since this is expensive, should only be active when alpha < 255
+- livePathBitmap - is cleared and has the live stroke drawn in full alpha each live stroke change
+- staticPathBitmap - gets the static paths drawn into it in full alpha
+- pathCompositeBitmap - livePathBitmap and staticPathBitmap are drawn at full alpha, then, pathCompositeBitmap is drawn to screen (later to backing store when stroke is complete) at the stroke's alpha.
+
+
 
 #Chunking
 

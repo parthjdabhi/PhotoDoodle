@@ -7,4 +7,13 @@
 	<string name="redraw">Redraw</string>
 	<string name="undo">Undo</string>
 	<string name="saveAndReload">Save &amp; Reload</string>
+
+	<string name="tool_name_brush">Brush</string>
+	<string name="tool_name_pencil">Pencil</string>
+	<string name="tool_name_large_eraser">Large Eraser</string>
+	<string name="tool_name_small_eraser">Small Eraser</string>
+
+	<string name="doodle_menu_undo">Undo</string>
+	<string name="doodle_menu_clear">Clear</string>
+
 </resources>

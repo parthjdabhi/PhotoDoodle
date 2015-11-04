@@ -6,6 +6,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -14,6 +15,7 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by shamyl on 9/28/15.
@@ -27,12 +29,41 @@ public class InputStroke implements Parcelable, KryoSerializable {
 	private static final float AUTO_OPTIMIZE_CORNER_THRESHOLD = (float) Math.cos(45);
 
 	static final int MIN_OPTIMIZATION_SIZE = 8;
-	static final float POINT_VELOCITY_SMOOTHING_KERNEL[] = {0.5f / 5f, 1f / 5f, 2f / 5f, 1f / 5f, 0.5f / 5f};
-	static final int POINT_VELOCITY_SMOOTHING_KERNEL_BACKTRACK = 2;
+	static final int POINT_VELOCITY_SMOOTHING_KERNEL_SIZE = 7; // MUST BE ODD
+	static float POINT_VELOCITY_SMOOTHING_KERNEL[];
+	static int POINT_VELOCITY_SMOOTHING_KERNEL_BACKTRACK = 0;
 
 	private ArrayList<Point> points = new ArrayList<>();
 	private RectF boundingRect = new RectF();
 	private float autoOptimizationThreshold = 0;
+
+	static {
+		// generate a kernel with linear fade out from center
+		final int kernelSize = POINT_VELOCITY_SMOOTHING_KERNEL_SIZE;
+		final int halfKernelSize = kernelSize / 2;
+		POINT_VELOCITY_SMOOTHING_KERNEL = new float[kernelSize];
+		POINT_VELOCITY_SMOOTHING_KERNEL_BACKTRACK = halfKernelSize;
+		for (int i = 0; i <= halfKernelSize; i++) {
+			float v = (float) i / (float) (halfKernelSize + 1);
+			float kv = 1f - v;
+			POINT_VELOCITY_SMOOTHING_KERNEL[halfKernelSize + i] = kv;
+			POINT_VELOCITY_SMOOTHING_KERNEL[halfKernelSize - i] = kv;
+		}
+
+		// now sum
+		float sum = 0;
+		for (int i = 0; i < kernelSize; i++) {
+			sum += POINT_VELOCITY_SMOOTHING_KERNEL[i];
+		}
+
+		// now normalize
+		for (int i = 0; i < kernelSize; i++) {
+			POINT_VELOCITY_SMOOTHING_KERNEL[i] /= sum;
+		}
+
+
+		Log.i(TAG, "kernel: " + TextUtils.join(", ", Arrays.asList(POINT_VELOCITY_SMOOTHING_KERNEL)) + " backtrack: " + POINT_VELOCITY_SMOOTHING_KERNEL_BACKTRACK);
+	}
 
 	public InputStroke() {
 	}

@@ -74,8 +74,11 @@ public abstract class Doodle {
 		return brush;
 	}
 
-	public void onSaveInstanceState(Bundle outState){}
-	public void onCreate(Bundle savedInstanceState){}
+	public void onSaveInstanceState(Bundle outState) {
+	}
+
+	public void onCreate(Bundle savedInstanceState) {
+	}
 
 	public boolean onTouchEvent(@NonNull MotionEvent event) {
 		switch (event.getAction()) {
@@ -94,7 +97,9 @@ public abstract class Doodle {
 	}
 
 	protected abstract void onTouchEventBegin(@NonNull MotionEvent event);
+
 	protected abstract void onTouchEventMove(@NonNull MotionEvent event);
+
 	protected abstract void onTouchEventEnd(@NonNull MotionEvent event);
 
 }

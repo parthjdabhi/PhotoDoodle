@@ -21,7 +21,7 @@ public class PointFUtil {
 	}
 
 	public static float dot(PointF a, PointF b) {
-		return a.x*b.x + a.y*b.y;
+		return a.x * b.x + a.y * b.y;
 	}
 
 	public static float length2(PointF a) {
@@ -45,7 +45,7 @@ public class PointFUtil {
 	}
 
 	public static PointF multiply(PointF a, PointF b) {
-		return new PointF(a.x*b.x, a.y*b.y);
+		return new PointF(a.x * b.x, a.y * b.y);
 	}
 
 	public static Pair<PointF, Float> normalize(PointF p) {

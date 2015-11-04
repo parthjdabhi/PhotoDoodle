@@ -114,7 +114,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 		// draw the invalidation rect
 		if (renderInvalidationRect) {
-			RectF r = invalidationRect != null ? invalidationRect : new RectF(0,0,getWidth(),getHeight());
+			RectF r = invalidationRect != null ? invalidationRect : new RectF(0, 0, getWidth(), getHeight());
 			canvas.drawRect(r, invalidationRectPaint);
 		}
 
@@ -226,7 +226,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		// now, re-open and load
 		try (Input input = new Input(context.openFileInput(TEST_KRYO_SERIALIZATION_FILE))) {
 			Kryo kryo = new Kryo();
-			loadedDrawingSteps = kryo.readObject(input,ArrayList.class);
+			loadedDrawingSteps = kryo.readObject(input, ArrayList.class);
 		} catch (FileNotFoundException ex) {
 			Log.e(TAG, "Unable to open file for reading: " + ex);
 		}
@@ -374,7 +374,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		@SuppressWarnings("unchecked")
 		public void read(Kryo kryo, Input input) {
 			int serializationVersion = input.readInt();
-			switch(serializationVersion) {
+			switch (serializationVersion) {
 				case 0:
 					brush = kryo.readObject(input, Brush.class);
 					inputStrokes = kryo.readObject(input, ArrayList.class);

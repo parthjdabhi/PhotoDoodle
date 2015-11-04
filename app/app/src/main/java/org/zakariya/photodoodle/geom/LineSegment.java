@@ -16,7 +16,7 @@ public class LineSegment {
 	public LineSegment(PointF a, PointF b) {
 		this.a = a;
 		this.b = b;
-		Pair<PointF,Float> dir = PointFUtil.dir(a,b);
+		Pair<PointF, Float> dir = PointFUtil.dir(a, b);
 		this.dir = dir.first;
 		this.length = dir.second;
 	}
@@ -40,7 +40,7 @@ public class LineSegment {
 	public float distance(PointF point, boolean bounded) {
 
 		PointF toPoint = PointFUtil.subtract(point, a);
-		float projectedLength = PointFUtil.dot(toPoint,dir);
+		float projectedLength = PointFUtil.dot(toPoint, dir);
 
 		if (bounded) {
 			// early exit condition, we'll have to get distance from endpoints
@@ -59,7 +59,7 @@ public class LineSegment {
 	public float distanceSquared(PointF point, boolean bounded) {
 
 		PointF toPoint = PointFUtil.subtract(point, a);
-		float projectedLength = PointFUtil.dot(toPoint,dir);
+		float projectedLength = PointFUtil.dot(toPoint, dir);
 
 		if (bounded) {
 			// early exit condition, we'll have to get distance from endpoints
@@ -77,7 +77,8 @@ public class LineSegment {
 
 	/**
 	 * Find the intersection point of this LineSegment and another, if any.
-	 * @param other the line segment to intersect
+	 *
+	 * @param other   the line segment to intersect
 	 * @param bounded if false, the line segments are treated as infinite-length lines
 	 * @return the intersection point, if any. null if the lines are parallel, or if the test is bounded and the segments do not intersect
 	 */

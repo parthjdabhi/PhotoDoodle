@@ -38,6 +38,7 @@ public class IncrementalInputStrokeTessellator {
 		 * As the live livePath is drawn and optimized, older parts of the livePath may be frozen and do
 		 * not need to be recomputed with each input stroke modification. As these chunks freeze,
 		 * they will be passed to the listener as new static paths.
+		 *
 		 * @param path the new chunk of static livePath that's available
 		 * @param rect the rect containing the new chun of static livePath
 		 */
@@ -77,13 +78,14 @@ public class IncrementalInputStrokeTessellator {
 	/**
 	 * Create new IncrementalStrokeTessellator
 	 * NOTE: listener is held weakly
+	 *
 	 * @param listener listener which will be notified as renderable paths are generated
 	 */
 	public IncrementalInputStrokeTessellator(Listener listener) {
 		listenerWeakReference = new WeakReference<>(listener);
 		optimizationThreshold = listener.getInputStrokeOptimizationThreshold();
 		inputStroke = new InputStroke(optimizationThreshold);
-		inputStrokeTessellator = new InputStrokeTessellator(inputStroke,listener.getStrokeMinWidth(),listener.getStrokeMaxWidth(),listener.getStrokeMaxVelDPps());
+		inputStrokeTessellator = new InputStrokeTessellator(inputStroke, listener.getStrokeMinWidth(), listener.getStrokeMaxWidth(), listener.getStrokeMaxVelDPps());
 	}
 
 	public InputStroke getInputStroke() {
@@ -95,7 +97,7 @@ public class IncrementalInputStrokeTessellator {
 	}
 
 	public void add(float x, float y) {
-		add(x,y,System.currentTimeMillis());
+		add(x, y, System.currentTimeMillis());
 	}
 
 	public void add(float x, float y, long timestamp) {
@@ -139,7 +141,7 @@ public class IncrementalInputStrokeTessellator {
 
 					staticPaths.add(newStaticPathChunk);
 					newStaticPathChunk.computeBounds(staticPathBounds, true);
-					listener.onNewStaticPathAvailable(newStaticPathChunk,staticPathBounds);
+					listener.onNewStaticPathAvailable(newStaticPathChunk, staticPathBounds);
 				}
 
 			} else {
@@ -182,7 +184,7 @@ public class IncrementalInputStrokeTessellator {
 			if (!newStaticPathChunk.isEmpty()) {
 				staticPaths.add(newStaticPathChunk);
 				newStaticPathChunk.computeBounds(staticPathBounds, true);
-				listener.onNewStaticPathAvailable(newStaticPathChunk,staticPathBounds);
+				listener.onNewStaticPathAvailable(newStaticPathChunk, staticPathBounds);
 			}
 		}
 	}

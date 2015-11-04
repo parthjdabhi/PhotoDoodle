@@ -132,9 +132,9 @@ public class InputStrokeTessellationDoodle extends Doodle {
 		}
 
 		// now, confirm closest match was close enough
-		if (index >= 0 ){
+		if (index >= 0) {
 			float radius = inputStrokeTessellator.getRadiusForInputStrokePoint(draggingPoint);
-			if (minDist2 > (radius*radius)) {
+			if (minDist2 > (radius * radius)) {
 				draggingPoint = null;
 			}
 		}
@@ -195,7 +195,7 @@ public class InputStrokeTessellationDoodle extends Doodle {
 	}
 
 	private void tessellate() {
-		inputStrokeTessellator = new InputStrokeTessellator(inputStroke,4,60,200);
+		inputStrokeTessellator = new InputStrokeTessellator(inputStroke, 4, 60, 200);
 		inputStrokeTessellatedPath = inputStrokeTessellator.tessellate(false, true, true);
 	}
 }

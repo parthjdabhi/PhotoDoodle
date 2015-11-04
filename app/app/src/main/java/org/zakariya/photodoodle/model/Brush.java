@@ -120,7 +120,7 @@ public class Brush implements Parcelable, KryoSerializable {
 	@Override
 	public void read(Kryo kryo, Input input) {
 		int serializationVersion = input.readInt();
-		switch(serializationVersion) {
+		switch (serializationVersion) {
 			case 0:
 				color = input.readInt();
 				minWidth = input.readFloat();

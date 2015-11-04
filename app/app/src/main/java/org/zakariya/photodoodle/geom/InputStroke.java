@@ -6,7 +6,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -15,7 +14,6 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by shamyl on 9/28/15.
@@ -60,9 +58,6 @@ public class InputStroke implements Parcelable, KryoSerializable {
 		for (int i = 0; i < kernelSize; i++) {
 			POINT_VELOCITY_SMOOTHING_KERNEL[i] /= sum;
 		}
-
-
-		Log.i(TAG, "kernel: " + TextUtils.join(", ", Arrays.asList(POINT_VELOCITY_SMOOTHING_KERNEL)) + " backtrack: " + POINT_VELOCITY_SMOOTHING_KERNEL_BACKTRACK);
 	}
 
 	public InputStroke() {

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="match_parent"
-             android:layout_height="match_parent">
+             android:layout_height="match_parent"
+             xmlns:app="http://schemas.android.com/apk/res-auto">
 
-	<org.zakariya.photodoodle.DoodleView
+	<org.zakariya.photodoodle.view.DoodleView
 		android:id="@+id/doodleView"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
@@ -45,6 +46,11 @@
 		    android:contentDescription="@string/tool_name_small_eraser"
 			/>
 
+		<org.zakariya.photodoodle.view.ColorSwatchView
+			android:layout_width="@dimen/doodle_drawing_tool_icon_size"
+			android:layout_height="@dimen/doodle_drawing_tool_icon_size"
+			app:swatchColor="#FF00FFFF"
+			app:isSelected="false"/>
 
 	</LinearLayout>
 

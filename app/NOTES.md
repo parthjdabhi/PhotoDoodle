@@ -1,5 +1,5 @@
 #Currently
-Try making a much larger smoothing kernel. Instead of manually computing the weights, fill it algorithmically. Instead of size 5, make it size 30 or something. 
+Color Picker
 
 #Alpha Blending
 Will require 3 new full-screen bitmaps. 

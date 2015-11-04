@@ -7,7 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 
-import org.zakariya.photodoodle.DoodleView;
+import org.zakariya.photodoodle.view.DoodleView;
 
 import java.lang.ref.WeakReference;
 

@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import org.zakariya.photodoodle.model.Brush;
 import org.zakariya.photodoodle.model.Doodle;
 import org.zakariya.photodoodle.model.IncrementalInputStrokeDoodle;
+import org.zakariya.photodoodle.view.DoodleView;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;

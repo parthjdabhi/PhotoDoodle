@@ -1,4 +1,4 @@
-package org.zakariya.photodoodle;
+package org.zakariya.photodoodle.view;
 
 import android.content.Context;
 import android.graphics.Canvas;

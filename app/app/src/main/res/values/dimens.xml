@@ -5,4 +5,6 @@
 
 	<dimen name="doodle_drawing_tool_icon_size">48dp</dimen>
 
+	<dimen name="swatch_alpha_checker_size">8dp</dimen>
+
 </resources>

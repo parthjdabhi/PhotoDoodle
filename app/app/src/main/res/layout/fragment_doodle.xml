@@ -50,7 +50,8 @@
 			android:layout_width="@dimen/doodle_drawing_tool_icon_size"
 			android:layout_height="@dimen/doodle_drawing_tool_icon_size"
 			app:swatchColor="#FF00FFFF"
-			app:isSelected="false"/>
+			app:selectionThickness="0dp"
+			android:padding="8dp"/>
 
 	</LinearLayout>
 

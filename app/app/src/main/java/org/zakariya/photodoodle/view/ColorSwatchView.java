@@ -71,17 +71,14 @@ public class ColorSwatchView extends View {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
-		final float width = getWidth();
-		final float height = getHeight();
-		final float cx = width / 2;
-		final float cy = height / 2;
-
 		if (Color.alpha(swatchColor) < 255) {
 			// draw alpha checkerboard. First set a circular clip path
 
 			canvas.save();
 			canvas.clipPath(alphaClipPath);
 
+			final float width = getWidth();
+			final float height = getHeight();
 			alphaCheckerPaint.setColor(0xFFFFFFFF);
 			canvas.drawRect(0,0,width,height,alphaCheckerPaint);
 
@@ -97,6 +94,9 @@ public class ColorSwatchView extends View {
 			canvas.restore();
 		}
 
+		final float cx = getSwatchCenterX();
+		final float cy = getSwatchCenterY();
+
 		canvas.drawCircle(cx, cy, getSwatchRadius(), swatchPaint);
 
 		if (selected) {
@@ -111,9 +111,17 @@ public class ColorSwatchView extends View {
 		configurePaintsAndInvalidate();
 	}
 
+	private float getSwatchCenterX() {
+		return getWidth()/2 + getPaddingLeft()/2 - getPaddingRight()/2;
+	}
+
+	private float getSwatchCenterY() {
+		return getHeight()/2 + getPaddingTop()/2 - getPaddingBottom()/2;
+	}
+
 	private float getSwatchRadius() {
-		final float width = getWidth();
-		final float height = getHeight();
+		final float width = getWidth() - (getPaddingLeft()+getPaddingRight());
+		final float height = getHeight() - (getPaddingTop() + getPaddingBottom());
 		return Math.min(width, height)/2 - selectionThickness;
 	}
 
@@ -135,13 +143,8 @@ public class ColorSwatchView extends View {
 			}
 
 			if (alphaClipPath == null) {
-				final float width = getWidth();
-				final float height = getHeight();
-				final float cx = width / 2;
-				final float cy = height / 2;
-
 				alphaClipPath = new Path();
-				alphaClipPath.addCircle(cx, cy, getSwatchRadius(), Path.Direction.CW);
+				alphaClipPath.addCircle(getSwatchCenterX(), getSwatchCenterY(), getSwatchRadius(), Path.Direction.CW);
 			}
 		}
 

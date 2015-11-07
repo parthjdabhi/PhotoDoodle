@@ -3,6 +3,7 @@ package org.zakariya.photodoodle;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,6 +15,7 @@ import android.widget.ImageButton;
 import org.zakariya.photodoodle.model.Brush;
 import org.zakariya.photodoodle.model.Doodle;
 import org.zakariya.photodoodle.model.IncrementalInputStrokeDoodle;
+import org.zakariya.photodoodle.view.ColorSwatchView;
 import org.zakariya.photodoodle.view.DoodleView;
 
 import butterknife.Bind;
@@ -48,6 +50,9 @@ public class DoodleFragment extends Fragment {
 
 	@Bind(R.id.smallEraserToolButton)
 	ImageButton smallEraserToolButton;
+
+	@Bind(R.id.colorSwatch)
+	ColorSwatchView colorSwatch;
 
 
 	Doodle doodle;
@@ -157,6 +162,11 @@ public class DoodleFragment extends Fragment {
 		doodle.setBrush(new Brush(0x0, 12, 16, 600, true));
 		selectedTool = ToolType.SMALL_ERASER.ordinal();
 		updateToolIcons();
+	}
+
+	@OnClick(R.id.colorSwatch)
+	public void onColorSwatchTap() {
+		Log.i(TAG, "onColorSwatchTap");
 	}
 
 	public void onSaveAndReloadTap() {

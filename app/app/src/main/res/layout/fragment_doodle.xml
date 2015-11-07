@@ -47,6 +47,7 @@
 			/>
 
 		<org.zakariya.photodoodle.view.ColorSwatchView
+			android:id="@+id/colorSwatch"
 			android:layout_width="@dimen/doodle_drawing_tool_icon_size"
 			android:layout_height="@dimen/doodle_drawing_tool_icon_size"
 			app:swatchColor="#FF00FFFF"

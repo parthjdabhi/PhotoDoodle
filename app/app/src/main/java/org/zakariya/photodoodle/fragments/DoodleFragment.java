@@ -1,4 +1,4 @@
-package org.zakariya.photodoodle;
+package org.zakariya.photodoodle.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
+import org.zakariya.photodoodle.R;
 import org.zakariya.photodoodle.model.Brush;
 import org.zakariya.photodoodle.model.Doodle;
 import org.zakariya.photodoodle.model.IncrementalInputStrokeDoodle;

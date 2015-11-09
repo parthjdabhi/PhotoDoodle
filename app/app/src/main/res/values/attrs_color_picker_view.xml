@@ -1,0 +1,6 @@
+<resources>
+	<declare-styleable name="ColorPickerView">
+		<attr name="precision" format="integer"/>
+		<attr name="initialColor" format="color"/>
+	</declare-styleable>
+</resources>

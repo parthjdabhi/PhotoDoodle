@@ -12,9 +12,11 @@ import android.graphics.drawable.Drawable;
 import android.support.v4.graphics.ColorUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 import org.zakariya.photodoodle.R;
+import org.zakariya.photodoodle.geom.PointFUtil;
 
 /**
  * TODO: document your custom view class.
@@ -22,6 +24,12 @@ import org.zakariya.photodoodle.R;
 public class ColorPickerView extends View {
 
 	private static final String TAG = "ColorPickerView";
+
+	private enum DragState {
+		NONE,
+		DRAGGING_HUE_HANDLE,
+		DRAGGING_TONE_HANDLE
+	};
 
 	private static final float SQRT_2 = (float) Math.sqrt(2);
 	private static final float HUE_RING_THICKNESS = 8f;
@@ -31,7 +39,6 @@ public class ColorPickerView extends View {
 
 	private int color = 0xFF000000;
 	private int snappedColor;
-	private int toneSquareBaseColor;
 	private float snappedHue, snappedSaturation, snappedLightness;
 
 	private int precision = 16;
@@ -40,6 +47,7 @@ public class ColorPickerView extends View {
 	private LayoutInfo layoutInfo = new LayoutInfo();
 	private Path hueRingWedgePath;
 	private Path hueRingWedgeSeparatorPath;
+	private DragState dragState;
 
 	public ColorPickerView(Context context) {
 		super(context);
@@ -63,7 +71,7 @@ public class ColorPickerView extends View {
 
 		color = a.getColor(R.styleable.ColorPickerView_initialColor, color);
 		precision = a.getInt(R.styleable.ColorPickerView_precision, precision);
-		computeSnappedColor();
+		computeSnappedHSLFromColor(color);
 
 		a.recycle();
 
@@ -128,23 +136,35 @@ public class ColorPickerView extends View {
 		float swatchY = 0f;
 		float swatchX;
 		float swatchIncrement = 1f / (float) (precision - 1);
-		int toneSquareBaseColor = this.toneSquareBaseColor;
+		float[] toneSquareSnappedHSL = {snappedHue, 1, 0.5f};
+		int toneSquareBaseColor = ColorUtils.HSLToColor(toneSquareSnappedHSL);
 
 		// first rendered row is white, which is drawn by stroking an empty white circle
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setColor(0xFFdddddd);
-		paint.setStrokeWidth(1);
 
 		for (int row = 0; row < precision; row++, swatchY += swatchIncrement) {
 			swatchLeft = layoutInfo.toneSquareLeft;
 			swatchTop = layoutInfo.toneSquareTop + row * swatchSize;
 			swatchX = 0f;
 
-			for (int col = 0; col < precision; col++, swatchLeft += swatchSize, swatchX += swatchIncrement) {
-				if (row > 0) {
-					paint.setColor(plotToneSquareSwatchColor(toneSquareBaseColor, swatchX, swatchY));
+			// first row is solid white - so draw with a hairline grey circle to clarify
+			if (row == 0) {
+				paint.setStyle(Paint.Style.FILL);
+				paint.setColor(0xFFFFFFFF);
+				for (int col = 0; col < precision; col++, swatchLeft += swatchSize) {
+					canvas.drawCircle(swatchLeft + swatchSize / 2, swatchTop + swatchSize / 2, swatchSize / 2 - halfPad, paint);
 				}
-				canvas.drawCircle(swatchLeft + swatchSize / 2, swatchTop + swatchSize / 2, swatchSize / 2 - halfPad, paint);
+				paint.setStyle(Paint.Style.STROKE);
+				paint.setColor(0xFFdddddd);
+				paint.setStrokeWidth(1);
+				swatchLeft = layoutInfo.toneSquareLeft;
+				for (int col = 0; col < precision; col++, swatchLeft += swatchSize) {
+					canvas.drawCircle(swatchLeft + swatchSize / 2, swatchTop + swatchSize / 2, swatchSize / 2 - halfPad, paint);
+				}
+			} else {
+				for (int col = 0; col < precision; col++, swatchLeft += swatchSize, swatchX += swatchIncrement) {
+					paint.setColor(plotToneSquareSwatchColor(toneSquareBaseColor, swatchX, swatchY));
+					canvas.drawCircle(swatchLeft + swatchSize / 2, swatchTop + swatchSize / 2, swatchSize / 2 - halfPad, paint);
+				}
 			}
 
 			paint.setStyle(Paint.Style.FILL);
@@ -175,8 +195,8 @@ public class ColorPickerView extends View {
 
 	private void paintSelectionHandle(Canvas canvas, int color, float x, float y, float radius) {
 		paint.setStyle(Paint.Style.FILL);
-		paint.setColor(0xFFFFFFFF);
-		canvas.drawCircle(x, y, radius + HANDLE_BORDER_WIDTH, paint);
+		//paint.setColor(0xFFFFFFFF);
+		//canvas.drawCircle(x, y, radius + HANDLE_BORDER_WIDTH, paint);
 
 		paint.setColor(color);
 		canvas.drawCircle(x, y, radius, paint);
@@ -299,7 +319,7 @@ public class ColorPickerView extends View {
 
 	public void setPrecision(int precision) {
 		this.precision = Math.min(Math.max(precision, 1), 256);
-		computeSnappedColor();
+		computeSnappedHSLFromColor(color);
 		invalidate();
 	}
 
@@ -309,34 +329,130 @@ public class ColorPickerView extends View {
 
 	public void setColor(int color) {
 		this.color = color;
-		computeSnappedColor();
+		computeSnappedHSLFromColor(color);
 		invalidate();
 	}
 
-	private void computeSnappedColor() {
+	private void computeSnappedHSLFromColor(int color) {
 		float[] hsl = {0, 0, 0};
 		ColorUtils.RGBToHSL(Color.red(color), Color.green(color), Color.blue(color), hsl);
 
-		int hue = ((int) hsl[0] / precision) * precision;
-		int sat = (((int) (hsl[1] * 256)) / precision) * precision;
-		int light = (((int) (hsl[2] * 256)) / precision) * precision;
+		snappedHue = snapHueValue(hsl[0]);
+		snappedSaturation = snapSaturationOrLightnessValue(hsl[1]);
+		snappedLightness = snapSaturationOrLightnessValue(hsl[2]);
 
-		snappedHue = hue;
-		snappedSaturation = sat / 256f;
-		snappedLightness = light / 256f;
+		updateSnappedColor();
+	}
 
-		// convert back to int color
-		hsl[0] = snappedHue;
-		hsl[1] = snappedSaturation;
-		hsl[2] = snappedLightness;
+	private void updateSnappedColor() {
+		float[] hsl = {snappedHue, snappedSaturation, snappedLightness};
 		snappedColor = ColorUtils.HSLToColor(hsl);
 
-		Log.i(TAG, "computeSnappedColor h: " + snappedHue + " s: " + snappedSaturation + " l: " + snappedLightness + " -> #" + Integer.toHexString(snappedColor));
+		Log.i(TAG, "updateSnappedColor h: " + snappedHue + " s: " + snappedSaturation + " l: " + snappedLightness + " -> #" + Integer.toHexString(snappedColor));
+	}
 
-		// make fully bright, and generate base color for toneSquare
-		hsl[1] = 1;
-		hsl[2] = 0.5f;
-		toneSquareBaseColor = ColorUtils.HSLToColor(hsl);
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		switch( event.getAction()) {
+			case MotionEvent.ACTION_DOWN:
+				return onTouchStart(event);
+			case MotionEvent.ACTION_MOVE:
+				return onTouchMove(event);
+			case MotionEvent.ACTION_UP:
+				return onTouchEnd(event);
+		}
+
+		return super.onTouchEvent(event);
+	}
+
+	private boolean onTouchStart(MotionEvent event) {
+		PointF pos = new PointF(event.getX(),event.getY());
+		PointF hueKnobPosition = getHueKnobPosition(snappedHue);
+		PointF toneKnobPosition = getToneKnobPosition(snappedHue, snappedSaturation, snappedLightness);
+		float dist2 = KNOB_RADIUS * KNOB_RADIUS;
+		float hueKnobDist2 = PointFUtil.distance2(hueKnobPosition, pos);
+		float toneKnobDist2 = PointFUtil.distance2(toneKnobPosition,pos);
+
+		if (hueKnobDist2 < dist2 && hueKnobDist2 < toneKnobDist2) {
+			dragState = DragState.DRAGGING_HUE_HANDLE;
+			return true;
+		} else if (toneKnobDist2 < dist2 && toneKnobDist2 < hueKnobDist2) {
+			dragState = DragState.DRAGGING_TONE_HANDLE;
+			return true;
+		} else {
+
+			// user did not tap a knob. so check if user tapped on the ring, in which case
+			// set the hue directly and switch drag state to DRAGGING_HUE_HANDLE, otherwise,
+			// see if user tapped on the tone swatch. if so, set sat/light directly and switch
+			// drag state to DRAGGING_TONE_HANDLE. Otherwise, do nothing.
+
+			float touchRadiusFromCenter = PointFUtil.distance(
+					new PointF(layoutInfo.centerX,layoutInfo.centerY),
+					new PointF(event.getX(),event.getY()));
+
+			if (touchRadiusFromCenter > layoutInfo.hueRingInnerRadius - KNOB_RADIUS &&
+					touchRadiusFromCenter < layoutInfo.hueRingOuterRadius + KNOB_RADIUS) {
+				updateSnappedHueForTouchPosition(event.getX(),event.getY());
+				dragState = DragState.DRAGGING_HUE_HANDLE;
+				return true;
+			}
+		}
+
+		dragState = DragState.NONE;
+		return false;
+	}
+
+	private boolean onTouchMove(MotionEvent event) {
+		switch (dragState) {
+			case DRAGGING_HUE_HANDLE:
+				updateSnappedHueForTouchPosition(event.getX(),event.getY());
+				return true;
+
+			case DRAGGING_TONE_HANDLE:
+				updateSnappedSaturationAndLightnessForTouchPosition(event.getX(),event.getY());
+				return true;
+
+			case NONE:
+				break;
+		}
+		return false;
+	}
+
+	private boolean onTouchEnd(MotionEvent event) {
+		dragState = DragState.NONE;
+		return false;
+	}
+
+	private void updateSnappedHueForTouchPosition(float x, float y) {
+		PointF dir = PointFUtil.dir(new PointF(0,0), new PointF(layoutInfo.centerX-x,layoutInfo.centerY-y)).first;
+		float angle = (float)(Math.atan2(dir.y,dir.x) * 180 / Math.PI) - 90f; // hue zero is pointing up, so rotate CCW 90deg
+		while (angle < 0) {
+			angle += 360.0f;
+		}
+
+		float snapped = snapHueValue(angle);
+
+		Log.d(TAG, "updateSnappedHueForTouchPosition dir: " + dir + " angle: " + angle + " snappedAngle: " + snapped);
+
+		if (Math.abs(snapped - snappedHue) > 1e-3) {
+			snappedHue = snapped;
+			updateSnappedColor();
+			invalidate();
+		}
+	}
+
+	private void updateSnappedSaturationAndLightnessForTouchPosition(float x, float y) {
+
+	}
+
+	private float snapHueValue(float hue) {
+		return snapSaturationOrLightnessValue(hue / 360f) * 360f;
+	}
+
+	private float snapSaturationOrLightnessValue(float v) {
+		v = Math.round(v * precision);
+		v = v / (float) precision;
+		return v;
 	}
 
 	private static final class LayoutInfo {

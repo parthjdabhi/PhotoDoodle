@@ -11,5 +11,6 @@
 		android:layout_height="match_parent"
 		android:padding="40dp"
 		app:initialColor="#FF0000"
-		app:precision="16"/>
+		app:precision="16"
+		android:background="@color/windowBackgroundColor"/>
 </LinearLayout>

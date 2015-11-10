@@ -5,12 +5,58 @@
               android:layout_height="match_parent"
               android:orientation="vertical">
 
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:gravity="center_vertical"
+		android:padding="16dp">
+
+		<org.zakariya.photodoodle.view.ColorSwatchView
+			android:id="@+id/inColorSwatch"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
+			android:padding="8dp"
+			/>
+
+		<android.support.design.widget.TextInputLayout
+			android:id="@+id/inTextInputLayout"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:layout_marginRight="16dp">
+			<EditText
+				android:id="@+id/inEditText"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:hint="Input Color"/>
+		</android.support.design.widget.TextInputLayout>
+
+		<org.zakariya.photodoodle.view.ColorSwatchView
+			android:id="@+id/outColorSwatch"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
+			android:padding="8dp"
+			android:layout_marginLeft="16dp"/>
+
+		<TextView
+			android:id="@+id/outTextView"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"/>
+
+
+	</LinearLayout>
+
 	<org.zakariya.photodoodle.view.ColorPickerView
 		android:id="@+id/colorPicker"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"
 		android:padding="40dp"
 		app:initialColor="#FF0000"
-		app:precision="16"
+		app:precision="8"
 		android:background="@color/windowBackgroundColor"/>
+
+
 </LinearLayout>

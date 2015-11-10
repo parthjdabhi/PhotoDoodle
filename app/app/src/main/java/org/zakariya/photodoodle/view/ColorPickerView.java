@@ -22,6 +22,10 @@ import org.zakariya.photodoodle.geom.PointFUtil;
  */
 public class ColorPickerView extends View {
 
+	public interface OnColorChangeListener {
+		void onColorChange(ColorPickerView view, int color);
+	}
+
 	private static final String TAG = "ColorPickerView";
 
 	private enum DragState {
@@ -29,8 +33,6 @@ public class ColorPickerView extends View {
 		DRAGGING_HUE_HANDLE,
 		DRAGGING_TONE_HANDLE
 	}
-
-	;
 
 	private static final float SQRT_2 = (float) Math.sqrt(2);
 	private static final float HUE_RING_THICKNESS = 8f;
@@ -49,6 +51,7 @@ public class ColorPickerView extends View {
 	private Path hueRingWedgePath;
 	private Path hueRingWedgeSeparatorPath;
 	private DragState dragState;
+	private OnColorChangeListener onColorChangeListener;
 
 	public ColorPickerView(Context context) {
 		super(context);
@@ -140,12 +143,7 @@ public class ColorPickerView extends View {
 		float swatchIncrement = 1f / (float) (precision - 1);
 		int toneSquareBaseColor = snappedPureHueColor;
 
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setColor(0x77FF00FF);
-		canvas.drawRect(layoutInfo.toneSquareLeft, layoutInfo.toneSquareTop, layoutInfo.toneSquareLeft + layoutInfo.toneSquareSize, layoutInfo.toneSquareTop + layoutInfo.toneSquareSize, paint);
-
 		// first rendered row is white, which is drawn by stroking an empty white circle
-
 		for (int row = 0; row < precision; row++, swatchY += swatchIncrement) {
 			swatchLeft = layoutInfo.toneSquareLeft;
 			swatchTop = layoutInfo.toneSquareTop + row * swatchSize;
@@ -178,6 +176,14 @@ public class ColorPickerView extends View {
 		// now draw selection handles
 		paintHueKnob(canvas);
 		paintToneKnob(canvas);
+	}
+
+	public OnColorChangeListener getOnColorChangeListener() {
+		return onColorChangeListener;
+	}
+
+	public void setOnColorChangeListener(OnColorChangeListener onColorChangeListener) {
+		this.onColorChangeListener = onColorChangeListener;
 	}
 
 	private PointF getHueKnobPosition(float hue) {
@@ -347,9 +353,9 @@ public class ColorPickerView extends View {
 		float[] hsl = {0, 0, 0};
 		ColorUtils.RGBToHSL(Color.red(color), Color.green(color), Color.blue(color), hsl);
 
-		snappedHue = snapHueValue(hsl[0]);
-		snappedSaturation = snapSaturationOrLightnessValue(hsl[1]);
-		snappedLightness = snapSaturationOrLightnessValue(hsl[2]);
+		snappedHue = (float)snapHueValue(hsl[0]);
+		snappedSaturation = (float)snapSaturationOrLightnessValue(hsl[1]);
+		snappedLightness = (float)snapSaturationOrLightnessValue(hsl[2]);
 
 		updateSnappedColor();
 	}
@@ -361,6 +367,10 @@ public class ColorPickerView extends View {
 		hsl[1] = 1;
 		hsl[2] = 0.5f;
 		snappedPureHueColor = ColorUtils.HSLToColor(hsl);
+
+		if (onColorChangeListener != null) {
+			onColorChangeListener.onColorChange(this,snappedColor);
+		}
 	}
 
 	@Override
@@ -460,7 +470,7 @@ public class ColorPickerView extends View {
 			angle += 360.0f;
 		}
 
-		float snapped = snapHueValue(angle);
+		float snapped = (float)snapHueValue(angle);
 		if (Math.abs(snapped - snappedHue) > 1e-3) {
 			snappedHue = snapped;
 			updateSnappedColor();
@@ -475,8 +485,8 @@ public class ColorPickerView extends View {
 		toneX = Math.min(Math.max(toneX, 0), 1);
 		toneY = Math.min(Math.max(toneY, 0), 1);
 
-		float sat = snapSaturationOrLightnessValue(1 - toneX);
-		float light = snapSaturationOrLightnessValue(1 - toneY);
+		float sat = (float)snapSaturationOrLightnessValue(1 - toneX);
+		float light = (float)snapSaturationOrLightnessValue(1 - toneY);
 
 		if (Math.abs(sat - snappedSaturation) > 1e-3 || Math.abs(light - snappedLightness) > 1e-3) {
 			snappedSaturation = sat;
@@ -486,13 +496,21 @@ public class ColorPickerView extends View {
 		}
 	}
 
-	private float snapHueValue(float hue) {
-		return snapSaturationOrLightnessValue(hue / 360f) * 360f;
+	private double snapHueValue(double hue) {
+		// notice, hue uses precision, whereas sat/light uses (precision-1)
+		// this is because the hue slider ring has precision+1 entries, because value 360 == value 0,
+		// it's like a spiral where the last entry overlaps the first.
+
+		hue /= 360;
+		hue = Math.round(hue * precision);
+		hue /= precision;
+		hue *= 360;
+		return hue;
 	}
 
-	private float snapSaturationOrLightnessValue(float v) {
+	private double snapSaturationOrLightnessValue(double v) {
 		v = Math.round(v * (precision-1));
-		v = v / (float) (precision-1);
+		v = v / (double) (precision-1);
 		return v;
 	}
 

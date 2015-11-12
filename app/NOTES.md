@@ -1,6 +1,11 @@
 #Currently
 Color Picker
 
+Two bugs:
+1) The active tone swatch color doesn't match the color of the swatch beneath. It should. It's close. It's not right tho.
+2) On tablet, the active tone swatch is way small (which is how the above bug was visible). The knob size must be larger than the tone swatch size. This is a circular problem though since the tone swatch size is indirectly dependant on the knob size. So, come up with an algorithm to determine toneSquareSize independant of KNOB_SIZE, and then make KNOB_SIZE into a layoutInfo field.
+
+
 #Alpha Blending
 Will require 3 new full-screen bitmaps. 
 Since this is expensive, should only be active when alpha < 255

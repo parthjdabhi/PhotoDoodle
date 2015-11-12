@@ -93,7 +93,6 @@ public class ColorPickerView extends View {
 
 		paint = new Paint();
 		paint.setAntiAlias(true);
-		paint.setStyle(Paint.Style.FILL_AND_STROKE);
 
 		interpolator = new AnticipateOvershootInterpolator();
 		setDragState(DragState.NONE);

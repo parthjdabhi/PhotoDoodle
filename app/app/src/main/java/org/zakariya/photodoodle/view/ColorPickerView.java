@@ -7,12 +7,18 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.graphics.ColorUtils;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Interpolator;
 
 import org.zakariya.photodoodle.R;
 import org.zakariya.photodoodle.geom.PointFUtil;
@@ -37,8 +43,8 @@ public class ColorPickerView extends View {
 	private static final float SQRT_2 = (float) Math.sqrt(2);
 	private static final float HUE_RING_THICKNESS = 8f;
 	private static final float SEPARATOR_WIDTH = 4f;
-	private static final float KNOB_BORDER_WIDTH = 8f;
-	private static final float KNOB_RADIUS = 44;
+	private static final float KNOB_RADIUS = 30;
+	private static final long ANIMATION_DURATION = 200;
 
 	private int color = 0xFF000000;
 	private int snappedColor, snappedPureHueColor;
@@ -52,6 +58,10 @@ public class ColorPickerView extends View {
 	private Path hueRingWedgeSeparatorPath;
 	private DragState dragState;
 	private OnColorChangeListener onColorChangeListener;
+	private long dragStartTime, dragEndTime;
+	private Interpolator interpolator;
+	float hueKnobEngagment;
+	float toneKnobEngagment;
 
 	public ColorPickerView(Context context) {
 		super(context);
@@ -82,6 +92,19 @@ public class ColorPickerView extends View {
 		paint = new Paint();
 		paint.setAntiAlias(true);
 		paint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+		interpolator = new AccelerateDecelerateInterpolator();
+		setDragState(DragState.NONE);
+	}
+
+	@Override
+	protected void onAttachedToWindow() {
+		super.onAttachedToWindow();
+		if (getParent() != null) {
+			ViewGroup v = (ViewGroup) getParent();
+			v.setClipChildren(false);
+			Log.i(TAG, "Disabling child view clipping");
+		}
 	}
 
 	@Override
@@ -94,7 +117,10 @@ public class ColorPickerView extends View {
 			backgroundColor = ((ColorDrawable) backgroundDrawable).getColor();
 		}
 
-		// first draw the hue ring
+		//
+		// first draw the hue ring - a set of wedges radiating from center
+		//
+
 		canvas.save();
 		canvas.translate(layoutInfo.centerX, layoutInfo.centerY);
 
@@ -119,7 +145,9 @@ public class ColorPickerView extends View {
 
 		canvas.restore();
 
-		// draw the hue angle wedge separators
+		//
+		// draw the hue angle wedge separators and the background fill on top to leave only the hue ring visible
+		//
 
 		canvas.save();
 		canvas.translate(layoutInfo.centerX, layoutInfo.centerY);
@@ -129,11 +157,12 @@ public class ColorPickerView extends View {
 		canvas.drawPath(hueRingWedgeSeparatorPath, paint);
 		canvas.restore();
 
-		// now draw the background fill on top (this covers the outside and inside of ring to leave rainbow donut)
 		paint.setStyle(Paint.Style.FILL);
 		canvas.drawPath(backgroundFillPath, paint);
 
+		//
 		// now render the tone square
+		//
 
 		float swatchSize = layoutInfo.toneSquareSwatchSize;
 		float swatchRadius = swatchSize / 2 - SEPARATOR_WIDTH;
@@ -143,7 +172,6 @@ public class ColorPickerView extends View {
 		float swatchIncrement = 1f / (float) (precision - 1);
 		int toneSquareBaseColor = snappedPureHueColor;
 
-		// first rendered row is white, which is drawn by stroking an empty white circle
 		for (int row = 0; row < precision; row++, swatchY += swatchIncrement) {
 			swatchLeft = layoutInfo.toneSquareLeft;
 			swatchTop = layoutInfo.toneSquareTop + row * swatchSize;
@@ -173,9 +201,83 @@ public class ColorPickerView extends View {
 			paint.setStyle(Paint.Style.FILL);
 		}
 
-		// now draw selection handles
-		paintHueKnob(canvas);
-		paintToneKnob(canvas);
+		final long now = System.currentTimeMillis();
+
+		//
+		// Draw the knob handles.
+		// First, get the "engagement" factor. The knob grows when it's grabbed, and
+		// shrinks when let go. The engagement grows from 0->1, then 1->0 to show this.
+		//
+
+		switch (dragState) {
+			case DRAGGING_HUE_HANDLE:
+				hueKnobEngagment = Math.min((float)(now - dragStartTime)/(float)ANIMATION_DURATION, 1f);
+				toneKnobEngagment = 0;
+				break;
+			case DRAGGING_TONE_HANDLE:
+				toneKnobEngagment = Math.min((float)(now - dragStartTime)/(float)ANIMATION_DURATION, 1f);
+				hueKnobEngagment = 0;
+				break;
+			case NONE:
+				if (toneKnobEngagment > 0) {
+					toneKnobEngagment = 1f - Math.min(((float) (now - dragEndTime) / (float) ANIMATION_DURATION), 1f);
+				}
+				if (hueKnobEngagment > 0) {
+					hueKnobEngagment = 1f - Math.min(((float) (now - dragEndTime) / (float) ANIMATION_DURATION), 1f);
+				}
+				break;
+		}
+
+		PointF hueKnobPosition = getHueKnobPosition(snappedHue);
+		PointF toneKnobPosition = getToneKnobPosition(snappedHue, snappedSaturation, snappedLightness);
+
+		// draw whichever knob is currently engaged on top
+		if (hueKnobEngagment > toneKnobEngagment) {
+			drawKnob(canvas, snappedColor, toneKnobPosition.x, toneKnobPosition.y, toneKnobEngagment);
+			drawKnob(canvas, snappedPureHueColor, hueKnobPosition.x, hueKnobPosition.y, hueKnobEngagment);
+		} else {
+			drawKnob(canvas, snappedPureHueColor, hueKnobPosition.x, hueKnobPosition.y, hueKnobEngagment);
+			drawKnob(canvas, snappedColor, toneKnobPosition.x, toneKnobPosition.y, toneKnobEngagment);
+		}
+
+		//
+		// now determine if we must continue animation
+		//
+
+		boolean animating = false;
+		if (dragState == DragState.NONE) {
+			if (now - dragEndTime < ANIMATION_DURATION) {
+				animating = true;
+			}
+		} else {
+			animating = true;
+		}
+
+		if (animating) {
+			ViewCompat.postInvalidateOnAnimation(this);
+		}
+	}
+
+	private void drawKnob(Canvas canvas, int color, float x, float y, float engagement) {
+		paint.setStyle(Paint.Style.FILL);
+		paint.setColor(color);
+
+		if (engagement > 0) {
+			final float rInactive = KNOB_RADIUS;
+			final float rActive = KNOB_RADIUS * 1.5f;
+			final float extensionInactive = 1f;
+			final float extensionActive = 3f;
+			final long now = System.currentTimeMillis();
+			final float t = interpolator.getInterpolation(engagement);
+			float r = lrp(rInactive,rActive,t);
+			float extension = lrp(extensionInactive,extensionActive,t);
+
+			Path popupKnobPath = new Path();
+			popupKnobPath.addRoundRect(new RectF(x - r, y - extension * r, x + r, y + r), r, r, Path.Direction.CW);
+			canvas.drawPath(popupKnobPath, paint);
+		} else {
+			canvas.drawCircle(x, y, KNOB_RADIUS, paint);
+		}
 	}
 
 	public OnColorChangeListener getOnColorChangeListener() {
@@ -198,29 +300,6 @@ public class ColorPickerView extends View {
 		float x = layoutInfo.toneSquareLeft + (1 - snappedSaturation) * layoutInfo.toneSquareSize;
 		float y = layoutInfo.toneSquareTop + (1 - snappedLightness) * layoutInfo.toneSquareSize;
 		return new PointF(x, y);
-	}
-
-	private void paintHueKnob(Canvas canvas) {
-		PointF hueKnobPosition = getHueKnobPosition(snappedHue);
-		paint.setStyle(Paint.Style.FILL);
-		paint.setColor(snappedPureHueColor);
-		canvas.drawCircle(hueKnobPosition.x, hueKnobPosition.y, KNOB_RADIUS, paint);
-	}
-
-	private void paintToneKnob(Canvas canvas) {
-		PointF toneKnobPosition = getToneKnobPosition(snappedHue, snappedSaturation, snappedLightness);
-
-		float radius = KNOB_RADIUS;
-		if (dragState == DragState.DRAGGING_TONE_HANDLE) {
-			radius *= 3;
-		}
-
-		paint.setStyle(Paint.Style.FILL);
-		paint.setColor(0xFFFFFFFF);
-		canvas.drawCircle(toneKnobPosition.x, toneKnobPosition.y, radius + KNOB_BORDER_WIDTH, paint);
-
-		paint.setColor(snappedColor);
-		canvas.drawCircle(toneKnobPosition.x, toneKnobPosition.y, radius, paint);
 	}
 
 	private int plotToneSquareSwatchColor(int color, float x, float y) {
@@ -271,9 +350,8 @@ public class ColorPickerView extends View {
 
 		layoutInfo.hueRingOuterRadius = contentSize / 2f;
 		layoutInfo.hueRingInnerRadius = layoutInfo.hueRingOuterRadius - HUE_RING_THICKNESS;
-		float ringThickness = layoutInfo.hueRingOuterRadius - layoutInfo.hueRingInnerRadius;
 
-		layoutInfo.toneSquareSize = (layoutInfo.hueRingInnerRadius - (ringThickness / 2) - (KNOB_RADIUS * 2)) / SQRT_2 * 2f;
+		layoutInfo.toneSquareSize = (layoutInfo.hueRingInnerRadius - (KNOB_RADIUS * 2)) / SQRT_2 * 2f;
 		layoutInfo.toneSquareSwatchSize = layoutInfo.toneSquareSize / (float) (precision - 1);
 		layoutInfo.toneSquareLeft = centerX - layoutInfo.toneSquareSize / 2;
 		layoutInfo.toneSquareTop = centerY - layoutInfo.toneSquareSize / 2;
@@ -317,9 +395,8 @@ public class ColorPickerView extends View {
 	}
 
 	@Override
-	public void layout(int l, int t, int r, int b) {
-		super.layout(l, t, r, b);
-
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
 		computeLayoutInfo();
 		generateRenderPaths();
 		invalidate();
@@ -353,9 +430,9 @@ public class ColorPickerView extends View {
 		float[] hsl = {0, 0, 0};
 		ColorUtils.RGBToHSL(Color.red(color), Color.green(color), Color.blue(color), hsl);
 
-		snappedHue = (float)snapHueValue(hsl[0]);
-		snappedSaturation = (float)snapSaturationOrLightnessValue(hsl[1]);
-		snappedLightness = (float)snapSaturationOrLightnessValue(hsl[2]);
+		snappedHue = (float) snapHueValue(hsl[0]);
+		snappedSaturation = (float) snapSaturationOrLightnessValue(hsl[1]);
+		snappedLightness = (float) snapSaturationOrLightnessValue(hsl[2]);
 
 		updateSnappedColor();
 	}
@@ -369,7 +446,7 @@ public class ColorPickerView extends View {
 		snappedPureHueColor = ColorUtils.HSLToColor(hsl);
 
 		if (onColorChangeListener != null) {
-			onColorChangeListener.onColorChange(this,snappedColor);
+			onColorChangeListener.onColorChange(this, snappedColor);
 		}
 	}
 
@@ -397,12 +474,10 @@ public class ColorPickerView extends View {
 
 		// check if user tapped hue or tone knobs
 		if (hueKnobDist2 < dist2 && hueKnobDist2 < toneKnobDist2) {
-			dragState = DragState.DRAGGING_HUE_HANDLE;
-			invalidate();
+			setDragState(DragState.DRAGGING_HUE_HANDLE);
 			return true;
 		} else if (toneKnobDist2 < dist2 && toneKnobDist2 < hueKnobDist2) {
-			dragState = DragState.DRAGGING_TONE_HANDLE;
-			invalidate();
+			setDragState(DragState.DRAGGING_TONE_HANDLE);
 			return true;
 		} else {
 
@@ -419,8 +494,7 @@ public class ColorPickerView extends View {
 			if (touchRadiusFromCenter > layoutInfo.hueRingInnerRadius - KNOB_RADIUS &&
 					touchRadiusFromCenter < layoutInfo.hueRingOuterRadius + KNOB_RADIUS) {
 				updateSnappedHueForTouchPosition(event.getX(), event.getY());
-				dragState = DragState.DRAGGING_HUE_HANDLE;
-				invalidate();
+				setDragState(DragState.DRAGGING_HUE_HANDLE);
 				return true;
 			}
 
@@ -431,13 +505,12 @@ public class ColorPickerView extends View {
 
 			if (toneX >= -fudge && toneX <= 1 + fudge && toneY >= -fudge && toneY <= 1 + fudge) {
 				updateSnappedSaturationAndLightnessForTouchPosition(event.getX(), event.getY());
-				dragState = DragState.DRAGGING_TONE_HANDLE;
-				invalidate();
+				setDragState(DragState.DRAGGING_TONE_HANDLE);
 				return true;
 			}
 		}
 
-		dragState = DragState.NONE;
+		setDragState(DragState.NONE);
 		return false;
 	}
 
@@ -458,9 +531,22 @@ public class ColorPickerView extends View {
 	}
 
 	private boolean onTouchEnd(MotionEvent event) {
-		dragState = DragState.NONE;
-		invalidate();
+		setDragState(DragState.NONE);
 		return false;
+	}
+
+	private void setDragState(DragState dragState) {
+		this.dragState = dragState;
+		if (dragState == DragState.NONE) {
+			dragStartTime = 0;
+			dragEndTime = System.currentTimeMillis();
+		} else {
+			dragStartTime = System.currentTimeMillis();
+			dragEndTime = 0;
+
+			// start animation
+			ViewCompat.postInvalidateOnAnimation(this);
+		}
 	}
 
 	private void updateSnappedHueForTouchPosition(float x, float y) {
@@ -470,7 +556,7 @@ public class ColorPickerView extends View {
 			angle += 360.0f;
 		}
 
-		float snapped = (float)snapHueValue(angle);
+		float snapped = (float) snapHueValue(angle);
 		if (Math.abs(snapped - snappedHue) > 1e-3) {
 			snappedHue = snapped;
 			updateSnappedColor();
@@ -485,8 +571,8 @@ public class ColorPickerView extends View {
 		toneX = Math.min(Math.max(toneX, 0), 1);
 		toneY = Math.min(Math.max(toneY, 0), 1);
 
-		float sat = (float)snapSaturationOrLightnessValue(1 - toneX);
-		float light = (float)snapSaturationOrLightnessValue(1 - toneY);
+		float sat = (float) snapSaturationOrLightnessValue(1 - toneX);
+		float light = (float) snapSaturationOrLightnessValue(1 - toneY);
 
 		if (Math.abs(sat - snappedSaturation) > 1e-3 || Math.abs(light - snappedLightness) > 1e-3) {
 			snappedSaturation = sat;
@@ -509,8 +595,8 @@ public class ColorPickerView extends View {
 	}
 
 	private double snapSaturationOrLightnessValue(double v) {
-		v = Math.round(v * (precision-1));
-		v = v / (double) (precision-1);
+		v = Math.round(v * (precision - 1));
+		v = v / (double) (precision - 1);
 		return v;
 	}
 

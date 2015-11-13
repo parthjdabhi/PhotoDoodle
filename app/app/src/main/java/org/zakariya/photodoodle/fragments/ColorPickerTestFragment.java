@@ -19,6 +19,7 @@ import org.zakariya.photodoodle.view.ColorSwatchView;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import icepick.Icepick;
 import icepick.State;
 
@@ -46,10 +47,10 @@ public class ColorPickerTestFragment extends Fragment {
 	TextView outTextView;
 
 	@State
-	int inColor = 0xFFFF00FF;
+	int inColor = 0xFF00FFFF; // defaults to Cyan
 
 	@State
-	int outColor = 0xFFFF00FF;
+	int outColor = 0x0;
 
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,9 +73,12 @@ public class ColorPickerTestFragment extends Fragment {
 		inTextInputLayout.setErrorEnabled(true);
 		inEditText.setText(hexString(inColor));
 		inColorSwatch.setSwatchColor(inColor);
+
+		colorPickerView.setInitialColor(inColor);
+
+		outColor = colorPickerView.getCurrentColor();
 		outTextView.setText(hexString(outColor));
 		outColorSwatch.setSwatchColor(outColor);
-		colorPickerView.setColor(outColor);
 
 		inEditText.addTextChangedListener(new TextWatcher() {
 			@Override
@@ -90,7 +94,7 @@ public class ColorPickerTestFragment extends Fragment {
 			@Override
 			public void afterTextChanged(Editable s) {
 				String ss = s.toString();
-				if ( !ss.equals(hexString(inColor))) {
+				if (!ss.equals(hexString(inColor))) {
 					parseColorString(ss);
 				}
 			}
@@ -100,18 +104,23 @@ public class ColorPickerTestFragment extends Fragment {
 			@Override
 			public void onColorChange(ColorPickerView view, int color) {
 				outColor = color;
-				outTextView.setText(hexString(color));
-				outColorSwatch.setSwatchColor(Color.rgb(Color.red(color), Color.green(color), Color.blue(color)));
+				outTextView.setText(hexString(outColor));
+				outColorSwatch.setSwatchColor(outColor);
 			}
 		});
 
 		return v;
 	}
 
+	@OnClick(R.id.inColorSwatch)
+	void onInColorSwatchClick() {
+		setInColor(inColorSwatch.getSwatchColor());
+	}
+
 	private void setInColor(int color) {
 		inColor = Color.rgb(Color.red(color),Color.green(color),Color.blue(color));
 		inColorSwatch.setSwatchColor(inColor);
-		colorPickerView.setColor(inColor);
+		colorPickerView.setInitialColor(inColor);
 	}
 
 	private String hexString(int color) {
@@ -125,10 +134,11 @@ public class ColorPickerTestFragment extends Fragment {
 			return;
 		}
 
+		inTextInputLayout.setError(null);
+
 		try {
 			int c = Integer.parseInt(colorString,16);
 			c = Color.rgb(Color.red(c),Color.green(c),Color.blue(c));
-			inTextInputLayout.setError(null);
 			setInColor(c);
 		} catch (NumberFormatException nfe) {
 			inColorSwatch.setSwatchColor(0x0);

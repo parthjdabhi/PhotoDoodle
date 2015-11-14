@@ -8,8 +8,10 @@
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:orientation="horizontal"
+		android:focusable="true"
+		android:focusableInTouchMode="true"
 		android:gravity="center_vertical"
+		android:orientation="horizontal"
 		android:padding="16dp">
 
 		<org.zakariya.photodoodle.view.ColorSwatchView
@@ -23,8 +25,9 @@
 			android:id="@+id/inTextInputLayout"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
-			android:layout_weight="1"
-			android:layout_marginRight="16dp">
+			android:layout_marginRight="16dp"
+			android:layout_weight="1">
+
 			<EditText
 				android:id="@+id/inEditText"
 				android:layout_width="match_parent"
@@ -36,8 +39,8 @@
 			android:id="@+id/outColorSwatch"
 			android:layout_width="48dp"
 			android:layout_height="48dp"
-			android:padding="8dp"
-			android:layout_marginLeft="16dp"/>
+			android:layout_marginLeft="16dp"
+			android:padding="8dp"/>
 
 		<TextView
 			android:id="@+id/outTextView"
@@ -53,10 +56,10 @@
 		android:layout_width="match_parent"
 		android:layout_height="0dp"
 		android:layout_weight="1"
+		android:background="@color/windowBackgroundColor"
 		android:padding="16dp"
 		app:initialColor="#FF0000"
-		app:precision="8"
-		android:background="@color/windowBackgroundColor"/>
+		app:precision="8"/>
 
 
 </LinearLayout>

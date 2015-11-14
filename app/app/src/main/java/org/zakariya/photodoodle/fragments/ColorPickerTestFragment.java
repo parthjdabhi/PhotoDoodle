@@ -76,7 +76,10 @@ public class ColorPickerTestFragment extends Fragment {
 
 		colorPickerView.setInitialColor(inColor);
 
-		outColor = colorPickerView.getCurrentColor();
+		if (outColor == 0x0) {
+			outColor = colorPickerView.getCurrentColor();
+		}
+
 		outTextView.setText(hexString(outColor));
 		outColorSwatch.setSwatchColor(outColor);
 
@@ -130,6 +133,7 @@ public class ColorPickerTestFragment extends Fragment {
 
 	private void parseColorString(String colorString) {
 		if (colorString.length() > 6) {
+			inColorSwatch.setSwatchColor(0x0);
 			inTextInputLayout.setError("Cannot have more than 6 chars");
 			return;
 		}

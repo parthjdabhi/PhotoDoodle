@@ -41,9 +41,9 @@ public class ColorPickerView extends View {
 	}
 
 	private static final float SQRT_2 = (float) Math.sqrt(2);
-	private static final float HUE_RING_THICKNESS = 8f;
-	private static final float SEPARATOR_WIDTH = 4f;
-	private static final float MAX_TONE_SWATCH_RADIUS = 22;
+	private static final float HUE_RING_THICKNESS_DP = 16f;
+	private static final float SEPARATOR_WIDTH_DP = 4f;
+	private static final float MAX_TONE_SWATCH_RADIUS_DP = 22;
 	private static final long ANIMATION_DURATION = 200;
 
 	private int color = 0xFF000000;
@@ -156,8 +156,8 @@ public class ColorPickerView extends View {
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
-		computeLayoutInfo();
-		generateRenderPaths();
+		updateLayoutInfo();
+		updateRenderPaths();
 		invalidate();
 	}
 
@@ -203,10 +203,12 @@ public class ColorPickerView extends View {
 		// draw the hue angle wedge separators and the background fill on top to leave only the hue ring visible
 		//
 
+		final float SeparatorWidth = getResources().getDisplayMetrics().density * SEPARATOR_WIDTH_DP;
+
 		canvas.save();
 		canvas.translate(layoutInfo.centerX, layoutInfo.centerY);
 		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeWidth(SEPARATOR_WIDTH);
+		paint.setStrokeWidth(SeparatorWidth);
 		paint.setColor(backgroundColor);
 		canvas.drawPath(hueRingWedgeSeparatorPath, paint);
 		canvas.restore();
@@ -219,7 +221,7 @@ public class ColorPickerView extends View {
 		//
 
 		float swatchSize = layoutInfo.toneSquareSwatchSize;
-		float swatchRadius = swatchSize / 2 - SEPARATOR_WIDTH;
+		float swatchRadius = swatchSize / 2 - SeparatorWidth;
 		float swatchY = 0f;
 		float swatchX;
 		float swatchIncrement = 1f / (float) (precision - 1);
@@ -395,7 +397,11 @@ public class ColorPickerView extends View {
 		}
 	}
 
-	private void computeLayoutInfo() {
+	private void updateLayoutInfo() {
+
+		final float HueRingThickness = HUE_RING_THICKNESS_DP;
+		final float MaxToneSwatchRadius = MAX_TONE_SWATCH_RADIUS_DP;
+
 		int paddingLeft = getPaddingLeft();
 		int paddingTop = getPaddingTop();
 		int paddingRight = getPaddingRight();
@@ -413,9 +419,9 @@ public class ColorPickerView extends View {
 		layoutInfo.centerY = centerY;
 
 		layoutInfo.hueRingOuterRadius = contentSize / 2f;
-		layoutInfo.hueRingInnerRadius = layoutInfo.hueRingOuterRadius - HUE_RING_THICKNESS;
+		layoutInfo.hueRingInnerRadius = layoutInfo.hueRingOuterRadius - HueRingThickness;
 
-		layoutInfo.toneSquareSize = (layoutInfo.hueRingInnerRadius - (MAX_TONE_SWATCH_RADIUS * 2)) / SQRT_2 * 2f;
+		layoutInfo.toneSquareSize = 2 * (((layoutInfo.hueRingInnerRadius - MaxToneSwatchRadius) * 0.75f) / SQRT_2);
 		layoutInfo.toneSquareSwatchSize = layoutInfo.toneSquareSize / (float) (precision - 1);
 		layoutInfo.toneSquareLeft = centerX - layoutInfo.toneSquareSize / 2;
 		layoutInfo.toneSquareTop = centerY - layoutInfo.toneSquareSize / 2;
@@ -426,7 +432,7 @@ public class ColorPickerView extends View {
 		layoutInfo.knobRadius = layoutInfo.toneSquareSwatchSize/2 * 1.25f;
 	}
 
-	private void generateRenderPaths() {
+	private void updateRenderPaths() {
 		// backgroundPath is rect matching view, with donut cut out for hue ring
 		backgroundFillPath = new Path();
 		backgroundFillPath.addRect(0, 0, getWidth(), getHeight(), Path.Direction.CW);

@@ -439,7 +439,7 @@ public class ColorPickerView extends View {
 		layoutInfo.hueRingOuterRadius = contentSize / 2f;
 		layoutInfo.hueRingInnerRadius = layoutInfo.hueRingOuterRadius - HueRingThickness;
 
-		layoutInfo.toneSquareSize = 2 * (((layoutInfo.hueRingInnerRadius - MaxToneSwatchRadius) * 0.875f) / SQRT_2);
+		layoutInfo.toneSquareSize = 2 * (((layoutInfo.hueRingInnerRadius - MaxToneSwatchRadius) * 0.825f) / SQRT_2);
 		layoutInfo.toneSquareSwatchSize = layoutInfo.toneSquareSize / (float) (precision - 1);
 		layoutInfo.toneSquareLeft = centerX - layoutInfo.toneSquareSize / 2;
 		layoutInfo.toneSquareTop = centerY - layoutInfo.toneSquareSize / 2;

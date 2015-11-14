@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:app="http://schemas.android.com/apk/res-auto"
               android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+              android:layout_height="match_parent">
+
+	<org.zakariya.photodoodle.view.ColorPickerView
+		android:id="@+id/colorPicker"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="@color/windowBackgroundColor"
+		android:padding="32dp"
+		app:initialColor="#FF0000"
+		app:precision="8"/>
+
 
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:focusable="true"
 		android:focusableInTouchMode="true"
+		android:layout_gravity="center_horizontal|top"
 		android:gravity="center_vertical"
 		android:orientation="horizontal"
 		android:padding="16dp">
@@ -51,15 +61,4 @@
 
 	</LinearLayout>
 
-	<org.zakariya.photodoodle.view.ColorPickerView
-		android:id="@+id/colorPicker"
-		android:layout_width="match_parent"
-		android:layout_height="0dp"
-		android:layout_weight="1"
-		android:background="@color/windowBackgroundColor"
-		android:padding="16dp"
-		app:initialColor="#FF0000"
-		app:precision="8"/>
-
-
-</LinearLayout>
+</FrameLayout>

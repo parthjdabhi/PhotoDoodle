@@ -45,6 +45,7 @@ public class ColorPickerView extends View {
 	private static final float SEPARATOR_WIDTH_DP = 4f;
 	private static final float MAX_TONE_SWATCH_RADIUS_DP = 22;
 	private static final long ANIMATION_DURATION = 200;
+	private static final int WHITE = 0xFFFFFFFF;
 
 	private int color = 0xFF000000;
 	private int snappedColor, snappedPureHueColor;
@@ -93,6 +94,7 @@ public class ColorPickerView extends View {
 
 		paint = new Paint();
 		paint.setAntiAlias(true);
+		setLayerType(LAYER_TYPE_SOFTWARE, paint);
 
 		interpolator = new AnticipateOvershootInterpolator();
 		setDragState(DragState.NONE);
@@ -125,6 +127,7 @@ public class ColorPickerView extends View {
 	 * Set the initial color for this color picker to attempt to represent, given the
 	 * color space resolution constraints of its current precision. After setting an
 	 * initial color, getCurrentColor() will return the closest color representable.
+	 *
 	 * @param color an initial color for the color picker to represent.
 	 */
 	public void setInitialColor(int color) {
@@ -137,6 +140,7 @@ public class ColorPickerView extends View {
 	 * Get the current color represented by this color picker. Note, if this is called
 	 * immediately after calling setInitialColor(), the current color may not be the same as the color
 	 * provided to setInitialColor, since the precision of the color picker view narrows the color space.
+	 *
 	 * @return the color selected by the user
 	 */
 	public int getCurrentColor() {
@@ -165,7 +169,7 @@ public class ColorPickerView extends View {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
-		int backgroundColor = 0xFFFFFFFF;
+		int backgroundColor = WHITE;
 		Drawable backgroundDrawable = getBackground();
 		if (backgroundDrawable instanceof ColorDrawable) {
 			backgroundColor = ((ColorDrawable) backgroundDrawable).getColor();
@@ -232,7 +236,7 @@ public class ColorPickerView extends View {
 			swatchX = 0f;
 
 			// first row is solid white - so draw with a hairline grey circle to clarify
-			if (row == 0) {
+			if (row == 0 && backgroundColor == WHITE) {
 				paint.setStyle(Paint.Style.FILL);
 				paint.setColor(0xFFFFFFFF);
 				for (int col = 0; col < precision; col++, swatchLeft += swatchSize) {
@@ -316,6 +320,13 @@ public class ColorPickerView extends View {
 	private void drawKnob(Canvas canvas, int color, float x, float y, float engagement) {
 		paint.setStyle(Paint.Style.FILL);
 		paint.setColor(color);
+		paint.setShadowLayer(8, 0, 4, 0x99000000);
+
+		int shadowColor = 0x55000000;
+		float minShadowRadius = 4;
+		float maxShadowRadius = 16;
+		float minShadowOffset = 2;
+		float maxShadowOffset = 16;
 
 		if (engagement > 0) {
 			final float rInactive = layoutInfo.knobRadius;
@@ -328,10 +339,17 @@ public class ColorPickerView extends View {
 
 			Path popupKnobPath = new Path();
 			popupKnobPath.addRoundRect(new RectF(x - r, y - extension * r, x + r, y + r), r, r, Path.Direction.CW);
+
+			float sr = lrp(minShadowRadius, maxShadowRadius, t);
+			float so = lrp(minShadowOffset, maxShadowOffset, t);
+			paint.setShadowLayer(sr, 0, so, shadowColor);
 			canvas.drawPath(popupKnobPath, paint);
 		} else {
+			paint.setShadowLayer(minShadowRadius, 0, minShadowOffset, shadowColor);
 			canvas.drawCircle(x, y, layoutInfo.knobRadius, paint);
 		}
+
+		paint.setShadowLayer(0, 0, 0, 0);
 	}
 
 	private PointF getHueKnobPosition(float hue) {
@@ -349,10 +367,10 @@ public class ColorPickerView extends View {
 	}
 
 	private int plotToneSquareSwatchColor(float hue, float x, float y) {
-		float [] hsl = {
+		float[] hsl = {
 				hue,
-				(float)snapSaturationOrLightnessValue(1-x),
-				(float)snapSaturationOrLightnessValue(1-y)
+				(float) snapSaturationOrLightnessValue(1 - x),
+				(float) snapSaturationOrLightnessValue(1 - y)
 		};
 
 		return ColorUtils.HSLToColor(hsl);
@@ -384,14 +402,14 @@ public class ColorPickerView extends View {
 		float bp = b - 360f;
 
 		// find shortest distance to interpolate
-		float abd = Math.abs(a-b);
-		float apbd = Math.abs(ap-b);
-		float abpd = Math.abs(a-bp);
+		float abd = Math.abs(a - b);
+		float apbd = Math.abs(ap - b);
+		float abpd = Math.abs(a - bp);
 
 		if (abd < apbd && abd < abpd) {
-			return a + v * (b-a);
-		} else if ( apbd < abd && apbd < abpd) {
-			return ap + v * (b-ap);
+			return a + v * (b - a);
+		} else if (apbd < abd && apbd < abpd) {
+			return ap + v * (b - ap);
 		} else {
 			return a + v * (bp - a);
 		}
@@ -421,7 +439,7 @@ public class ColorPickerView extends View {
 		layoutInfo.hueRingOuterRadius = contentSize / 2f;
 		layoutInfo.hueRingInnerRadius = layoutInfo.hueRingOuterRadius - HueRingThickness;
 
-		layoutInfo.toneSquareSize = 2 * (((layoutInfo.hueRingInnerRadius - MaxToneSwatchRadius) * 0.75f) / SQRT_2);
+		layoutInfo.toneSquareSize = 2 * (((layoutInfo.hueRingInnerRadius - MaxToneSwatchRadius) * 0.875f) / SQRT_2);
 		layoutInfo.toneSquareSwatchSize = layoutInfo.toneSquareSize / (float) (precision - 1);
 		layoutInfo.toneSquareLeft = centerX - layoutInfo.toneSquareSize / 2;
 		layoutInfo.toneSquareTop = centerY - layoutInfo.toneSquareSize / 2;
@@ -429,7 +447,7 @@ public class ColorPickerView extends View {
 		layoutInfo.hueAngleIncrement = (float) (2 * Math.PI) / (float) precision;
 		layoutInfo.hueAngleIncrementDegrees = 360f / (float) precision;
 
-		layoutInfo.knobRadius = layoutInfo.toneSquareSwatchSize/2 * 1.25f;
+		layoutInfo.knobRadius = (layoutInfo.toneSquareSwatchSize / 2) + (4 * SEPARATOR_WIDTH_DP);
 	}
 
 	private void updateRenderPaths() {

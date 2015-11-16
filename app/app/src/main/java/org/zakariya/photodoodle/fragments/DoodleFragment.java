@@ -1,8 +1,10 @@
 package org.zakariya.photodoodle.fragments;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,6 +18,7 @@ import org.zakariya.photodoodle.R;
 import org.zakariya.photodoodle.model.Brush;
 import org.zakariya.photodoodle.model.Doodle;
 import org.zakariya.photodoodle.model.IncrementalInputStrokeDoodle;
+import org.zakariya.photodoodle.view.ColorPickerView;
 import org.zakariya.photodoodle.view.ColorSwatchView;
 import org.zakariya.photodoodle.view.DoodleView;
 
@@ -168,6 +171,28 @@ public class DoodleFragment extends Fragment {
 	@OnClick(R.id.colorSwatch)
 	public void onColorSwatchTap() {
 		Log.i(TAG, "onColorSwatchTap");
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+		LayoutInflater inflater = LayoutInflater.from(builder.getContext());
+		View view = inflater.inflate(R.layout.dialog_color_picker, null);
+		final ColorPickerView colorPickerView = (ColorPickerView) view.findViewById(R.id.colorPicker);
+		colorPickerView.setInitialColor(colorSwatch.getSwatchColor());
+
+		builder.setTitle(R.string.color_dialog_title);
+		builder.setView(view);
+		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				int color = colorPickerView.getCurrentColor();
+				colorSwatch.setSwatchColor(color);
+				Log.i(TAG, "DONE - selected color: " + Integer.toHexString(color));
+			}
+		});
+
+		builder.setNegativeButton(android.R.string.cancel,null);
+
+		builder.show();
 	}
 
 	public void onSaveAndReloadTap() {

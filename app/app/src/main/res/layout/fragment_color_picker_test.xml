@@ -8,7 +8,6 @@
 		android:id="@+id/colorPicker"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:background="@color/windowBackgroundColor"
 		android:padding="32dp"
 		app:initialColor="#FF0000"
 		app:precision="8"/>

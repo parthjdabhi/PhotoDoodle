@@ -14,6 +14,7 @@ import android.support.v4.graphics.ColorUtils;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +48,7 @@ public class ColorPickerView extends View {
 	private static final long ANIMATION_DURATION = 200;
 	private static final int WHITE = 0xFFFFFFFF;
 
+	private int backgroundColor = 0xFFFFFFFF;
 	private int color = 0xFF000000;
 	private int snappedColor, snappedPureHueColor;
 	private float currentDragHue, snappedHue, snappedSaturation, snappedLightness;
@@ -91,6 +93,21 @@ public class ColorPickerView extends View {
 		computeSnappedHSLFromColor(color);
 
 		a.recycle();
+
+		// determine the background color of the current theme
+		TypedValue ba = new TypedValue();
+		getContext().getTheme().resolveAttribute(android.R.attr.windowBackground, ba, true);
+		if (ba.type >= TypedValue.TYPE_FIRST_COLOR_INT && ba.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+			backgroundColor = ba.data;
+			Log.i(TAG, "init - got theme background color of: " + Integer.toHexString(backgroundColor));
+		}
+
+		Drawable backgroundDrawable = getBackground();
+		if (backgroundDrawable instanceof ColorDrawable) {
+			backgroundColor = ((ColorDrawable) backgroundDrawable).getColor();
+			Log.i(TAG, "init - got specific background color of: " + Integer.toHexString(backgroundColor));
+		}
+
 
 		paint = new Paint();
 		paint.setAntiAlias(true);
@@ -168,12 +185,6 @@ public class ColorPickerView extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-
-		int backgroundColor = WHITE;
-		Drawable backgroundDrawable = getBackground();
-		if (backgroundDrawable instanceof ColorDrawable) {
-			backgroundColor = ((ColorDrawable) backgroundDrawable).getColor();
-		}
 
 		//
 		// first draw the hue ring - a set of wedges radiating from center

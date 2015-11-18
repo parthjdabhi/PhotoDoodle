@@ -97,7 +97,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	@Override
 	public void draw(Canvas canvas) {
 		// clear canvas
-		canvas.drawColor(0xFFddddFF);
+		canvas.drawColor(0xFFFFFFFF);
 
 		// render backing store
 		canvas.drawBitmap(bitmap, 0, 0, bitmapPaint);

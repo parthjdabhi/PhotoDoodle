@@ -36,9 +36,8 @@ public class DoodleFragment extends Fragment {
 	private static final String TAG = "DoodleFragment";
 	private static final String DOODLE_STATE = "DOODLE_STATE";
 
-	enum ToolType {PENCIL, BRUSH, LARGE_ERASER, SMALL_ERASER}
+	enum BrushType {PENCIL, BRUSH, LARGE_ERASER, SMALL_ERASER}
 
-	;
 
 	@Bind(R.id.doodleView)
 	DoodleView doodleView;
@@ -58,11 +57,13 @@ public class DoodleFragment extends Fragment {
 	@Bind(R.id.colorSwatch)
 	ColorSwatchView colorSwatch;
 
-
-	Doodle doodle;
+	@State
+	int color = 0xFF000000;
 
 	@State
-	int selectedTool = ToolType.PENCIL.ordinal();
+	int selectedBrush = BrushType.PENCIL.ordinal();
+
+	Doodle doodle;
 
 	public DoodleFragment() {
 		setHasOptionsMenu(true);
@@ -122,49 +123,37 @@ public class DoodleFragment extends Fragment {
 
 		doodleView.setDoodle(doodle);
 
-		switch (ToolType.values()[selectedTool]) {
-			case PENCIL:
-				onPencilToolSelected();
-				break;
-			case BRUSH:
-				onBrushToolSelected();
-				break;
-			case LARGE_ERASER:
-				onLargeEraserToolSelected();
-				break;
-			case SMALL_ERASER:
-				onSmallEraserToolSelected();
-				break;
-		}
+		setColor(color);
+		setSelectedBrush(BrushType.values()[selectedBrush]);
 
 		return v;
 	}
 
 	@OnClick(R.id.pencilToolButton)
 	public void onPencilToolSelected() {
-		doodle.setBrush(new Brush(0xFF222222, 1, 4, 600, false));
-		selectedTool = ToolType.PENCIL.ordinal();
+		doodle.setBrush(new Brush(color, 1, 4, 600, false));
+		selectedBrush = BrushType.PENCIL.ordinal();
 		updateToolIcons();
 	}
 
 	@OnClick(R.id.brushToolButton)
 	public void onBrushToolSelected() {
-		doodle.setBrush(new Brush(0xFF222222, 8, 32, 600, false));
-		selectedTool = ToolType.BRUSH.ordinal();
+		doodle.setBrush(new Brush(color, 8, 32, 600, false));
+		selectedBrush = BrushType.BRUSH.ordinal();
 		updateToolIcons();
 	}
 
 	@OnClick(R.id.largeEraserToolButton)
 	public void onLargeEraserToolSelected() {
 		doodle.setBrush(new Brush(0x0, 24, 38, 600, true));
-		selectedTool = ToolType.LARGE_ERASER.ordinal();
+		selectedBrush = BrushType.LARGE_ERASER.ordinal();
 		updateToolIcons();
 	}
 
 	@OnClick(R.id.smallEraserToolButton)
 	public void onSmallEraserToolSelected() {
 		doodle.setBrush(new Brush(0x0, 12, 16, 600, true));
-		selectedTool = ToolType.SMALL_ERASER.ordinal();
+		selectedBrush = BrushType.SMALL_ERASER.ordinal();
 		updateToolIcons();
 	}
 
@@ -185,14 +174,47 @@ public class DoodleFragment extends Fragment {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				int color = colorPickerView.getCurrentColor();
-				colorSwatch.setSwatchColor(color);
-				Log.i(TAG, "DONE - selected color: " + Integer.toHexString(color));
+				setColor(color);
 			}
 		});
 
-		builder.setNegativeButton(android.R.string.cancel,null);
+		builder.setNegativeButton(android.R.string.cancel, null);
 
 		builder.show();
+	}
+
+	public int getColor() {
+		return color;
+	}
+
+	public void setColor(int color) {
+		this.color = color;
+		colorSwatch.setSwatchColor(color);
+
+		// update the current brush to use selected color
+		setSelectedBrush(BrushType.values()[selectedBrush]);
+	}
+
+	public BrushType getSelectedBrush() {
+		return BrushType.values()[selectedBrush];
+	}
+
+	public void setSelectedBrush(BrushType brushType) {
+		this.selectedBrush = brushType.ordinal();
+		switch (brushType) {
+			case PENCIL:
+				onPencilToolSelected();
+				break;
+			case BRUSH:
+				onBrushToolSelected();
+				break;
+			case LARGE_ERASER:
+				onLargeEraserToolSelected();
+				break;
+			case SMALL_ERASER:
+				onSmallEraserToolSelected();
+				break;
+		}
 	}
 
 	public void onSaveAndReloadTap() {
@@ -203,19 +225,19 @@ public class DoodleFragment extends Fragment {
 	}
 
 	private void updateToolIcons() {
-		pencilToolButton.setImageResource(selectedTool == ToolType.PENCIL.ordinal()
+		pencilToolButton.setImageResource(selectedBrush == BrushType.PENCIL.ordinal()
 				? R.drawable.doodle_tool_pencil_active
 				: R.drawable.doodle_tool_pencil_inactive);
 
-		brushToolButton.setImageResource(selectedTool == ToolType.BRUSH.ordinal()
+		brushToolButton.setImageResource(selectedBrush == BrushType.BRUSH.ordinal()
 				? R.drawable.doodle_tool_brush_active
 				: R.drawable.doodle_tool_brush_inactive);
 
-		largeEraserToolButton.setImageResource(selectedTool == ToolType.LARGE_ERASER.ordinal()
+		largeEraserToolButton.setImageResource(selectedBrush == BrushType.LARGE_ERASER.ordinal()
 				? R.drawable.doodle_tool_large_eraser_active
 				: R.drawable.doodle_tool_large_eraser_inactive);
 
-		smallEraserToolButton.setImageResource(selectedTool == ToolType.SMALL_ERASER.ordinal()
+		smallEraserToolButton.setImageResource(selectedBrush == BrushType.SMALL_ERASER.ordinal()
 				? R.drawable.doodle_tool_small_eraser_active
 				: R.drawable.doodle_tool_small_eraser_inactive);
 	}

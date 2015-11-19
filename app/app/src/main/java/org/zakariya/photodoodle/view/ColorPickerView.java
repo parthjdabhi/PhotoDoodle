@@ -43,7 +43,7 @@ public class ColorPickerView extends View {
 
 	private static final float SQRT_2 = (float) Math.sqrt(2);
 	private static final float HUE_RING_THICKNESS_DP = 16f;
-	private static final float SEPARATOR_WIDTH_DP = 4f;
+	private static final float SEPARATOR_WIDTH_DP = 8f;
 	private static final float MAX_TONE_SWATCH_RADIUS_DP = 22;
 	private static final long ANIMATION_DURATION = 200;
 	private static final int WHITE = 0xFFFFFFFF;
@@ -55,10 +55,7 @@ public class ColorPickerView extends View {
 
 	private int precision = 16;
 	private Paint paint;
-	private Path backgroundFillPath;
 	private LayoutInfo layoutInfo = new LayoutInfo();
-	private Path hueRingWedgePath;
-	private Path hueRingWedgeSeparatorPath;
 	private DragState dragState;
 	private OnColorChangeListener onColorChangeListener;
 
@@ -178,7 +175,6 @@ public class ColorPickerView extends View {
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
 		updateLayoutInfo();
-		updateRenderPaths();
 		invalidate();
 	}
 
@@ -187,61 +183,49 @@ public class ColorPickerView extends View {
 		super.onDraw(canvas);
 
 		//
-		// first draw the hue ring - a set of wedges radiating from center
+		// first draw the hue ring - a set of colored arcs around the center
 		//
 
 		canvas.save();
-		canvas.translate(layoutInfo.centerX, layoutInfo.centerY);
+
+		paint.setStyle(Paint.Style.STROKE);
+		paint.setStrokeWidth(HUE_RING_THICKNESS_DP);
+		paint.setStrokeCap(Paint.Cap.BUTT);
 
 		int precision = this.precision;
 		float[] hsl = {0, 1, 0.5f};
 		final float hueAngleIncrement = layoutInfo.hueAngleIncrement;
 		float hueAngle = 0;
+		float angleInset = (float)(Math.atan((SEPARATOR_WIDTH_DP/2) / layoutInfo.hueRingRadius) * 180 / Math.PI);
 
-		canvas.rotate(-90);
-		paint.setStyle(Paint.Style.FILL);
 		for (int hueStep = 0; hueStep < precision; hueStep++, hueAngle += hueAngleIncrement) {
 			hsl[0] = hueAngle * 180f / (float) Math.PI;
 			int color = ColorUtils.HSLToColor(hsl);
 			paint.setColor(color);
 
-			float r = (float) (hueStep * hueAngleIncrement * 180 / Math.PI);
-			canvas.save();
-			canvas.rotate(r);
-			canvas.drawPath(hueRingWedgePath, paint);
-			canvas.restore();
+			float angle = (float) (hueStep * hueAngleIncrement * 180 / Math.PI);
+			float startAngle = -90f + angle - layoutInfo.hueAngleIncrementDegrees / 2;
+			float sweep = layoutInfo.hueAngleIncrementDegrees;
+
+			canvas.drawArc(layoutInfo.hueRingRect, startAngle +  angleInset, sweep - 2*angleInset, false, paint);
 		}
 
 		canvas.restore();
 
-		//
-		// draw the hue angle wedge separators and the background fill on top to leave only the hue ring visible
-		//
-
-		final float SeparatorWidth = getResources().getDisplayMetrics().density * SEPARATOR_WIDTH_DP;
-
-		canvas.save();
-		canvas.translate(layoutInfo.centerX, layoutInfo.centerY);
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeWidth(SeparatorWidth);
-		paint.setColor(backgroundColor);
-		canvas.drawPath(hueRingWedgeSeparatorPath, paint);
-		canvas.restore();
-
-		paint.setStyle(Paint.Style.FILL);
-		canvas.drawPath(backgroundFillPath, paint);
 
 		//
 		// now render the tone square
 		//
 
 		float swatchSize = layoutInfo.toneSquareSwatchSize;
-		float swatchRadius = swatchSize / 2 - SeparatorWidth;
+		float swatchRadius = swatchSize / 2 - SEPARATOR_WIDTH_DP/2;
 		float swatchY = 0f;
 		float swatchX;
 		float swatchIncrement = 1f / (float) (precision - 1);
 
 		for (int row = 0; row < precision; row++, swatchY += swatchIncrement) {
+			paint.setStyle(Paint.Style.FILL);
+
 			float swatchLeft = layoutInfo.toneSquareLeft;
 			float swatchTop = layoutInfo.toneSquareTop + row * swatchSize;
 			swatchX = 0f;
@@ -365,7 +349,7 @@ public class ColorPickerView extends View {
 
 	private PointF getHueKnobPosition(float hue) {
 		float selectedHueAngle = (float) ((hue * Math.PI / 180) - Math.PI / 2);
-		float knobPositionRadius = (layoutInfo.hueRingOuterRadius + layoutInfo.hueRingInnerRadius) / 2;
+		float knobPositionRadius = layoutInfo.hueRingRadius;
 		float knobX = layoutInfo.centerX + (float) (Math.cos(selectedHueAngle) * knobPositionRadius);
 		float knobY = layoutInfo.centerY + (float) (Math.sin(selectedHueAngle) * knobPositionRadius);
 		return new PointF(knobX, knobY);
@@ -428,9 +412,6 @@ public class ColorPickerView extends View {
 
 	private void updateLayoutInfo() {
 
-		final float HueRingThickness = HUE_RING_THICKNESS_DP;
-		final float MaxToneSwatchRadius = MAX_TONE_SWATCH_RADIUS_DP;
-
 		int paddingLeft = getPaddingLeft();
 		int paddingTop = getPaddingTop();
 		int paddingRight = getPaddingRight();
@@ -447,10 +428,16 @@ public class ColorPickerView extends View {
 		layoutInfo.centerX = centerX;
 		layoutInfo.centerY = centerY;
 
-		layoutInfo.hueRingOuterRadius = contentSize / 2f;
-		layoutInfo.hueRingInnerRadius = layoutInfo.hueRingOuterRadius - HueRingThickness;
+		layoutInfo.hueRingRadius = contentSize / 2f;
 
-		layoutInfo.toneSquareSize = 2 * (((layoutInfo.hueRingInnerRadius - MaxToneSwatchRadius) * 0.825f) / SQRT_2);
+		float arcLeft = layoutInfo.centerX - layoutInfo.hueRingRadius;
+		float arcRight = layoutInfo.centerX + layoutInfo.hueRingRadius;
+		float arcTop = layoutInfo.centerY - layoutInfo.hueRingRadius;
+		float arcBottom = layoutInfo.centerY + layoutInfo.hueRingRadius;
+		layoutInfo.hueRingRect = new RectF(arcLeft, arcTop, arcRight, arcBottom);
+
+
+		layoutInfo.toneSquareSize = 2 * (((layoutInfo.hueRingRadius - HUE_RING_THICKNESS_DP/2 - MAX_TONE_SWATCH_RADIUS_DP) * 0.825f) / SQRT_2);
 		layoutInfo.toneSquareSwatchSize = layoutInfo.toneSquareSize / (float) (precision - 1);
 		layoutInfo.toneSquareLeft = centerX - layoutInfo.toneSquareSize / 2;
 		layoutInfo.toneSquareTop = centerY - layoutInfo.toneSquareSize / 2;
@@ -459,45 +446,6 @@ public class ColorPickerView extends View {
 		layoutInfo.hueAngleIncrementDegrees = 360f / (float) precision;
 
 		layoutInfo.knobRadius = (layoutInfo.toneSquareSwatchSize / 2) + (4 * SEPARATOR_WIDTH_DP);
-	}
-
-	private void updateRenderPaths() {
-		// backgroundPath is rect matching view, with donut cut out for hue ring
-		backgroundFillPath = new Path();
-		backgroundFillPath.addRect(0, 0, getWidth(), getHeight(), Path.Direction.CW);
-		backgroundFillPath.addCircle(layoutInfo.centerX, layoutInfo.centerY, layoutInfo.hueRingOuterRadius, Path.Direction.CW);
-		backgroundFillPath.addCircle(layoutInfo.centerX, layoutInfo.centerY, layoutInfo.hueRingInnerRadius, Path.Direction.CW);
-		backgroundFillPath.setFillType(Path.FillType.EVEN_ODD);
-
-		// right-facing wedge centered at origin
-		float halfHueIncrement = getHueAngleIncrement() / 2;
-		float x = (float) Math.cos(halfHueIncrement);
-		float y = (float) Math.sin(halfHueIncrement);
-		float outerRadius = layoutInfo.hueRingOuterRadius * 1.1f;
-		float innerRadius = layoutInfo.hueRingInnerRadius * 0.9f;
-
-		hueRingWedgePath = new Path();
-		hueRingWedgePath.moveTo(innerRadius * x, innerRadius * -y);
-		hueRingWedgePath.lineTo(outerRadius * x, outerRadius * -y);
-		hueRingWedgePath.lineTo(outerRadius * x, outerRadius * y);
-		hueRingWedgePath.lineTo(innerRadius * x, innerRadius * y);
-		hueRingWedgePath.close();
-
-		// thin separator lines to delineate the hue wedges
-		hueRingWedgeSeparatorPath = new Path();
-		float hueAngle = -layoutInfo.hueAngleIncrement / 2;
-		for (int hueStep = 0; hueStep < precision; hueStep++, hueAngle += layoutInfo.hueAngleIncrement) {
-			hueRingWedgeSeparatorPath.moveTo(0, 0);
-
-			x = (float) Math.cos(hueAngle);
-			y = (float) Math.sin(hueAngle);
-			hueRingWedgeSeparatorPath.lineTo(outerRadius * x, outerRadius * y);
-		}
-	}
-
-
-	private float getHueAngleIncrement() {
-		return (float) (2 * Math.PI) / (float) precision;
 	}
 
 	private void computeSnappedHSLFromColor(int color) {
@@ -514,8 +462,6 @@ public class ColorPickerView extends View {
 	private void updateSnappedColor() {
 		float[] hsl = {snappedHue, snappedSaturation, snappedLightness};
 		snappedColor = ColorUtils.HSLToColor(hsl);
-
-//		Log.d(TAG, "updateSnappedColor color: #" + Integer.toHexString(color).substring(2) + " snappedHue: " + snappedHue + " snappedSaturation: " + snappedSaturation + " snappedLightness: " + snappedLightness + " snappedColor: #" + Integer.toHexString(snappedColor).substring(2));
 
 		hsl[1] = 1;
 		hsl[2] = 0.5f;
@@ -568,8 +514,8 @@ public class ColorPickerView extends View {
 					new PointF(layoutInfo.centerX, layoutInfo.centerY),
 					new PointF(event.getX(), event.getY()));
 
-			if (touchRadiusFromCenter > layoutInfo.hueRingInnerRadius - layoutInfo.knobRadius &&
-					touchRadiusFromCenter < layoutInfo.hueRingOuterRadius + layoutInfo.knobRadius) {
+			if (touchRadiusFromCenter > layoutInfo.hueRingRadius - layoutInfo.knobRadius &&
+					touchRadiusFromCenter < layoutInfo.hueRingRadius + layoutInfo.knobRadius) {
 				updateSnappedHueForTouchPosition(event.getX(), event.getY());
 				setDragState(DragState.DRAGGING_HUE_HANDLE);
 				return true;
@@ -678,7 +624,8 @@ public class ColorPickerView extends View {
 	private static final class LayoutInfo {
 		float contentSize;
 		float centerX, centerY;
-		float hueRingOuterRadius, hueRingInnerRadius;
+		float hueRingRadius;
+		RectF hueRingRect;
 		float toneSquareSize, toneSquareLeft, toneSquareTop, toneSquareSwatchSize;
 		float hueAngleIncrement;
 		float hueAngleIncrementDegrees;

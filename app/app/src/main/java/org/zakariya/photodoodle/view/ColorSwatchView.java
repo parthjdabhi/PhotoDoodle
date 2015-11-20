@@ -12,14 +12,14 @@ import android.view.View;
 import org.zakariya.photodoodle.R;
 
 /**
- * Draws a circular swatchColor swatch, a circle in the assigned swatchColor.
+ * Draws a circular color swatch, a circle in the assigned color.
  */
 public class ColorSwatchView extends View {
 
 	private static final String TAG = "ColorSwatchView";
 	static final int ALPHA_CHECKER_COLOR = 0xFFD6D6D6;
 
-	private int swatchColor = Color.BLACK;
+	private int color = Color.BLACK;
 	private int selectionColor = Color.WHITE;
 	private boolean selected = false;
 	private float selectionThickness = 4;
@@ -48,7 +48,7 @@ public class ColorSwatchView extends View {
 	private void init(AttributeSet attrs, int defStyle) {
 		final TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.ColorSwatchView, defStyle, 0);
 
-		swatchColor = a.getColor(R.styleable.ColorSwatchView_swatchColor, swatchColor);
+		color = a.getColor(R.styleable.ColorSwatchView_android_color, color);
 		selectionColor = a.getColor(R.styleable.ColorSwatchView_selectionColor, selectionColor);
 		selectionThickness = a.getDimension(R.styleable.ColorSwatchView_selectionThickness, selectionThickness);
 		selected = a.getBoolean(R.styleable.ColorSwatchView_isSelected, selected);
@@ -71,7 +71,7 @@ public class ColorSwatchView extends View {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
-		if (Color.alpha(swatchColor) < 255) {
+		if (Color.alpha(color) < 255) {
 			// draw alpha checkerboard. First set a circular clip path
 
 			canvas.save();
@@ -130,12 +130,12 @@ public class ColorSwatchView extends View {
 	}
 
 	private void configurePaintsAndInvalidate() {
-		swatchPaint.setColor(swatchColor);
+		swatchPaint.setColor(color);
 		selectionPaint.setStrokeWidth(selectionThickness);
 		selectionPaint.setColor(selectionColor);
 
 
-		if (Color.alpha(swatchColor) < 255) {
+		if (Color.alpha(color) < 255) {
 			if (alphaCheckerPaint == null) {
 				alphaCheckerPaint = new Paint();
 				alphaCheckerPaint.setStyle(Paint.Style.FILL);
@@ -151,12 +151,12 @@ public class ColorSwatchView extends View {
 		invalidate();
 	}
 
-	public int getSwatchColor() {
-		return swatchColor;
+	public int getColor() {
+		return color;
 	}
 
-	public void setSwatchColor(int swatchColor) {
-		this.swatchColor = swatchColor;
+	public void setColor(int color) {
+		this.color = color;
 		configurePaintsAndInvalidate();
 	}
 

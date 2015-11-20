@@ -72,7 +72,7 @@ public class ColorPickerTestFragment extends Fragment {
 
 		inTextInputLayout.setErrorEnabled(true);
 		inEditText.setText(hexString(inColor));
-		inColorSwatch.setSwatchColor(inColor);
+		inColorSwatch.setColor(inColor);
 
 		colorPickerView.setInitialColor(inColor);
 
@@ -81,7 +81,7 @@ public class ColorPickerTestFragment extends Fragment {
 		}
 
 		outTextView.setText(hexString(outColor));
-		outColorSwatch.setSwatchColor(outColor);
+		outColorSwatch.setColor(outColor);
 
 		inEditText.addTextChangedListener(new TextWatcher() {
 			@Override
@@ -108,7 +108,7 @@ public class ColorPickerTestFragment extends Fragment {
 			public void onColorChange(ColorPickerView view, int color) {
 				outColor = color;
 				outTextView.setText(hexString(outColor));
-				outColorSwatch.setSwatchColor(outColor);
+				outColorSwatch.setColor(outColor);
 			}
 		});
 
@@ -117,12 +117,12 @@ public class ColorPickerTestFragment extends Fragment {
 
 	@OnClick(R.id.inColorSwatch)
 	void onInColorSwatchClick() {
-		setInColor(inColorSwatch.getSwatchColor());
+		setInColor(inColorSwatch.getColor());
 	}
 
 	private void setInColor(int color) {
 		inColor = Color.rgb(Color.red(color),Color.green(color),Color.blue(color));
-		inColorSwatch.setSwatchColor(inColor);
+		inColorSwatch.setColor(inColor);
 		colorPickerView.setInitialColor(inColor);
 	}
 
@@ -133,7 +133,7 @@ public class ColorPickerTestFragment extends Fragment {
 
 	private void parseColorString(String colorString) {
 		if (colorString.length() > 6) {
-			inColorSwatch.setSwatchColor(0x0);
+			inColorSwatch.setColor(0x0);
 			inTextInputLayout.setError("Cannot have more than 6 chars");
 			return;
 		}
@@ -145,7 +145,7 @@ public class ColorPickerTestFragment extends Fragment {
 			c = Color.rgb(Color.red(c),Color.green(c),Color.blue(c));
 			setInColor(c);
 		} catch (NumberFormatException nfe) {
-			inColorSwatch.setSwatchColor(0x0);
+			inColorSwatch.setColor(0x0);
 			inTextInputLayout.setError("Unable to parse as hex color");
 		}
 	}

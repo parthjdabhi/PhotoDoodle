@@ -166,7 +166,7 @@ public class DoodleFragment extends Fragment {
 		LayoutInflater inflater = LayoutInflater.from(builder.getContext());
 		View view = inflater.inflate(R.layout.dialog_color_picker, null);
 		final ColorPickerView colorPickerView = (ColorPickerView) view.findViewById(R.id.colorPicker);
-		colorPickerView.setInitialColor(colorSwatch.getSwatchColor());
+		colorPickerView.setInitialColor(colorSwatch.getColor());
 
 		builder.setTitle(R.string.color_dialog_title);
 		builder.setView(view);
@@ -189,7 +189,7 @@ public class DoodleFragment extends Fragment {
 
 	public void setColor(int color) {
 		this.color = color;
-		colorSwatch.setSwatchColor(color);
+		colorSwatch.setColor(color);
 
 		// update the current brush to use selected color
 		setSelectedBrush(BrushType.values()[selectedBrush]);

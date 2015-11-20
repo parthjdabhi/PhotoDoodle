@@ -1,6 +1,6 @@
 <resources>
 	<declare-styleable name="ColorPickerView">
 		<attr name="precision" format="integer"/>
-		<attr name="initialColor" format="color"/>
+		<attr name="android:color"/>
 	</declare-styleable>
 </resources>

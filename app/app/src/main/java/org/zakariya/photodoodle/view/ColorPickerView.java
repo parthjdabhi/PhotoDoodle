@@ -49,11 +49,11 @@ public class ColorPickerView extends View {
 	private static final int WHITE = 0xFFFFFFFF;
 
 	private int backgroundColor = 0xFFFFFFFF;
+	private int precision = 8;
 	private int color = 0xFF000000;
 	private int snappedColor, snappedPureHueColor;
 	private float currentDragHue, snappedHue, snappedSaturation, snappedLightness;
 
-	private int precision = 16;
 	private Paint paint;
 	private LayoutInfo layoutInfo = new LayoutInfo();
 	private DragState dragState;
@@ -85,7 +85,7 @@ public class ColorPickerView extends View {
 		final TypedArray a = getContext().obtainStyledAttributes(
 				attrs, R.styleable.ColorPickerView, defStyle, 0);
 
-		color = a.getColor(R.styleable.ColorPickerView_initialColor, color);
+		color = a.getColor(R.styleable.ColorPickerView_android_color, color);
 		precision = a.getInt(R.styleable.ColorPickerView_precision, precision);
 		computeSnappedHSLFromColor(color);
 
@@ -96,15 +96,12 @@ public class ColorPickerView extends View {
 		getContext().getTheme().resolveAttribute(android.R.attr.windowBackground, ba, true);
 		if (ba.type >= TypedValue.TYPE_FIRST_COLOR_INT && ba.type <= TypedValue.TYPE_LAST_COLOR_INT) {
 			backgroundColor = ba.data;
-			Log.i(TAG, "init - got theme background color of: " + Integer.toHexString(backgroundColor));
 		}
 
 		Drawable backgroundDrawable = getBackground();
 		if (backgroundDrawable instanceof ColorDrawable) {
 			backgroundColor = ((ColorDrawable) backgroundDrawable).getColor();
-			Log.i(TAG, "init - got specific background color of: " + Integer.toHexString(backgroundColor));
 		}
-
 
 		paint = new Paint();
 		paint.setAntiAlias(true);
@@ -196,7 +193,7 @@ public class ColorPickerView extends View {
 		float[] hsl = {0, 1, 0.5f};
 		final float hueAngleIncrement = layoutInfo.hueAngleIncrement;
 		float hueAngle = 0;
-		float angleInset = (float)(Math.atan((SEPARATOR_WIDTH_DP/2) / layoutInfo.hueRingRadius) * 180 / Math.PI);
+		float angleInset = (float) (Math.atan((SEPARATOR_WIDTH_DP / 2) / layoutInfo.hueRingRadius) * 180 / Math.PI);
 
 		for (int hueStep = 0; hueStep < precision; hueStep++, hueAngle += hueAngleIncrement) {
 			hsl[0] = hueAngle * 180f / (float) Math.PI;
@@ -207,7 +204,7 @@ public class ColorPickerView extends View {
 			float startAngle = -90f + angle - layoutInfo.hueAngleIncrementDegrees / 2;
 			float sweep = layoutInfo.hueAngleIncrementDegrees;
 
-			canvas.drawArc(layoutInfo.hueRingRect, startAngle +  angleInset, sweep - 2*angleInset, false, paint);
+			canvas.drawArc(layoutInfo.hueRingRect, startAngle + angleInset, sweep - 2 * angleInset, false, paint);
 		}
 
 		canvas.restore();
@@ -218,7 +215,7 @@ public class ColorPickerView extends View {
 		//
 
 		float swatchSize = layoutInfo.toneSquareSwatchSize;
-		float swatchRadius = swatchSize / 2 - SEPARATOR_WIDTH_DP/2;
+		float swatchRadius = swatchSize / 2 - SEPARATOR_WIDTH_DP / 2;
 		float swatchY = 0f;
 		float swatchX;
 		float swatchIncrement = 1f / (float) (precision - 1);
@@ -437,7 +434,7 @@ public class ColorPickerView extends View {
 		layoutInfo.hueRingRect = new RectF(arcLeft, arcTop, arcRight, arcBottom);
 
 
-		layoutInfo.toneSquareSize = 2 * (((layoutInfo.hueRingRadius - HUE_RING_THICKNESS_DP/2 - MAX_TONE_SWATCH_RADIUS_DP) * 0.825f) / SQRT_2);
+		layoutInfo.toneSquareSize = 2 * (((layoutInfo.hueRingRadius - HUE_RING_THICKNESS_DP / 2 - MAX_TONE_SWATCH_RADIUS_DP) * 0.825f) / SQRT_2);
 		layoutInfo.toneSquareSwatchSize = layoutInfo.toneSquareSize / (float) (precision - 1);
 		layoutInfo.toneSquareLeft = centerX - layoutInfo.toneSquareSize / 2;
 		layoutInfo.toneSquareTop = centerY - layoutInfo.toneSquareSize / 2;

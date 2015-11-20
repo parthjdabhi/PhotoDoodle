@@ -9,7 +9,7 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:padding="32dp"
-		app:initialColor="#FF0000"
+		android:color="#FF0000"
 		app:precision="8"/>
 
 

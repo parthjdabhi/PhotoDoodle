@@ -187,7 +187,6 @@ public class ColorPickerView extends View {
 		if (getParent() != null) {
 			ViewGroup v = (ViewGroup) getParent();
 			v.setClipChildren(false);
-			Log.i(TAG, "Disabling child view clipping");
 		}
 	}
 
@@ -198,37 +197,45 @@ public class ColorPickerView extends View {
 		invalidate();
 	}
 
-//	@Override
-//	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-//		final int estimatedIntrinsicSize = (int) ((MAX_TONE_SWATCH_RADIUS_DP * precision) * 0.5 * Math.sqrt(2));
-//
-//		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-//		int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-//		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-//		int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-//
-//		int width;
-//		int height;
-//
-//		if (widthMode == MeasureSpec.EXACTLY) {
-//			width = widthSize;
-//		} else if (widthMode == MeasureSpec.AT_MOST) {
-//			width = Math.min(estimatedIntrinsicSize, widthSize);
-//		} else {
-//			width = estimatedIntrinsicSize;
-//		}
-//
-//		if (heightMode == MeasureSpec.EXACTLY) {
-//			height = heightSize;
-//		} else if (heightMode == MeasureSpec.AT_MOST) {
-//			height = Math.min(estimatedIntrinsicSize, heightSize);
-//		} else {
-//			height = estimatedIntrinsicSize;
-//		}
-//
-//		int min = Math.min(width, height);
-//		setMeasuredDimension(min, min);
-//	}
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		if (requestedHueRingDiameter > 0) {
+			final int estimatedIntrinsicSize = (int)(requestedHueRingDiameter + 3*MAX_TONE_SWATCH_RADIUS_DP);
+
+			int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+			int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+			int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+			int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+			int width;
+			int height;
+
+			if (widthMode == MeasureSpec.EXACTLY) {
+				width = widthSize;
+			} else if (widthMode == MeasureSpec.AT_MOST) {
+				width = Math.min(estimatedIntrinsicSize, widthSize);
+			} else {
+				width = estimatedIntrinsicSize;
+			}
+
+			width += getPaddingLeft() + getPaddingRight();
+
+			if (heightMode == MeasureSpec.EXACTLY) {
+				height = heightSize;
+			} else if (heightMode == MeasureSpec.AT_MOST) {
+				height = Math.min(estimatedIntrinsicSize, heightSize);
+			} else {
+				height = estimatedIntrinsicSize;
+			}
+
+			height += getPaddingTop() + getPaddingBottom();
+
+			setMeasuredDimension(width, height);
+		} else {
+			// no requested hue ring diameter means we can't make a meaningful size measurement
+			super.onMeasure(widthMeasureSpec,heightMeasureSpec);
+		}
+	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {

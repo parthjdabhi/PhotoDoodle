@@ -9,11 +9,13 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:paddingLeft="32dp"
-		android:paddingTop="100dp"
+		android:paddingTop="32dp"
 		android:paddingRight="32dp"
 		android:paddingBottom="32dp"
 		android:color="#FF0000"
-		app:gravity="start|start"
+		android:layout_gravity="bottom|center"
+		app:hueRingDiameter="320dp"
+		app:gravity="center"
 		app:precision="8"/>
 
 

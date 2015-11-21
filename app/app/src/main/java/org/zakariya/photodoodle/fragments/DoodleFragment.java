@@ -168,7 +168,6 @@ public class DoodleFragment extends Fragment {
 		final ColorPickerView colorPickerView = (ColorPickerView) view.findViewById(R.id.colorPicker);
 		colorPickerView.setInitialColor(colorSwatch.getColor());
 
-		builder.setTitle(R.string.color_dialog_title);
 		builder.setView(view);
 		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 			@Override

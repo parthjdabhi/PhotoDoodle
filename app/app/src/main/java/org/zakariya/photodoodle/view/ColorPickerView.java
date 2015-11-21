@@ -12,6 +12,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.graphics.ColorUtils;
 import android.support.v4.view.ViewCompat;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -41,6 +42,12 @@ public class ColorPickerView extends View {
 		DRAGGING_TONE_HANDLE
 	}
 
+	private enum Gravity {
+		START,
+		CENTER,
+		END
+	}
+
 	private static final float SQRT_2 = (float) Math.sqrt(2);
 	private static final float HUE_RING_THICKNESS_DP = 16f;
 	private static final float SEPARATOR_WIDTH_DP = 8f;
@@ -53,6 +60,8 @@ public class ColorPickerView extends View {
 	private int color = 0xFF000000;
 	private int snappedColor, snappedPureHueColor;
 	private float currentDragHue, snappedHue, snappedSaturation, snappedLightness;
+	private Gravity hGravity = Gravity.CENTER;
+	private Gravity vGravity = Gravity.CENTER;
 
 	private Paint paint;
 	private LayoutInfo layoutInfo = new LayoutInfo();
@@ -88,6 +97,8 @@ public class ColorPickerView extends View {
 		color = a.getColor(R.styleable.ColorPickerView_android_color, color);
 		precision = a.getInt(R.styleable.ColorPickerView_precision, precision);
 		computeSnappedHSLFromColor(color);
+
+		parseAndApplyGravities(a.getString(R.styleable.ColorPickerView_gravity));
 
 		a.recycle();
 
@@ -174,6 +185,38 @@ public class ColorPickerView extends View {
 		updateLayoutInfo();
 		invalidate();
 	}
+
+//	@Override
+//	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+//		final int estimatedIntrinsicSize = (int) ((MAX_TONE_SWATCH_RADIUS_DP * precision) * 0.5 * Math.sqrt(2));
+//
+//		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+//		int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+//		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+//		int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+//
+//		int width;
+//		int height;
+//
+//		if (widthMode == MeasureSpec.EXACTLY) {
+//			width = widthSize;
+//		} else if (widthMode == MeasureSpec.AT_MOST) {
+//			width = Math.min(estimatedIntrinsicSize, widthSize);
+//		} else {
+//			width = estimatedIntrinsicSize;
+//		}
+//
+//		if (heightMode == MeasureSpec.EXACTLY) {
+//			height = heightSize;
+//		} else if (heightMode == MeasureSpec.AT_MOST) {
+//			height = Math.min(estimatedIntrinsicSize, heightSize);
+//		} else {
+//			height = estimatedIntrinsicSize;
+//		}
+//
+//		int min = Math.min(width, height);
+//		setMeasuredDimension(min, min);
+//	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
@@ -409,23 +452,44 @@ public class ColorPickerView extends View {
 
 	private void updateLayoutInfo() {
 
-		int paddingLeft = getPaddingLeft();
-		int paddingTop = getPaddingTop();
-		int paddingRight = getPaddingRight();
-		int paddingBottom = getPaddingBottom();
+		int knobPadding = (int)(MAX_TONE_SWATCH_RADIUS_DP + 4*SEPARATOR_WIDTH_DP);
+		int paddingLeft = getPaddingLeft() + knobPadding;
+		int paddingTop = getPaddingTop() + knobPadding;
+		int paddingRight = getPaddingRight() + knobPadding;
+		int paddingBottom = getPaddingBottom() + knobPadding;
 
 		int contentWidth = getWidth() - paddingLeft - paddingRight;
 		int contentHeight = getHeight() - paddingTop - paddingBottom;
 		int contentSize = Math.min(contentWidth, contentHeight);
 
-		float centerX = (float) Math.floor(paddingLeft + contentWidth / 2f);
-		float centerY = (float) Math.floor(paddingTop + contentHeight / 2f);
-
 		layoutInfo.contentSize = contentSize;
-		layoutInfo.centerX = centerX;
-		layoutInfo.centerY = centerY;
-
 		layoutInfo.hueRingRadius = contentSize / 2f;
+
+		// apply gravity to centerX, centerY
+		switch (hGravity) {
+			case START:
+				layoutInfo.centerX = paddingLeft + layoutInfo.hueRingRadius;
+				break;
+			case END:
+				layoutInfo.centerX = paddingLeft + contentWidth - layoutInfo.hueRingRadius;
+				break;
+			case CENTER:
+				layoutInfo.centerX = (float) Math.floor(paddingLeft + contentWidth / 2f);
+				break;
+		}
+
+		switch (vGravity) {
+			case START:
+				layoutInfo.centerY = paddingTop + layoutInfo.hueRingRadius;
+				break;
+			case END:
+				layoutInfo.centerY = paddingTop + contentHeight - layoutInfo.hueRingRadius;
+				break;
+			case CENTER:
+				layoutInfo.centerY = (float) Math.floor(paddingTop + contentHeight / 2f);
+				break;
+		}
+
 
 		float arcLeft = layoutInfo.centerX - layoutInfo.hueRingRadius;
 		float arcRight = layoutInfo.centerX + layoutInfo.hueRingRadius;
@@ -436,8 +500,8 @@ public class ColorPickerView extends View {
 
 		layoutInfo.toneSquareSize = 2 * (((layoutInfo.hueRingRadius - HUE_RING_THICKNESS_DP / 2 - MAX_TONE_SWATCH_RADIUS_DP) * 0.825f) / SQRT_2);
 		layoutInfo.toneSquareSwatchSize = layoutInfo.toneSquareSize / (float) (precision - 1);
-		layoutInfo.toneSquareLeft = centerX - layoutInfo.toneSquareSize / 2;
-		layoutInfo.toneSquareTop = centerY - layoutInfo.toneSquareSize / 2;
+		layoutInfo.toneSquareLeft = layoutInfo.centerX - layoutInfo.toneSquareSize / 2;
+		layoutInfo.toneSquareTop = layoutInfo.centerY - layoutInfo.toneSquareSize / 2;
 
 		layoutInfo.hueAngleIncrement = (float) (2 * Math.PI) / (float) precision;
 		layoutInfo.hueAngleIncrementDegrees = 360f / (float) precision;
@@ -616,6 +680,37 @@ public class ColorPickerView extends View {
 		v = Math.round(v * (precision - 1));
 		v = v / (double) (precision - 1);
 		return v;
+	}
+
+	private void parseAndApplyGravities(String spec) {
+		if (!TextUtils.isEmpty(spec)) {
+
+			spec = spec.toLowerCase().trim();
+			String[] tokens = spec.split("\\|", 2);
+			Log.i(TAG, "parseAndApplyGravities spec: \"" + spec + "\" tokens: " + TextUtils.join(",", tokens));
+
+			if (tokens.length == 1) {
+				// horizontal and vertical gravities are same
+				hGravity = vGravity = parseGravitySpec(tokens[0]);
+			} else if (tokens.length == 2) {
+				hGravity = parseGravitySpec(tokens[0]);
+				vGravity = parseGravitySpec(tokens[1]);
+			}
+		}
+	}
+
+	private Gravity parseGravitySpec(String specToken) {
+		switch (specToken) {
+			case "start":
+				return Gravity.START;
+			case "end":
+				return Gravity.END;
+			case "center":
+				return Gravity.CENTER;
+		}
+
+		// default fallthrough to center
+		return Gravity.CENTER;
 	}
 
 	private static final class LayoutInfo {

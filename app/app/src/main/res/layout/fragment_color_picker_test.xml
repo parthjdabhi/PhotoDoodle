@@ -13,7 +13,6 @@
 		android:paddingRight="32dp"
 		android:paddingBottom="32dp"
 		android:color="#FF0000"
-		app:hueRingDiameter="220dp"
 		app:gravity="start|start"
 		app:precision="8"/>
 

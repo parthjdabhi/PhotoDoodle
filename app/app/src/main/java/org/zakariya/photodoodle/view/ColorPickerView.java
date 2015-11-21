@@ -49,7 +49,6 @@ public class ColorPickerView extends View {
 	}
 
 	private static final float SQRT_2 = (float) Math.sqrt(2);
-	private static final float HUE_RING_THICKNESS_DP = 16f;
 	private static final float SEPARATOR_WIDTH_DP = 8f;
 	private static final float MAX_TONE_SWATCH_RADIUS_DP = 22;
 	private static final long ANIMATION_DURATION = 200;
@@ -161,6 +160,16 @@ public class ColorPickerView extends View {
 		invalidate();
 	}
 
+	public float getHueRingDiameter() {
+		return requestedHueRingDiameter;
+	}
+
+	public void setHueRingDiameter(float requestedHueRingDiameter) {
+		this.requestedHueRingDiameter = requestedHueRingDiameter;
+		updateLayoutInfo();
+		invalidate();
+	}
+
 	/**
 	 * Get the current color represented by this color picker. Note, if this is called
 	 * immediately after calling setInitialColor(), the current color may not be the same as the color
@@ -232,7 +241,7 @@ public class ColorPickerView extends View {
 		canvas.save();
 
 		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeWidth(HUE_RING_THICKNESS_DP);
+		paint.setStrokeWidth(layoutInfo.hueRingThickness);
 		paint.setStrokeCap(Paint.Cap.BUTT);
 
 		int precision = this.precision;
@@ -470,7 +479,7 @@ public class ColorPickerView extends View {
 
 		if (requestedHueRingDiameter > 0) {
 			float minHueRingRadius = (precision * MAX_TONE_SWATCH_RADIUS_DP) * SQRT_2;
-			layoutInfo.hueRingRadius = Math.max(Math.min(requestedHueRingDiameter/2, maxHueRingRadius), minHueRingRadius);
+			layoutInfo.hueRingRadius = Math.max(Math.min(requestedHueRingDiameter / 2, maxHueRingRadius), minHueRingRadius);
 		} else {
 			layoutInfo.hueRingRadius = maxHueRingRadius;
 		}
@@ -508,11 +517,16 @@ public class ColorPickerView extends View {
 		layoutInfo.hueRingRect = new RectF(arcLeft, arcTop, arcRight, arcBottom);
 
 
-		layoutInfo.toneSquareSize = 2 * (((layoutInfo.hueRingRadius - HUE_RING_THICKNESS_DP / 2 - MAX_TONE_SWATCH_RADIUS_DP) * 0.825f) / SQRT_2);
+		float toneSquareScale = 0.875f;
+		float estimatedToneSquareSize = 2 * ((layoutInfo.hueRingRadius - MAX_TONE_SWATCH_RADIUS_DP) * toneSquareScale / SQRT_2);
+		float estimatedToneSwatchSize = estimatedToneSquareSize / precision;
+
+		layoutInfo.toneSquareSize = 2 * (((layoutInfo.hueRingRadius - estimatedToneSwatchSize - MAX_TONE_SWATCH_RADIUS_DP) * toneSquareScale) / SQRT_2);
 		layoutInfo.toneSquareSwatchSize = layoutInfo.toneSquareSize / (float) (precision - 1);
 		layoutInfo.toneSquareLeft = layoutInfo.centerX - layoutInfo.toneSquareSize / 2;
 		layoutInfo.toneSquareTop = layoutInfo.centerY - layoutInfo.toneSquareSize / 2;
 
+		layoutInfo.hueRingThickness = (layoutInfo.toneSquareSwatchSize - 2*SEPARATOR_WIDTH_DP) * 0.75f / 2;
 		layoutInfo.hueAngleIncrement = (float) (2 * Math.PI) / (float) precision;
 		layoutInfo.hueAngleIncrementDegrees = 360f / (float) precision;
 
@@ -727,6 +741,7 @@ public class ColorPickerView extends View {
 		float contentSize;
 		float centerX, centerY;
 		float hueRingRadius;
+		float hueRingThickness;
 		RectF hueRingRect;
 		float toneSquareSize, toneSquareLeft, toneSquareTop, toneSquareSwatchSize;
 		float hueAngleIncrement;

@@ -60,6 +60,7 @@ public class ColorPickerView extends View {
 	private int color = 0xFF000000;
 	private int snappedColor, snappedPureHueColor;
 	private float currentDragHue, snappedHue, snappedSaturation, snappedLightness;
+	private float requestedHueRingDiameter = 0;
 	private Gravity hGravity = Gravity.CENTER;
 	private Gravity vGravity = Gravity.CENTER;
 
@@ -97,6 +98,8 @@ public class ColorPickerView extends View {
 		color = a.getColor(R.styleable.ColorPickerView_android_color, color);
 		precision = a.getInt(R.styleable.ColorPickerView_precision, precision);
 		computeSnappedHSLFromColor(color);
+
+		requestedHueRingDiameter = a.getDimension(R.styleable.ColorPickerView_hueRingDiameter, requestedHueRingDiameter);
 
 		parseAndApplyGravities(a.getString(R.styleable.ColorPickerView_gravity));
 
@@ -461,9 +464,16 @@ public class ColorPickerView extends View {
 		int contentWidth = getWidth() - paddingLeft - paddingRight;
 		int contentHeight = getHeight() - paddingTop - paddingBottom;
 		int contentSize = Math.min(contentWidth, contentHeight);
+		float maxHueRingRadius = contentSize/2f;
 
 		layoutInfo.contentSize = contentSize;
-		layoutInfo.hueRingRadius = contentSize / 2f;
+
+		if (requestedHueRingDiameter > 0) {
+			float minHueRingRadius = (precision * MAX_TONE_SWATCH_RADIUS_DP) * SQRT_2;
+			layoutInfo.hueRingRadius = Math.max(Math.min(requestedHueRingDiameter/2, maxHueRingRadius), minHueRingRadius);
+		} else {
+			layoutInfo.hueRingRadius = maxHueRingRadius;
+		}
 
 		// apply gravity to centerX, centerY
 		switch (hGravity) {

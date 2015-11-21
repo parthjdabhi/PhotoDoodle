@@ -8,9 +8,13 @@
 		android:id="@+id/colorPicker"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:padding="32dp"
+		android:paddingLeft="32dp"
+		android:paddingTop="100dp"
+		android:paddingRight="32dp"
+		android:paddingBottom="32dp"
 		android:color="#FF0000"
-		app:gravity="center|end"
+		app:hueRingDiameter="220dp"
+		app:gravity="start|start"
 		app:precision="8"/>
 
 

@@ -374,7 +374,6 @@ public class ColorPickerView extends View {
 	private void drawKnob(Canvas canvas, int color, float x, float y, float engagement) {
 		paint.setStyle(Paint.Style.FILL);
 		paint.setColor(color);
-		paint.setShadowLayer(8, 0, 4, 0x99000000);
 
 		int shadowColor = 0x55000000;
 		float minShadowRadius = 4;

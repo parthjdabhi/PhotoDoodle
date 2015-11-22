@@ -56,9 +56,14 @@ public class ColorSwatchView extends View {
 
 		a.recycle();
 
+		int shadowColor = 0x55000000;
+		float shadowRadius = 4;
+		float shadowOffset = 2;
 		swatchPaint = new Paint();
 		swatchPaint.setAntiAlias(true);
 		swatchPaint.setStyle(Paint.Style.FILL);
+		swatchPaint.setShadowLayer(shadowRadius, 0, shadowOffset, shadowColor);
+		setLayerType(LAYER_TYPE_SOFTWARE, swatchPaint);
 
 		selectionPaint = new Paint();
 		selectionPaint.setAntiAlias(true);

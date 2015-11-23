@@ -26,10 +26,9 @@
 		<item name="android:textColor">@color/actionBarText</item>
 	</style>
 
-	<style name="DrawingToolButtonStyle" parent="Widget.AppCompat.ImageButton">
+	<style name="DrawingToolButtonStyle" parent="Widget.AppCompat.Button.Borderless">
 		<item name="android:layout_width">@dimen/doodle_drawing_tool_icon_size</item>
 		<item name="android:layout_height">@dimen/doodle_drawing_tool_icon_size</item>
-		<item name="android:background">@android:color/transparent</item>
 	</style>
 
 </resources>

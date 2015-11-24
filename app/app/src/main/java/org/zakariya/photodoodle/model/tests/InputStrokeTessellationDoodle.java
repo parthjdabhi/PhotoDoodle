@@ -1,7 +1,8 @@
-package org.zakariya.photodoodle.model;
+package org.zakariya.photodoodle.model.tests;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -13,6 +14,7 @@ import android.view.MotionEvent;
 import org.zakariya.photodoodle.geom.InputStroke;
 import org.zakariya.photodoodle.geom.InputStrokeTessellator;
 import org.zakariya.photodoodle.geom.PointFUtil;
+import org.zakariya.photodoodle.model.Doodle;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -87,8 +89,10 @@ public class InputStrokeTessellationDoodle extends Doodle {
 
 	@Override
 	public void draw(Canvas canvas) {
-		// clear canvas
-		canvas.drawColor(0xFFFFFFFF);
+
+		if (Color.alpha(getBackgroundColor()) > 0) {
+			canvas.drawColor(getBackgroundColor());
+		}
 
 		if (inputStrokeTessellatedPath != null) {
 			canvas.drawPath(inputStrokeTessellatedPath, tessellatedInputStrokePathFillPaint);
@@ -106,7 +110,6 @@ public class InputStrokeTessellationDoodle extends Doodle {
 				PointF t = new PointF(point.position.x + tangent.x * 2 * radius, point.position.y + tangent.y * 2 * radius);
 				canvas.drawLine(point.position.x, point.position.y, t.x, t.y, handlePaint);
 			}
-
 		}
 	}
 

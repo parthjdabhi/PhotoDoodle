@@ -13,9 +13,18 @@
 	<string name="tool_name_large_eraser">Large Eraser</string>
 	<string name="tool_name_small_eraser">Small Eraser</string>
 
+	<string name="tool_name_take_photo">Snap Photo</string>
+	<string name="tool_name_crop_photo">Crop</string>
+
+	<string name="doodle_menu_camera">Snap</string>
+	<string name="doodle_menu_draw">Draw</string>
 	<string name="doodle_menu_undo">Undo</string>
 	<string name="doodle_menu_clear">Clear</string>
 
 	<string name="color_dialog_title">Color</string>
+
+	<string name="no_camera_dialog_title">Can\'t take a photo</string>
+	<string name="no_camera_dialog_message">This device can\'t take photos, either it has no camera app or it has no camera device.</string>
+	<string name="no_camera_dialog_positive_button_title">Shucks</string>
 
 </resources>

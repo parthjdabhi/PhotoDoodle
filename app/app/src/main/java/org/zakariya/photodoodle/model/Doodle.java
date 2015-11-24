@@ -18,6 +18,7 @@ public abstract class Doodle {
 
 	private Brush brush;
 	private int width, height;
+	private int backgroundColor = 0xFFFFFFFF;
 	WeakReference<DoodleView> doodleViewWeakReference;
 
 	public void setDoodleView(DoodleView doodleView) {
@@ -102,4 +103,11 @@ public abstract class Doodle {
 
 	protected abstract void onTouchEventEnd(@NonNull MotionEvent event);
 
+	public int getBackgroundColor() {
+		return backgroundColor;
+	}
+
+	public void setBackgroundColor(int backgroundColor) {
+		this.backgroundColor = backgroundColor;
+	}
 }

@@ -3,6 +3,7 @@ package org.zakariya.photodoodle.model;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -96,8 +97,10 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public void draw(Canvas canvas) {
-		// clear canvas
-		canvas.drawColor(0xFFFFFFFF);
+
+		if (Color.alpha(getBackgroundColor()) > 0) {
+			canvas.drawColor(getBackgroundColor());
+		}
 
 		// render backing store
 		canvas.drawBitmap(bitmap, 0, 0, bitmapPaint);

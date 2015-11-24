@@ -2,6 +2,20 @@
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
       tools:context=".activities.MainActivity">
+
+	<item android:id="@+id/menuItemCameraMode"
+	      android:title="@string/doodle_menu_camera"
+	      android:icon="@drawable/ic_photo_camera"
+	      android:orderInCategory="0"
+	      app:showAsAction="always" />
+
+	<item android:id="@+id/menuItemDrawMode"
+	      android:title="@string/doodle_menu_draw"
+	      android:icon="@drawable/ic_mode_edit"
+	      android:orderInCategory="1"
+	      app:showAsAction="always" />
+
+
 	<item android:id="@+id/menuItemUndo"
 	      android:title="@string/doodle_menu_undo"
 	      android:orderInCategory="100"

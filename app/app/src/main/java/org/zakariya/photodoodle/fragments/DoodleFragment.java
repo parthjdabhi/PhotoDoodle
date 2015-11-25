@@ -142,6 +142,9 @@ public class DoodleFragment extends Fragment {
 				doodle.onCreate(doodleState);
 			}
 		}
+
+		// be tidy - the photo file may have been left over after a crash
+		deletePhotoTempFile();
 	}
 
 	@Override
@@ -182,6 +185,9 @@ public class DoodleFragment extends Fragment {
 				} else {
 					Log.w(TAG, "onActivityResult(REQUEST_TAKE_PHOTO) - photo wasn't taken.");
 				}
+
+				// clean up
+				deletePhotoTempFile();
 				break;
 
 			default:
@@ -388,6 +394,15 @@ public class DoodleFragment extends Fragment {
 	private File getPhotoTempFile() {
 		File path = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 		return new File(path, "snap.jpg");
+	}
+
+	private void deletePhotoTempFile() {
+		File photoTempFile = getPhotoTempFile();
+		if (photoTempFile.exists()) {
+			if (!photoTempFile.delete()){
+				Log.e(TAG, "Unable to delete the photo temp save file at " + photoTempFile);
+			}
+		}
 	}
 
 }

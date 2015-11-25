@@ -9,7 +9,6 @@ import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
 
 import icepick.Icepick;
-import icepick.State;
 
 /**
  * Created by shamyl on 11/23/15.
@@ -17,8 +16,8 @@ import icepick.State;
 public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 
 	private static final String TAG = "PhotoDoodle";
+	private static final String STATE_BITMAP = "bitmap";
 
-	@State
 	Bitmap photo;
 
 	private Paint photoPaint;
@@ -35,12 +34,19 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
+
+		setPhoto((Bitmap) savedInstanceState.getParcelable(STATE_BITMAP));
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		Icepick.saveInstanceState(this, outState);
+
+		if (photo != null) {
+			outState.putParcelable(STATE_BITMAP, photo);
+		}
+
 	}
 
 	@Override

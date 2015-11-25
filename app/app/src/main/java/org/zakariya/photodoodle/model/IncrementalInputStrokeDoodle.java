@@ -209,6 +209,10 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		renderDrawingSteps();
 	}
 
+	public Context getContext() {
+		return context;
+	}
+
 	private static final String TEST_KRYO_SERIALIZATION_FILE = "KryoTest.bin";
 
 	@SuppressWarnings("unchecked")

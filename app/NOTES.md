@@ -4,9 +4,11 @@ PhotoDoodle can't save current photo via icepick - it's too big. Probably need t
 
 You can draw on the photo while in PHOTO mode. I need to figure out how to delegate input appropriately. Probably want to have a isCropMode kind of flag on PhotoDoodle, in which case it lets user manipulate photo (and does NOT pass on input to super), otherwise, it passes on to super, and drawing happens. 
 
-Photo toolbar needs better icons, and they need to show state.
+Photo toolbar needs better icons, and they need to show on/off state. Got to think this through. 
+	- take a photo, this is an action
+	- edit mode can be on or off. This is a toggle????
 
-Toolbars: SHould they be on top, right under the appbar? SHould the background be @primaryColor????
+Toolbars: Should they be on top, right under the appbar? Should the background be @primaryColor????
 
 
 #Alpha Blending

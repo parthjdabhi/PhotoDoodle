@@ -77,7 +77,7 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 
 	@Override
 	public void clear() {
-		setPhoto(null);
+		clearPhoto();
 		super.clear();
 	}
 
@@ -147,6 +147,10 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 			case DRAW:
 				super.onTouchEventEnd(event);
 		}
+	}
+
+	public void clearPhoto() {
+		setPhoto(null);
 	}
 
 	public Bitmap getPhoto() {

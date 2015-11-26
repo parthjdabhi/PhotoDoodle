@@ -8,9 +8,9 @@
 	<FrameLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:background="@color/primary">
+		android:background="@color/primary_dark">
 
-		<LinearLayout
+		<FrameLayout
 			android:id="@+id/photoToolbar"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -20,65 +20,81 @@
 
 			<ImageButton
 				android:id="@+id/takePhotoButton"
-				style="@style/DrawingToolButtonStyle"
+				style="@style/DoodleToolbarImageButtonStyle"
+				android:layout_gravity="center_vertical|center_horizontal"
 				android:contentDescription="@string/tool_name_take_photo"
 				android:src="@drawable/ic_camera"
 				/>
 
-			<ImageButton
-				android:id="@+id/cropPhotoButton"
-				style="@style/DrawingToolButtonStyle"
-				android:contentDescription="@string/tool_name_take_photo"
-				android:src="@drawable/ic_crop_free"
-				/>
+			<Button
+				android:id="@+id/clearPhotoButton"
+				style="@style/DoodleToolbarTextButtonStyle"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_vertical|end"
+				android:text="@string/clear"/>
 
-		</LinearLayout>
+		</FrameLayout>
 
-		<LinearLayout
+		<FrameLayout
 			android:id="@+id/drawToolbar"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_gravity="center"
-			android:gravity="center_vertical|center_horizontal"
-			android:orientation="horizontal">
+			android:layout_gravity="center_vertical|center_horizontal">
 
-			<ImageButton
-				android:id="@+id/pencilToolButton"
-				style="@style/DrawingToolButtonStyle"
-				android:contentDescription="@string/tool_name_pencil"
-				android:src="@drawable/doodle_tool_pencil_inactive"
-				/>
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:gravity="center_vertical|center_horizontal"
+				android:orientation="horizontal">
 
-			<ImageButton
-				android:id="@+id/brushToolButton"
-				style="@style/DrawingToolButtonStyle"
-				android:contentDescription="@string/tool_name_brush"
-				android:src="@drawable/doodle_tool_brush_inactive"
-				/>
+				<ImageButton
+					android:id="@+id/pencilToolButton"
+					style="@style/DoodleToolbarImageButtonStyle"
+					android:contentDescription="@string/tool_name_pencil"
+					android:src="@drawable/doodle_tool_pencil_inactive"
+					/>
 
-			<ImageButton
-				android:id="@+id/largeEraserToolButton"
-				style="@style/DrawingToolButtonStyle"
-				android:contentDescription="@string/tool_name_large_eraser"
-				android:src="@drawable/doodle_tool_large_eraser_inactive"
-				/>
+				<ImageButton
+					android:id="@+id/brushToolButton"
+					style="@style/DoodleToolbarImageButtonStyle"
+					android:contentDescription="@string/tool_name_brush"
+					android:src="@drawable/doodle_tool_brush_inactive"
+					/>
 
-			<ImageButton
-				android:id="@+id/smallEraserToolButton"
-				style="@style/DrawingToolButtonStyle"
-				android:contentDescription="@string/tool_name_small_eraser"
-				android:src="@drawable/doodle_tool_small_eraser_inactive"
-				/>
+				<ImageButton
+					android:id="@+id/largeEraserToolButton"
+					style="@style/DoodleToolbarImageButtonStyle"
+					android:contentDescription="@string/tool_name_large_eraser"
+					android:src="@drawable/doodle_tool_large_eraser_inactive"
+					/>
 
-			<org.zakariya.photodoodle.view.ColorSwatchView
-				android:id="@+id/colorSwatch"
-				android:layout_width="@dimen/doodle_drawing_tool_icon_size"
-				android:layout_height="@dimen/doodle_drawing_tool_icon_size"
-				android:color="#FF00FFFF"
-				android:padding="8dp"
-				app:selectionThickness="0dp"/>
+				<ImageButton
+					android:id="@+id/smallEraserToolButton"
+					style="@style/DoodleToolbarImageButtonStyle"
+					android:contentDescription="@string/tool_name_small_eraser"
+					android:src="@drawable/doodle_tool_small_eraser_inactive"
+					/>
 
-		</LinearLayout>
+				<org.zakariya.photodoodle.view.ColorSwatchView
+					android:id="@+id/colorSwatch"
+					android:layout_width="@dimen/doodle_drawing_tool_icon_size"
+					android:layout_height="@dimen/doodle_drawing_tool_icon_size"
+					android:padding="8dp"
+					app:selectionThickness="0dp"/>
+			</LinearLayout>
+
+			<Button
+				android:id="@+id/clearDrawingButton"
+				style="@style/DoodleToolbarTextButtonStyle"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_vertical|end"
+				android:text="@string/clear"/>
+
+		</FrameLayout>
+
 	</FrameLayout>
 
 	<org.zakariya.photodoodle.view.DoodleView

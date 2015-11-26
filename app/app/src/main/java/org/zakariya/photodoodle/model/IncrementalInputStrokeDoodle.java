@@ -90,10 +90,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public void clear() {
-		incrementalInputStrokeTessellator = null;
-		drawingSteps.clear();
-		bitmap.eraseColor(0x0);
-		invalidate();
+		clearDrawing();
 	}
 
 	@Override
@@ -200,6 +197,13 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	public void setRenderInvalidationRect(boolean renderInvalidationRect) {
 		this.renderInvalidationRect = renderInvalidationRect;
+	}
+
+	public void clearDrawing() {
+		incrementalInputStrokeTessellator = null;
+		drawingSteps.clear();
+		bitmap.eraseColor(0x0);
+		invalidate();
 	}
 
 	public void undo() {

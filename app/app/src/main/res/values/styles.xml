@@ -26,9 +26,14 @@
 		<item name="android:textColor">@color/actionBarText</item>
 	</style>
 
-	<style name="DrawingToolButtonStyle" parent="Widget.AppCompat.Button.Borderless">
+	<style name="DoodleToolbarImageButtonStyle" parent="Widget.AppCompat.Button.Borderless">
 		<item name="android:layout_width">@dimen/doodle_drawing_tool_icon_size</item>
 		<item name="android:layout_height">@dimen/doodle_drawing_tool_icon_size</item>
+		<item name="android:tint">@android:color/white</item>
+	</style>
+
+	<style name="DoodleToolbarTextButtonStyle" parent="Widget.AppCompat.Button.Borderless">
+		<item name="android:textColor">@android:color/white</item>
 	</style>
 
 </resources>

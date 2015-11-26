@@ -42,6 +42,8 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	protected Matrix screenToCanvasMatrix;
 	protected Matrix canvasToScreenMatrix;
+	protected float screenToCanvasScale;
+	protected float canvasToScreenScale;
 
 	private Paint invalidationRectPaint, bitmapPaint;
 	private RectF invalidationRect;
@@ -284,9 +286,10 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		final float midX = getWidth() * 0.5f;
 		final float midY = getHeight() * 0.5f;
 		final float maxHalfDim = Math.max(getWidth(), getHeight()) * 0.5f;
+		screenToCanvasScale = CANVAS_SIZE / maxHalfDim;
 
 		Matrix matrix = new Matrix();
-		matrix.preScale(CANVAS_SIZE / maxHalfDim, CANVAS_SIZE / maxHalfDim);
+		matrix.preScale(screenToCanvasScale, screenToCanvasScale);
 		matrix.preTranslate(-midX, -midY);
 
 		return matrix;
@@ -296,10 +299,11 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		final float midX = getWidth() * 0.5f;
 		final float midY = getHeight() * 0.5f;
 		final float maxHalfDim = Math.max(getWidth(), getHeight()) * 0.5f;
+		canvasToScreenScale = maxHalfDim / CANVAS_SIZE;
 
 		Matrix matrix = new Matrix();
 		matrix.preTranslate(midX, midY);
-		matrix.preScale(maxHalfDim / CANVAS_SIZE, maxHalfDim / CANVAS_SIZE);
+		matrix.preScale(canvasToScreenScale,canvasToScreenScale);
 
 		return matrix;
 	}

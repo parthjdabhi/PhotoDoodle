@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 	Bitmap photo;
 
 	private Matrix photoMatrix;
+	private Matrix userAdjustmentMatrix;
 	private Paint photoPaint;
 	private Paint debugPaint;
 
@@ -41,8 +43,16 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 	@State
 	int interactionMode = InteractionMode.DRAW.ordinal();
 
+	@State
+	PointF userTranslation = new PointF();
+
+	PointF touchStartPosition;
+
 	public PhotoDoodle(Context context) {
 		super(context);
+
+		photoMatrix = new Matrix();
+		userAdjustmentMatrix = new Matrix();
 
 		photoPaint = new Paint();
 		photoPaint.setAntiAlias(true);
@@ -55,6 +65,7 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
 		setPhoto((Bitmap) savedInstanceState.getParcelable(STATE_BITMAP));
+		updateUserAdjustmentMatrix();
 	}
 
 	@Override
@@ -72,6 +83,7 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		super.resize(newWidth, newHeight);
 		if (photo != null) {
 			updatePhotoMatrix();
+			updateUserAdjustmentMatrix();
 		}
 	}
 
@@ -87,6 +99,7 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		if (photo != null) {
 			canvas.save();
 			canvas.concat(canvasToScreenMatrix);
+			canvas.concat(userAdjustmentMatrix);
 			canvas.concat(photoMatrix);
 			canvas.drawBitmap(photo, 0, 0, photoPaint);
 
@@ -123,6 +136,7 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 	protected void onTouchEventBegin(@NonNull MotionEvent event) {
 		switch (getInteractionMode()) {
 			case PHOTO:
+				touchStartPosition = new PointF(event.getX() - userTranslation.x, event.getY() - userTranslation.y);
 				break;
 			case DRAW:
 				super.onTouchEventBegin(event);
@@ -133,6 +147,10 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 	protected void onTouchEventMove(@NonNull MotionEvent event) {
 		switch (getInteractionMode()) {
 			case PHOTO:
+				userTranslation.x = event.getX() - touchStartPosition.x;
+				userTranslation.y = event.getY() - touchStartPosition.y;
+				updateUserAdjustmentMatrix();
+				invalidate();
 				break;
 			case DRAW:
 				super.onTouchEventMove(event);
@@ -201,5 +219,10 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		photoMatrix = new Matrix();
 		photoMatrix.preScale(scale, scale);
 		photoMatrix.preTranslate(-photo.getWidth() / 2, -photo.getHeight() / 2);
+	}
+
+	private void updateUserAdjustmentMatrix() {
+		userAdjustmentMatrix.reset();
+		userAdjustmentMatrix.preTranslate(userTranslation.x * screenToCanvasScale, userTranslation.y * screenToCanvasScale);
 	}
 }

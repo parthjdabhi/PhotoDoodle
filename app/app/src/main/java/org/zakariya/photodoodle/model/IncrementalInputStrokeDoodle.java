@@ -38,18 +38,19 @@ import icepick.State;
 public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalInputStrokeTessellator.Listener {
 	private static final String TAG = "IncInptStrokeDoodle";
 
-	private static final float CANVAS_SIZE = 1024f;
+	public static final float CANVAS_SIZE = 1024f;
+
+	protected Matrix screenToCanvasMatrix;
+	protected Matrix canvasToScreenMatrix;
 
 	private Paint invalidationRectPaint, bitmapPaint;
 	private RectF invalidationRect;
 	private IncrementalInputStrokeTessellator incrementalInputStrokeTessellator;
 	private Context context;
 	private Canvas bitmapCanvas;
-	private Matrix screenToCanvasMatrix;
-	private Matrix canvasToScreenMatrix;
 	private boolean renderInvalidationRect = false;
+	private Bitmap bitmap;
 
-	Bitmap bitmap;
 
 	@State
 	ArrayList<IntermediateDrawingStep> drawingSteps = new ArrayList<>();
@@ -263,6 +264,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		float[] canvasPoint = {event.getX(), event.getY()};
 		screenToCanvasMatrix.mapPoints(canvasPoint);
 
+		//Log.i(TAG, "touch move canvas coord: " + canvasPoint[0] + ", " + canvasPoint[1]);
 		incrementalInputStrokeTessellator.add(canvasPoint[0], canvasPoint[1]);
 	}
 
@@ -274,7 +276,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		}
 	}
 
-	private Matrix computeScreenToCanvasMatrix() {
+	protected Matrix computeScreenToCanvasMatrix() {
 		final float midX = getWidth() * 0.5f;
 		final float midY = getHeight() * 0.5f;
 		final float maxHalfDim = Math.max(getWidth(), getHeight()) * 0.5f;
@@ -286,7 +288,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		return matrix;
 	}
 
-	private Matrix computeCanvasToScreenMatrix() {
+	protected Matrix computeCanvasToScreenMatrix() {
 		final float midX = getWidth() * 0.5f;
 		final float midY = getHeight() * 0.5f;
 		final float maxHalfDim = Math.max(getWidth(), getHeight()) * 0.5f;

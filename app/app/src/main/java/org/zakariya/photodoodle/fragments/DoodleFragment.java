@@ -49,8 +49,6 @@ public class DoodleFragment extends Fragment {
 
 	enum BrushType {PENCIL, BRUSH, LARGE_ERASER, SMALL_ERASER}
 
-	enum InteractionMode {PHOTO, DRAW}
-
 
 	@Bind(R.id.doodleView)
 	DoodleView doodleView;
@@ -86,9 +84,6 @@ public class DoodleFragment extends Fragment {
 	int selectedBrush = BrushType.PENCIL.ordinal();
 
 	@State
-	int interactionMode = InteractionMode.DRAW.ordinal();
-
-	@State
 	File photoFile;
 
 	PhotoDoodle doodle;
@@ -117,11 +112,11 @@ public class DoodleFragment extends Fragment {
 				return true;
 
 			case R.id.menuItemCameraMode:
-				setInteractionMode(InteractionMode.PHOTO);
+				setInteractionMode(PhotoDoodle.InteractionMode.PHOTO);
 				return true;
 
 			case R.id.menuItemDrawMode:
-				setInteractionMode(InteractionMode.DRAW);
+				setInteractionMode(PhotoDoodle.InteractionMode.DRAW);
 				return true;
 
 			default:
@@ -167,7 +162,7 @@ public class DoodleFragment extends Fragment {
 
 		setColor(color);
 		setSelectedBrush(BrushType.values()[selectedBrush]);
-		setInteractionMode(InteractionMode.values()[interactionMode]);
+		setInteractionMode(doodle.getInteractionMode());
 
 		return v;
 	}
@@ -306,12 +301,12 @@ public class DoodleFragment extends Fragment {
 		}
 	}
 
-	public InteractionMode getInteractionMode() {
-		return InteractionMode.values()[interactionMode];
+	public PhotoDoodle.InteractionMode getInteractionMode() {
+		return doodle.getInteractionMode();
 	}
 
-	public void setInteractionMode(InteractionMode interactionMode) {
-		this.interactionMode = interactionMode.ordinal();
+	public void setInteractionMode(PhotoDoodle.InteractionMode interactionMode) {
+		doodle.setInteractionMode(interactionMode);
 		updateUIToShowInteractionMode();
 	}
 
@@ -362,11 +357,15 @@ public class DoodleFragment extends Fragment {
 		doodle.clear();
 	}
 
+	@Nullable
 	private Bitmap loadPhotoFromFile(File file) {
+
+		if (!file.exists()) {
+			return null;
+		}
+
 		try {
-			String filePath = file.getAbsolutePath();
-			BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-			Bitmap bitmap = BitmapFactory.decodeFile(filePath, bmOptions);
+			Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
 
 			// determine a minimum size of the bitmap which would fill the device screen
 			Point displaySize = new Point();
@@ -383,7 +382,6 @@ public class DoodleFragment extends Fragment {
 			} else {
 				return bitmap;
 			}
-
 		} catch (Exception e) {
 			Log.e(TAG, "loadPhotoFromFile - TROUBLE");
 			e.printStackTrace();

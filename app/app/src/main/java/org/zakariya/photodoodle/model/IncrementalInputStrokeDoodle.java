@@ -40,6 +40,11 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	public static final float CANVAS_SIZE = 1024f;
 
+	public enum ScaleMode {
+		FIT,
+		FILL
+	}
+
 	protected Matrix screenToCanvasMatrix;
 	protected Matrix canvasToScreenMatrix;
 	protected float screenToCanvasScale;
@@ -51,6 +56,9 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	private Context context;
 	private Canvas bitmapCanvas;
 	private Bitmap bitmap;
+
+	@State
+	int scaleMode = ScaleMode.FILL.ordinal();
 
 	@State
 	boolean drawInvalidationRect = false;
@@ -239,6 +247,16 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		return context;
 	}
 
+	public ScaleMode getScaleMode() {
+		return ScaleMode.values()[scaleMode];
+	}
+
+	public void setScaleMode(ScaleMode scaleMode) {
+		this.scaleMode = scaleMode.ordinal();
+		invalidate();
+	}
+
+
 	public boolean isDrawDebugPositioningOverlay() {
 		return drawDebugPositioningOverlay;
 	}
@@ -325,7 +343,15 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		final float midX = getWidth() * 0.5f;
 		final float midY = getHeight() * 0.5f;
 		final float maxHalfDim = Math.max(getWidth(), getHeight()) * 0.5f;
-		screenToCanvasScale = CANVAS_SIZE / maxHalfDim;
+		final float minHalfDim = Math.min(getWidth(), getHeight()) * 0.5f;
+
+		switch(getScaleMode()){
+			case FIT:
+				screenToCanvasScale = CANVAS_SIZE / minHalfDim;
+				break;
+			case FILL:
+				screenToCanvasScale = CANVAS_SIZE / maxHalfDim;
+		}
 
 		Matrix matrix = new Matrix();
 		matrix.preScale(screenToCanvasScale, screenToCanvasScale);
@@ -338,7 +364,15 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		final float midX = getWidth() * 0.5f;
 		final float midY = getHeight() * 0.5f;
 		final float maxHalfDim = Math.max(getWidth(), getHeight()) * 0.5f;
-		canvasToScreenScale = maxHalfDim / CANVAS_SIZE;
+		final float minHalfDim = Math.min(getWidth(), getHeight()) * 0.5f;
+
+		switch(getScaleMode()){
+			case FIT:
+				canvasToScreenScale = minHalfDim / CANVAS_SIZE;
+				break;
+			case FILL:
+				canvasToScreenScale = maxHalfDim / CANVAS_SIZE;
+		}
 
 		Matrix matrix = new Matrix();
 		matrix.preTranslate(midX, midY);

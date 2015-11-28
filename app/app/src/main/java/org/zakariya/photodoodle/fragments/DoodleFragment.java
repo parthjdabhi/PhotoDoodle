@@ -46,7 +46,6 @@ public class DoodleFragment extends Fragment {
 	private static final String DOODLE_STATE = "DOODLE_STATE";
 
 	private static final int REQUEST_TAKE_PHOTO = 1;
-	private static final boolean DEBUG_KEEP_LAST_PHOTO = true;
 
 	enum BrushType {PENCIL, BRUSH, LARGE_ERASER, SMALL_ERASER}
 
@@ -131,20 +130,12 @@ public class DoodleFragment extends Fragment {
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
 		doodle = new PhotoDoodle(getActivity());
-		doodle.setDrawDebugPositioningOverlay(true);
+		doodle.setDrawDebugPositioningOverlay(false);
 
 		if (savedInstanceState != null) {
 			Bundle doodleState = savedInstanceState.getBundle(DOODLE_STATE);
 			if (doodleState != null) {
 				doodle.onCreate(doodleState);
-			}
-		}
-
-		if (DEBUG_KEEP_LAST_PHOTO && doodle.getPhoto() == null) {
-			Log.w(TAG, "onCreate - loading snap.jpg into doodle to simplify matrix testing");
-			Bitmap bitmap = loadPhotoFromFile(getPhotoTempFile());
-			if (bitmap != null) {
-				doodle.setPhoto(bitmap);
 			}
 		}
 
@@ -410,11 +401,6 @@ public class DoodleFragment extends Fragment {
 	}
 
 	private void deletePhotoTempFile() {
-		if (DEBUG_KEEP_LAST_PHOTO) {
-			Log.w(TAG, "disabled deletePhotoTempFile while testing...");
-			return;
-		}
-
 		File photoTempFile = getPhotoTempFile();
 		if (photoTempFile.exists()) {
 			if (!photoTempFile.delete()){

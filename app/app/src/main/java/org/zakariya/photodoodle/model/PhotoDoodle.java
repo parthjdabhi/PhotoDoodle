@@ -37,7 +37,7 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 	int interactionMode = InteractionMode.DRAW.ordinal();
 
 	@State
-	PointF userTranslation = new PointF();
+	PointF userTranslationOnCanvas = new PointF();
 
 	PointF touchStartPosition;
 
@@ -112,7 +112,9 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 	protected void onTouchEventBegin(@NonNull MotionEvent event) {
 		switch (getInteractionMode()) {
 			case PHOTO:
-				touchStartPosition = new PointF(event.getX() - userTranslation.x, event.getY() - userTranslation.y);
+				touchStartPosition = new PointF(
+						event.getX() - (userTranslationOnCanvas.x*canvasToScreenScale),
+						event.getY() - (userTranslationOnCanvas.y*canvasToScreenScale));
 				break;
 			case DRAW:
 				super.onTouchEventBegin(event);
@@ -123,8 +125,8 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 	protected void onTouchEventMove(@NonNull MotionEvent event) {
 		switch (getInteractionMode()) {
 			case PHOTO:
-				userTranslation.x = event.getX() - touchStartPosition.x;
-				userTranslation.y = event.getY() - touchStartPosition.y;
+				userTranslationOnCanvas.x = (event.getX() - touchStartPosition.x) / canvasToScreenScale;
+				userTranslationOnCanvas.y = (event.getY() - touchStartPosition.y) / canvasToScreenScale;
 				updatePhotoMatrix();
 				invalidate();
 				break;
@@ -171,13 +173,25 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 
 	private void updatePhotoMatrix() {
 
+		// this can happen during rotations before scaling matrices are configured
+		if (canvasToScreenScale < 1e-3) {
+			return;
+		}
+
 		float minPhotoSize = Math.min(photo.getWidth(), photo.getHeight());
-		float photoScale = CANVAS_SIZE * 2 / minPhotoSize;
-		float adjustX = userTranslation.x / canvasToScreenScale;
-		float adjustY = userTranslation.y / canvasToScreenScale;
+		float maxPhotoSize = Math.max(photo.getWidth(), photo.getHeight());
+		float photoScale = 1;
+		switch(getScaleMode()){
+			case FIT:
+				photoScale = CANVAS_SIZE * 2 / maxPhotoSize;
+				break;
+			case FILL:
+				photoScale = CANVAS_SIZE * 2 / minPhotoSize;
+				break;
+		}
 
 		photoMatrix.reset();
-		photoMatrix.preTranslate(adjustX,adjustY);
+		photoMatrix.preTranslate(userTranslationOnCanvas.x, userTranslationOnCanvas.y);
 		photoMatrix.preScale(photoScale, photoScale);
 		photoMatrix.preTranslate(-photo.getWidth() / 2, -photo.getHeight() / 2);
 	}

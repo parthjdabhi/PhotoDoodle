@@ -131,6 +131,7 @@ public class DoodleFragment extends Fragment {
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
 		doodle = new PhotoDoodle(getActivity());
+		doodle.setDrawDebugPositioningOverlay(true);
 
 		if (savedInstanceState != null) {
 			Bundle doodleState = savedInstanceState.getBundle(DOODLE_STATE);

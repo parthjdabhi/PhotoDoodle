@@ -45,14 +45,18 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	protected float screenToCanvasScale;
 	protected float canvasToScreenScale;
 
-	private Paint invalidationRectPaint, bitmapPaint;
+	private Paint invalidationRectPaint, debugPositioningPaint, bitmapPaint;
 	private RectF invalidationRect;
 	private IncrementalInputStrokeTessellator incrementalInputStrokeTessellator;
 	private Context context;
 	private Canvas bitmapCanvas;
-	private boolean renderInvalidationRect = false;
 	private Bitmap bitmap;
 
+	@State
+	boolean drawInvalidationRect = false;
+
+	@State
+	boolean drawDebugPositioningOverlay = false;
 
 	@State
 	ArrayList<IntermediateDrawingStep> drawingSteps = new ArrayList<>();
@@ -115,8 +119,23 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 			}
 		}
 
+		// draw the canvas bounds
+		if (isDrawDebugPositioningOverlay()) {
+			canvas.save();
+			canvas.concat(canvasToScreenMatrix);
+
+			Paint dp = getDebugPositioningPaint();
+			dp.setColor(0xFFFF9900); // yellow
+			dp.setStrokeWidth(4);
+			canvas.drawRect(-CANVAS_SIZE, -CANVAS_SIZE, CANVAS_SIZE, CANVAS_SIZE, dp);
+			canvas.drawLine(-CANVAS_SIZE, -CANVAS_SIZE, CANVAS_SIZE, CANVAS_SIZE, dp);
+			canvas.drawLine(CANVAS_SIZE, -CANVAS_SIZE, -CANVAS_SIZE, CANVAS_SIZE, dp);
+
+			canvas.restore();
+		}
+
 		// draw the invalidation rect
-		if (renderInvalidationRect) {
+		if (isDrawInvalidationRect()) {
 			RectF r = invalidationRect != null ? invalidationRect : new RectF(0, 0, getWidth(), getHeight());
 			canvas.drawRect(r, invalidationRectPaint);
 		}
@@ -193,12 +212,12 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		return getBrush().getMaxWidthDpPs();
 	}
 
-	public boolean isRenderInvalidationRect() {
-		return renderInvalidationRect;
+	public boolean isDrawInvalidationRect() {
+		return drawInvalidationRect;
 	}
 
-	public void setRenderInvalidationRect(boolean renderInvalidationRect) {
-		this.renderInvalidationRect = renderInvalidationRect;
+	public void setDrawInvalidationRect(boolean drawInvalidationRect) {
+		this.drawInvalidationRect = drawInvalidationRect;
 	}
 
 	public void clearDrawing() {
@@ -219,6 +238,15 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	public Context getContext() {
 		return context;
 	}
+
+	public boolean isDrawDebugPositioningOverlay() {
+		return drawDebugPositioningOverlay;
+	}
+
+	public void setDrawDebugPositioningOverlay(boolean drawDebugPositioningOverlay) {
+		this.drawDebugPositioningOverlay = drawDebugPositioningOverlay;
+	}
+
 
 	private static final String TEST_KRYO_SERIALIZATION_FILE = "KryoTest.bin";
 
@@ -280,6 +308,17 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		if (!incrementalInputStrokeTessellator.getStaticPaths().isEmpty()) {
 			drawingSteps.add(new IntermediateDrawingStep(getBrush().copy(), incrementalInputStrokeTessellator.getInputStrokes()));
 		}
+	}
+
+	protected Paint getDebugPositioningPaint() {
+		if (debugPositioningPaint == null) {
+			debugPositioningPaint = new Paint();
+			debugPositioningPaint.setStyle(Paint.Style.STROKE);
+			debugPositioningPaint.setStrokeWidth(8);
+			debugPositioningPaint.setAntiAlias(true);
+			debugPositioningPaint.setColor(0xFF00FFFF);
+		}
+		return debugPositioningPaint;
 	}
 
 	protected Matrix computeScreenToCanvasMatrix() {

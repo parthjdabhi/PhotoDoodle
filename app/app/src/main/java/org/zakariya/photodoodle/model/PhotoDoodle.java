@@ -25,20 +25,13 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		DRAW
 	}
 
-	;
-
 	private static final String TAG = "PhotoDoodle";
 	private static final String STATE_BITMAP = "bitmap";
 
 	Bitmap photo;
 
 	private Matrix photoMatrix;
-	private Matrix userAdjustmentMatrix;
 	private Paint photoPaint;
-	private Paint debugPaint;
-
-	@State
-	boolean drawDebugPositioningOverlay = false;
 
 	@State
 	int interactionMode = InteractionMode.DRAW.ordinal();
@@ -52,7 +45,6 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		super(context);
 
 		photoMatrix = new Matrix();
-		userAdjustmentMatrix = new Matrix();
 
 		photoPaint = new Paint();
 		photoPaint.setAntiAlias(true);
@@ -65,7 +57,6 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
 		setPhoto((Bitmap) savedInstanceState.getParcelable(STATE_BITMAP));
-		updateUserAdjustmentMatrix();
 	}
 
 	@Override
@@ -83,7 +74,6 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		super.resize(newWidth, newHeight);
 		if (photo != null) {
 			updatePhotoMatrix();
-			updateUserAdjustmentMatrix();
 		}
 	}
 
@@ -99,12 +89,12 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		if (photo != null) {
 			canvas.save();
 			canvas.concat(canvasToScreenMatrix);
-			canvas.concat(userAdjustmentMatrix);
 			canvas.concat(photoMatrix);
 			canvas.drawBitmap(photo, 0, 0, photoPaint);
 
-			if (drawDebugPositioningOverlay) {
-				Paint dp = getDebugPaint();
+			// draw the photo bounds
+			if (isDrawDebugPositioningOverlay()) {
+				Paint dp = getDebugPositioningPaint();
 				dp.setColor(0xFF00FFFF); // cyan
 				dp.setStrokeWidth(8);
 				canvas.drawRect(0, 0, photo.getWidth(), photo.getHeight(), dp);
@@ -116,20 +106,6 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		}
 
 		super.draw(canvas);
-
-		if (drawDebugPositioningOverlay) {
-			canvas.save();
-			canvas.concat(canvasToScreenMatrix);
-
-			Paint dp = getDebugPaint();
-			dp.setColor(0xFFFF9900); // yellow
-			dp.setStrokeWidth(4);
-			canvas.drawRect(-CANVAS_SIZE, -CANVAS_SIZE, CANVAS_SIZE, CANVAS_SIZE, dp);
-			canvas.drawLine(-CANVAS_SIZE, -CANVAS_SIZE, CANVAS_SIZE, CANVAS_SIZE, dp);
-			canvas.drawLine(CANVAS_SIZE, -CANVAS_SIZE, -CANVAS_SIZE, CANVAS_SIZE, dp);
-
-			canvas.restore();
-		}
 	}
 
 	@Override
@@ -149,7 +125,7 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 			case PHOTO:
 				userTranslation.x = event.getX() - touchStartPosition.x;
 				userTranslation.y = event.getY() - touchStartPosition.y;
-				updateUserAdjustmentMatrix();
+				updatePhotoMatrix();
 				invalidate();
 				break;
 			case DRAW:
@@ -184,14 +160,6 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		invalidate();
 	}
 
-	public boolean isDrawDebugPositioningOverlay() {
-		return drawDebugPositioningOverlay;
-	}
-
-	public void setDrawDebugPositioningOverlay(boolean drawDebugPositioningOverlay) {
-		this.drawDebugPositioningOverlay = drawDebugPositioningOverlay;
-	}
-
 	public InteractionMode getInteractionMode() {
 		return InteractionMode.values()[interactionMode];
 	}
@@ -200,29 +168,17 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		this.interactionMode = interactionMode.ordinal();
 	}
 
-	private Paint getDebugPaint() {
-		if (debugPaint == null) {
-			debugPaint = new Paint();
-			debugPaint.setStyle(Paint.Style.STROKE);
-			debugPaint.setStrokeWidth(8);
-			debugPaint.setAntiAlias(true);
-			debugPaint.setColor(0xFF00FFFF);
-		}
-		return debugPaint;
-	}
 
 	private void updatePhotoMatrix() {
 
 		float minPhotoSize = Math.min(photo.getWidth(), photo.getHeight());
-		float scale = CANVAS_SIZE * 2 / minPhotoSize;
+		float photoScale = CANVAS_SIZE * 2 / minPhotoSize;
+		float adjustX = userTranslation.x / canvasToScreenScale;
+		float adjustY = userTranslation.y / canvasToScreenScale;
 
-		photoMatrix = new Matrix();
-		photoMatrix.preScale(scale, scale);
+		photoMatrix.reset();
+		photoMatrix.preTranslate(adjustX,adjustY);
+		photoMatrix.preScale(photoScale, photoScale);
 		photoMatrix.preTranslate(-photo.getWidth() / 2, -photo.getHeight() / 2);
-	}
-
-	private void updateUserAdjustmentMatrix() {
-		userAdjustmentMatrix.reset();
-		userAdjustmentMatrix.preTranslate(userTranslation.x * screenToCanvasScale, userTranslation.y * screenToCanvasScale);
 	}
 }

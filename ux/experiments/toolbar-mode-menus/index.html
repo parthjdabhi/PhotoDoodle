@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Toolbar Mode Menu Experiment</title>
+	<style>
+
+		body {
+			margin: 0;
+			padding: 0;
+			background: #eee;
+			font-family: "Helvetica Neue",Helvetica,sans-serif;
+		}
+
+		.toolbar {
+			background: #600A69;
+			color: white;
+			padding: 10px;
+		}
+
+		.toolbar h1 {
+			margin: 0;
+			padding: 0;
+			font-weight: 700;
+			text-align: left;
+			display: inline-block;
+			line-height: 44px;
+		}
+
+		.toolbar .mode-menu {
+			list-style: none;
+			float: right;
+			margin: 0;
+			padding: 0;
+		}
+
+		.toolbar .mode-menu > li {
+			display: inline-block;
+			line-height: 44px;
+			margin: 0 20px 0 20px;
+			padding: 0;
+			position: relative;
+		}
+
+		.toolbar .mode-menu > li > p {
+			margin: 0;
+			padding: 0;
+			opacity: 0.35;
+			font-weight: 800;
+			border-bottom: 4px solid #600A69;
+		}
+
+		.toolbar .mode-menu > li.active > p {
+			opacity: 1;
+			border-color: white;
+		}
+
+
+		.toolbar .mode-menu .context-menu {
+			display: none;
+			background: #B258BB;
+			box-shadow: rgba(0,0,0,0.5) 0 4px 4px;
+			position: absolute;
+			right: 0;
+			top: 40px;
+			list-style: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		.toolbar .mode-menu .context-menu.open {
+			display: block;
+		}
+
+		.toolbar .mode-menu .context-menu > li {
+			padding: 0.2em 1em;
+			white-space: nowrap;
+		}
+
+
+	</style>
+</head>
+<body>
+
+<div class="toolbar">
+	<h1>Title</h1>
+	<ul class="mode-menu">
+		<li id="camera-trigger" class="mode-camera">
+			<p class="menu-title">Camera</p>
+			<ul class="context-menu">
+				<li>Take Picture</li>
+				<li>Clear</li>
+			</ul>
+		</li>
+		<li id="draw-trigger" class="mode-draw">
+			<p class="menu-title">Draw</p>
+			<ul class="context-menu">
+				<li>Pencil</li>
+				<li>Brush</li>
+				<li>Big Eraser</li>
+				<li>Small Eraser</li>
+				<li>Color</li>
+				<li>Clear</li>
+			</ul>
+		</li>
+	</ul>
+</div>
+
+<script>
+
+	var activeTrigger = null;
+
+	function select(trigger) {
+		if (activeTrigger) {
+			activeTrigger.classList.remove("active");
+		}
+
+		activeTrigger = trigger;
+		activeTrigger.classList.add("active");
+
+		var menus = activeTrigger.getElementsByClassName("context-menu");
+		for (var i = 0; i < menus.length; i++) {
+			menus[i].classList.add("open");
+		}
+	}
+
+	function bindTrigger(trigger) {
+		trigger.onclick = function(e) {
+			closeContextMenus();
+			select(trigger);
+			e.stopPropagation();
+		}
+	}
+
+	function closeContextMenus() {
+		var menus = document.getElementsByClassName("context-menu open");
+		for (var i = 0; i < menus.length; i++) {
+			menus[i].classList.remove("open");
+		}
+	}
+
+	document.onclick = function(e) {
+		closeContextMenus();
+		e.preventDefault();
+	};
+
+	var menuItems = document.querySelectorAll(".context-menu > li");
+	for (var i = 0; i < menuItems.length; i++) {
+		menuItems[i].onclick = function(e){
+			closeContextMenus();
+			e.stopPropagation();
+		}
+	}
+
+	var cameraTrigger = document.getElementById("camera-trigger");
+	var drawTrigger = document.getElementById("draw-trigger");
+	bindTrigger(cameraTrigger);
+	bindTrigger(drawTrigger);
+	select(drawTrigger);
+
+
+</script>
+
+</body>
+</html>

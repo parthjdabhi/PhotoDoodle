@@ -74,9 +74,6 @@ public class DoodleFragment extends Fragment {
 	@Bind(R.id.drawToolbar)
 	ViewGroup drawToolbar;
 
-	MenuItem cameraModeMenuItem;
-	MenuItem drawModeMenuItem;
-
 	@State
 	int color = 0xFF000000;
 
@@ -95,9 +92,6 @@ public class DoodleFragment extends Fragment {
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.menu_doodle, menu);
-		drawModeMenuItem = menu.findItem(R.id.menuItemDrawMode);
-		cameraModeMenuItem = menu.findItem(R.id.menuItemCameraMode);
-		updateUIToShowInteractionMode();
 	}
 
 	@Override
@@ -109,14 +103,6 @@ public class DoodleFragment extends Fragment {
 
 			case R.id.menuItemClear:
 				performClear();
-				return true;
-
-			case R.id.menuItemCameraMode:
-				setInteractionMode(PhotoDoodle.InteractionMode.PHOTO);
-				return true;
-
-			case R.id.menuItemDrawMode:
-				setInteractionMode(PhotoDoodle.InteractionMode.DRAW);
 				return true;
 
 			default:
@@ -321,18 +307,10 @@ public class DoodleFragment extends Fragment {
 			case PHOTO:
 				drawToolbar.setVisibility(View.GONE);
 				photoToolbar.setVisibility(View.VISIBLE);
-				if (drawModeMenuItem != null && drawModeMenuItem.getIcon() != null) {
-					drawModeMenuItem.getIcon().setAlpha(64);
-					cameraModeMenuItem.getIcon().setAlpha(255);
-				}
 				break;
 			case DRAW:
 				drawToolbar.setVisibility(View.VISIBLE);
 				photoToolbar.setVisibility(View.GONE);
-				if (drawModeMenuItem != null && drawModeMenuItem.getIcon() != null) {
-					drawModeMenuItem.getIcon().setAlpha(255);
-					cameraModeMenuItem.getIcon().setAlpha(64);
-				}
 				break;
 		}
 	}

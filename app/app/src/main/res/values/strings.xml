@@ -14,8 +14,6 @@
 	<string name="tool_name_small_eraser">Small Eraser</string>
 
 	<string name="tool_name_take_photo">Snap Photo</string>
-	<string name="tool_name_crop_photo">Crop</string>
-
 	<string name="doodle_menu_camera">Snap</string>
 	<string name="doodle_menu_draw">Draw</string>
 	<string name="doodle_menu_undo">Undo</string>

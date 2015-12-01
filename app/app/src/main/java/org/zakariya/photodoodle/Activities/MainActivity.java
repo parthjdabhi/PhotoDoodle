@@ -3,7 +3,6 @@ package org.zakariya.photodoodle.activities;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
-import org.zakariya.photodoodle.SingleFragmentActivity;
 import org.zakariya.photodoodle.fragments.DoodleFragment;
 
 public class MainActivity extends SingleFragmentActivity {

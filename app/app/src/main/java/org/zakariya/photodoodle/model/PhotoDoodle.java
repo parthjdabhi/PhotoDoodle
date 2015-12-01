@@ -113,8 +113,8 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		switch (getInteractionMode()) {
 			case PHOTO:
 				touchStartPosition = new PointF(
-						event.getX() - (userTranslationOnCanvas.x*canvasToScreenScale),
-						event.getY() - (userTranslationOnCanvas.y*canvasToScreenScale));
+						event.getX() - (userTranslationOnCanvas.x * canvasToScreenScale),
+						event.getY() - (userTranslationOnCanvas.y * canvasToScreenScale));
 				break;
 			case DRAW:
 				super.onTouchEventBegin(event);
@@ -173,26 +173,30 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 
 	private void updatePhotoMatrix() {
 
+		photoMatrix.reset();
+
 		// this can happen during rotations before scaling matrices are configured
 		if (canvasToScreenScale < 1e-3) {
 			return;
 		}
 
-		float minPhotoSize = Math.min(photo.getWidth(), photo.getHeight());
-		float maxPhotoSize = Math.max(photo.getWidth(), photo.getHeight());
-		float photoScale = 1;
-		switch(getScaleMode()){
-			case FIT:
-				photoScale = CANVAS_SIZE * 2 / maxPhotoSize;
-				break;
-			case FILL:
-				photoScale = CANVAS_SIZE * 2 / minPhotoSize;
-				break;
+		if (photo != null) {
+			float minPhotoSize = Math.min(photo.getWidth(), photo.getHeight());
+			float maxPhotoSize = Math.max(photo.getWidth(), photo.getHeight());
+			float photoScale = 1;
+			switch (getScaleMode()) {
+				case FIT:
+					photoScale = CANVAS_SIZE * 2 / maxPhotoSize;
+					break;
+				case FILL:
+					photoScale = CANVAS_SIZE * 2 / minPhotoSize;
+					break;
+			}
+
+			photoMatrix.preTranslate(userTranslationOnCanvas.x, userTranslationOnCanvas.y);
+			photoMatrix.preScale(photoScale, photoScale);
+			photoMatrix.preTranslate(-photo.getWidth() / 2, -photo.getHeight() / 2);
 		}
 
-		photoMatrix.reset();
-		photoMatrix.preTranslate(userTranslationOnCanvas.x, userTranslationOnCanvas.y);
-		photoMatrix.preScale(photoScale, photoScale);
-		photoMatrix.preTranslate(-photo.getWidth() / 2, -photo.getHeight() / 2);
 	}
 }

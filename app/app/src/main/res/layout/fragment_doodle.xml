@@ -5,6 +5,12 @@
               android:layout_height="match_parent"
               android:orientation="vertical">
 
+	<org.zakariya.photodoodle.view.DoodleView
+		android:id="@+id/doodleView"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"/>
+
 	<FrameLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
@@ -96,12 +102,5 @@
 		</FrameLayout>
 
 	</FrameLayout>
-
-	<org.zakariya.photodoodle.view.DoodleView
-		android:id="@+id/doodleView"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:layout_gravity="fill"/>
-
 
 </LinearLayout>

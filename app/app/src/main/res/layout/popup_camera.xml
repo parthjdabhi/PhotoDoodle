@@ -6,10 +6,21 @@
               android:background="@color/windowBackgroundColor"
               android:orientation="vertical">
 
-	<TextView
+	<ImageButton
+		android:id="@+id/takePhotoButton"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:text="Camera Popup"
-		android:layout_margin="16dp"/>
+		android:src="@drawable/ic_camera"
+		style="@style/DoodleToolbarImageButtonStyle"
+		android:layout_gravity="center_horizontal|center_vertical"
+		android:contentDescription="@string/tool_name_take_photo"/>
+
+	<Button
+		android:id="@+id/clearPhotoButton"
+		style="@style/DoodleToolbarTextButtonStyle"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_horizontal|center_vertical"
+		android:text="@string/clear"/>
 
 </LinearLayout>

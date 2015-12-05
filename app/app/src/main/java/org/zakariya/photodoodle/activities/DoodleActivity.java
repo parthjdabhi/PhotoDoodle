@@ -88,12 +88,12 @@ public class DoodleActivity extends AppCompatActivity
 	CameraPopupController cameraPopupController;
 
 
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_doodle);
 		ButterKnife.bind(this);
+		Icepick.restoreInstanceState(this, savedInstanceState);
 
 		tabPopupDismissDelayHandler = new Handler(Looper.getMainLooper());
 
@@ -122,12 +122,13 @@ public class DoodleActivity extends AppCompatActivity
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
 		Icepick.saveInstanceState(this, outState);
 
 		Bundle doodleState = new Bundle();
 		doodle.onSaveInstanceState(doodleState);
 		outState.putBundle(DOODLE_STATE, doodleState);
+
+		super.onSaveInstanceState(outState);
 	}
 
 	@Override
@@ -155,7 +156,7 @@ public class DoodleActivity extends AppCompatActivity
 
 	@Override
 	public void onBackPressed() {
-		if (!dismissTabItemPopup(false)){
+		if (!dismissTabItemPopup(false)) {
 			super.onBackPressed();
 		}
 	}
@@ -401,7 +402,7 @@ public class DoodleActivity extends AppCompatActivity
 					popupView = inflater.inflate(R.layout.popup_drawing, null);
 					drawPopupController = new DrawPopupController(popupView, this);
 					drawPopupController.setColorSwatchColor(getColor());
-					switch(getSelectedBrush()){
+					switch (getSelectedBrush()) {
 						case PENCIL:
 							drawPopupController.setActiveTool(DrawPopupController.ActiveTool.PENCIL);
 							break;
@@ -445,7 +446,7 @@ public class DoodleActivity extends AppCompatActivity
 						tabPopup.dismiss();
 						tabPopup = null;
 					}
-				},200);
+				}, 200);
 
 			} else {
 				tabPopup.dismiss();

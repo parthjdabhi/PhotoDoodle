@@ -20,7 +20,7 @@
 			android:layout_width="80dp"
 			android:layout_height="wrap_content"
 			android:layout_margin="@dimen/popup_item_margin"
-			android:src="@drawable/doodle_tool_pencil_inactive"
+			android:src="@drawable/icon_popup_pencil"
 			/>
 
 		<ImageButton
@@ -29,7 +29,7 @@
 			android:layout_width="80dp"
 			android:layout_height="wrap_content"
 			android:layout_margin="@dimen/popup_item_margin"
-			android:src="@drawable/doodle_tool_brush_inactive"
+			android:src="@drawable/icon_popup_brush"
 			/>
 	</LinearLayout>
 
@@ -44,7 +44,7 @@
 			android:layout_width="80dp"
 			android:layout_height="wrap_content"
 			android:layout_margin="@dimen/popup_item_margin"
-			android:src="@drawable/doodle_tool_small_eraser_inactive"
+			android:src="@drawable/icon_popup_small_eraser"
 			/>
 
 		<ImageButton
@@ -53,7 +53,7 @@
 			android:layout_width="80dp"
 			android:layout_height="wrap_content"
 			android:layout_margin="@dimen/popup_item_margin"
-			android:src="@drawable/doodle_tool_large_eraser_inactive"
+			android:src="@drawable/icon_popup_big_eraser"
 			/>
 
 	</LinearLayout>

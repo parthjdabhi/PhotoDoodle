@@ -10,7 +10,7 @@
 		android:id="@+id/takePhotoButton"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:src="@drawable/ic_camera"
+		android:src="@drawable/icon_popup_photo"
 		style="@style/DoodleToolbarImageButtonStyle"
 		android:layout_gravity="center_horizontal|center_vertical"
 		android:contentDescription="@string/tool_name_take_photo"

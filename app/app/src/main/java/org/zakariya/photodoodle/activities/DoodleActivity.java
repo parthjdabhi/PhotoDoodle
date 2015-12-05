@@ -16,9 +16,9 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.TintManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -359,15 +359,22 @@ public class DoodleActivity extends AppCompatActivity
 		doodle.setInteractionMode(interactionMode);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void buildModeTabs() {
 		cameraTab = modeTabs.newTab();
-		cameraTabIcon = TintManager.get(this).getDrawable(R.drawable.ic_photo_camera);
-		cameraTab.setIcon(cameraTabIcon);
-		modeTabs.addTab(cameraTab);
-
 		drawingTab = modeTabs.newTab();
-		drawingTabIcon = TintManager.get(this).getDrawable(R.drawable.ic_mode_edit);
+
+		cameraTabIcon = getResources().getDrawable(R.drawable.icon_tab_camera);
+		cameraTabIcon = DrawableCompat.wrap(cameraTabIcon);
+		DrawableCompat.setTint(cameraTabIcon,getResources().getColor(R.color.actionBarIconColor));
+		cameraTab.setIcon(cameraTabIcon);
+
+		drawingTabIcon = getResources().getDrawable(R.drawable.icon_tab_draw);
+		drawingTabIcon = DrawableCompat.wrap(drawingTabIcon);
+		DrawableCompat.setTint(drawingTabIcon,getResources().getColor(R.color.actionBarIconColor));
 		drawingTab.setIcon(drawingTabIcon);
+
+		modeTabs.addTab(cameraTab);
 		modeTabs.addTab(drawingTab, true); // make this tab selected by default
 
 		modeTabs.setOnTabSelectedListener(this);

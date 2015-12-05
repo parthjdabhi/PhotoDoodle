@@ -7,5 +7,6 @@
 	<color name="accent_light">#FFC37C</color>
 	<color name="windowBackgroundColor">#F0F0F0</color>
 	<color name="actionBarText">#ffffffff</color>
-	<color name="selected_popup_item_background">#dddddd</color>
+	<color name="actionBarIconColor">#ffffffff</color>
+	<color name="selected_popup_item_background">#44222222</color>
 </resources>

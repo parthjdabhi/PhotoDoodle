@@ -7,4 +7,6 @@
 
 	<dimen name="swatch_alpha_checker_size">8dp</dimen>
 
+	<dimen name="popup_item_margin">8dp</dimen>
+
 </resources>

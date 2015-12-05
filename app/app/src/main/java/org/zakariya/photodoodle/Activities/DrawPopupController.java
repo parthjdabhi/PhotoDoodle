@@ -1,5 +1,6 @@
 package org.zakariya.photodoodle.activities;
 
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -18,6 +19,13 @@ import butterknife.OnClick;
  */
 public class DrawPopupController {
 
+	public enum ActiveTool {
+		PENCIL,
+		BRUSH,
+		SMALL_ERASER,
+		BIG_ERASER
+	}
+
 	public interface Callbacks {
 		void onSelectPencil();
 		void onSelectBrush();
@@ -29,6 +37,7 @@ public class DrawPopupController {
 
 	WeakReference<Callbacks> callbacksWeakReference;
 	View popupView;
+	ActiveTool activeTool;
 
 	@Bind(R.id.pencilToolButton)
 	ImageButton pencilToolButton;
@@ -52,15 +61,48 @@ public class DrawPopupController {
 		this.popupView = popupView;
 		callbacksWeakReference = new WeakReference<>(callbacks);
 		ButterKnife.bind(this,popupView);
-
+		setActiveTool(ActiveTool.PENCIL);
 	}
 
 	public View getPopupView() {
 		return popupView;
 	}
 
+	public ActiveTool getActiveTool() {
+		return activeTool;
+	}
+
+	public void setActiveTool(ActiveTool activeTool) {
+		this.activeTool = activeTool;
+
+		ImageButton btn = null;
+		switch (activeTool){
+			case PENCIL:
+				btn = pencilToolButton;
+				break;
+			case BRUSH:
+				btn = brushToolButton;
+				break;
+			case SMALL_ERASER:
+				btn = smallEraserToolButton;
+				break;
+			case BIG_ERASER:
+				btn = bigEraserToolButton;
+				break;
+		}
+
+		@SuppressWarnings("deprecation")
+		Drawable highlight = popupView.getResources().getDrawable(R.drawable.popup_button_selected_background);
+
+		pencilToolButton.setBackground(btn == pencilToolButton ? highlight : null);
+		brushToolButton.setBackground(btn == brushToolButton ? highlight : null);
+		smallEraserToolButton.setBackground(btn == smallEraserToolButton ? highlight : null);
+		bigEraserToolButton.setBackground(btn == bigEraserToolButton ? highlight : null);
+	}
+
 	@OnClick(R.id.pencilToolButton)
 	void onPencilToolButtonClick(){
+		setActiveTool(ActiveTool.PENCIL);
 		Callbacks cb = callbacksWeakReference.get();
 		if (cb != null) {
 			cb.onSelectPencil();
@@ -69,6 +111,7 @@ public class DrawPopupController {
 
 	@OnClick(R.id.brushToolButton)
 	void onBrushToolButtonClick(){
+		setActiveTool(ActiveTool.BRUSH);
 		Callbacks cb = callbacksWeakReference.get();
 		if (cb != null) {
 			cb.onSelectBrush();
@@ -77,6 +120,7 @@ public class DrawPopupController {
 
 	@OnClick(R.id.smallEraserToolButton)
 	void onSmallEraserToolButtonClick(){
+		setActiveTool(ActiveTool.SMALL_ERASER);
 		Callbacks cb = callbacksWeakReference.get();
 		if (cb != null) {
 			cb.onSelectSmallEraser();
@@ -85,6 +129,7 @@ public class DrawPopupController {
 
 	@OnClick(R.id.bigEraserToolButton)
 	void onBigEraserToolButtonClick(){
+		setActiveTool(ActiveTool.BIG_ERASER);
 		Callbacks cb = callbacksWeakReference.get();
 		if (cb != null) {
 			cb.onSelectBigEraser();
@@ -111,6 +156,8 @@ public class DrawPopupController {
 		colorSwatchView.setColor(color);
 	}
 
+
+	@SuppressWarnings("unused")
 	public int getColorSwatchColor() {
 		return colorSwatchView.getColor();
 	}

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	android:id="@+id/popup_drawing"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:background="@color/windowBackgroundColor"
+	android:orientation="vertical"
+	>
+
+	<LinearLayout
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
+
+		<ImageButton
+			android:id="@+id/pencilToolButton"
+			style="@style/DoodleToolbarImageButtonStyle"
+			android:layout_width="80dp"
+			android:layout_height="wrap_content"
+			android:layout_margin="@dimen/popup_item_margin"
+			android:src="@drawable/doodle_tool_pencil_inactive"
+			/>
+
+		<ImageButton
+			android:id="@+id/brushToolButton"
+			style="@style/DoodleToolbarImageButtonStyle"
+			android:layout_width="80dp"
+			android:layout_height="wrap_content"
+			android:layout_margin="@dimen/popup_item_margin"
+			android:src="@drawable/doodle_tool_brush_inactive"
+			/>
+	</LinearLayout>
+
+	<LinearLayout
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
+
+		<ImageButton
+			android:id="@+id/smallEraserToolButton"
+			style="@style/DoodleToolbarImageButtonStyle"
+			android:layout_width="80dp"
+			android:layout_height="wrap_content"
+			android:layout_margin="@dimen/popup_item_margin"
+			android:src="@drawable/doodle_tool_small_eraser_inactive"
+			/>
+
+		<ImageButton
+			android:id="@+id/bigEraserToolButton"
+			style="@style/DoodleToolbarImageButtonStyle"
+			android:layout_width="80dp"
+			android:layout_height="wrap_content"
+			android:layout_margin="@dimen/popup_item_margin"
+			android:src="@drawable/doodle_tool_large_eraser_inactive"
+			/>
+
+	</LinearLayout>
+
+
+	<LinearLayout
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
+
+		<org.zakariya.photodoodle.view.ColorSwatchView
+			android:id="@+id/colorSwatchTool"
+			android:layout_width="80dp"
+			android:layout_height="48dp"
+			android:layout_gravity="center_horizontal|center_vertical"
+			android:padding="@dimen/popup_item_margin"
+			app:selectionThickness="0dp"
+			/>
+
+		<Button
+			android:id="@+id/clearDrawingButton"
+			style="@style/DoodleToolbarTextButtonStyle"
+			android:layout_width="80dp"
+			android:layout_height="48dp"
+			android:layout_gravity="center_horizontal|center_vertical"
+			android:layout_margin="@dimen/popup_item_margin"
+			android:text="@string/clear"
+			/>
+	</LinearLayout>
+
+</LinearLayout>

@@ -11,6 +11,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -80,15 +82,20 @@ public class DoodleActivity extends AppCompatActivity
 
 	boolean suppressTabPopup;
 	PopupWindow tabPopup;
+	Handler tabPopupDismissDelayHandler;
 
 	DrawPopupController drawPopupController;
 	CameraPopupController cameraPopupController;
+
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_doodle);
 		ButterKnife.bind(this);
+
+		tabPopupDismissDelayHandler = new Handler(Looper.getMainLooper());
 
 		setSupportActionBar(toolbar);
 		buildModeTabs();
@@ -148,10 +155,7 @@ public class DoodleActivity extends AppCompatActivity
 
 	@Override
 	public void onBackPressed() {
-		if (tabPopup != null) {
-			tabPopup.dismiss();
-			tabPopup = null;
-		} else {
+		if (!dismissTabItemPopup(false)){
 			super.onBackPressed();
 		}
 	}
@@ -222,6 +226,7 @@ public class DoodleActivity extends AppCompatActivity
 	public void onTakePhoto() {
 		Log.i(TAG, "onTakePhoto: ");
 
+		dismissTabItemPopup(true);
 		Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
 		// Ensure that there's a camera activity to handle the intent
@@ -246,30 +251,37 @@ public class DoodleActivity extends AppCompatActivity
 	@Override
 	public void onClearPhoto() {
 		doodle.clearPhoto();
+		dismissTabItemPopup(true);
 	}
 
 	@Override
 	public void onSelectPencil() {
 		setSelectedBrush(BrushType.PENCIL);
+		dismissTabItemPopup(true);
 	}
 
 	@Override
 	public void onSelectBrush() {
 		setSelectedBrush(BrushType.BRUSH);
+		dismissTabItemPopup(true);
 	}
 
 	@Override
 	public void onSelectSmallEraser() {
 		setSelectedBrush(BrushType.SMALL_ERASER);
+		dismissTabItemPopup(true);
 	}
 
 	@Override
 	public void onSelectBigEraser() {
 		setSelectedBrush(BrushType.LARGE_ERASER);
+		dismissTabItemPopup(true);
 	}
 
 	@Override
 	public void onSelectColor(ColorSwatchView colorSwatchView) {
+		dismissTabItemPopup(true);
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		LayoutInflater inflater = LayoutInflater.from(builder.getContext());
 		View view = inflater.inflate(R.layout.dialog_color_picker, null);
@@ -293,6 +305,7 @@ public class DoodleActivity extends AppCompatActivity
 	@Override
 	public void onClearDrawing() {
 		doodle.clearDrawing();
+		dismissTabItemPopup(true);
 	}
 
 	public void setSelectedBrush(BrushType selectedBrush) {
@@ -385,8 +398,23 @@ public class DoodleActivity extends AppCompatActivity
 				break;
 			case DRAW:
 				if (drawPopupController == null) {
-					popupView = inflater.inflate(R.layout.drawing_popup, null);
+					popupView = inflater.inflate(R.layout.popup_drawing, null);
 					drawPopupController = new DrawPopupController(popupView, this);
+					drawPopupController.setColorSwatchColor(getColor());
+					switch(getSelectedBrush()){
+						case PENCIL:
+							drawPopupController.setActiveTool(DrawPopupController.ActiveTool.PENCIL);
+							break;
+						case BRUSH:
+							drawPopupController.setActiveTool(DrawPopupController.ActiveTool.BRUSH);
+							break;
+						case SMALL_ERASER:
+							drawPopupController.setActiveTool(DrawPopupController.ActiveTool.SMALL_ERASER);
+							break;
+						case LARGE_ERASER:
+							drawPopupController.setActiveTool(DrawPopupController.ActiveTool.BIG_ERASER);
+							break;
+					}
 				} else {
 					popupView = drawPopupController.getPopupView();
 				}
@@ -405,6 +433,28 @@ public class DoodleActivity extends AppCompatActivity
 		tabPopup.setOutsideTouchable(true);
 
 		tabPopup.showAsDropDown(getSelectedTabItemView());
+	}
+
+	private boolean dismissTabItemPopup(boolean delay) {
+		if (tabPopup != null) {
+			if (delay) {
+
+				tabPopupDismissDelayHandler.postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						tabPopup.dismiss();
+						tabPopup = null;
+					}
+				},200);
+
+			} else {
+				tabPopup.dismiss();
+				tabPopup = null;
+			}
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private void updateModeTabDrawables() {

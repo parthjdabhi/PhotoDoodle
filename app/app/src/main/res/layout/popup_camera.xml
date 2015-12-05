@@ -13,7 +13,9 @@
 		android:src="@drawable/ic_camera"
 		style="@style/DoodleToolbarImageButtonStyle"
 		android:layout_gravity="center_horizontal|center_vertical"
-		android:contentDescription="@string/tool_name_take_photo"/>
+		android:contentDescription="@string/tool_name_take_photo"
+		android:layout_margin="@dimen/popup_item_margin"
+		/>
 
 	<Button
 		android:id="@+id/clearPhotoButton"
@@ -21,6 +23,8 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_gravity="center_horizontal|center_vertical"
-		android:text="@string/clear"/>
+		android:text="@string/clear"
+		android:layout_margin="@dimen/popup_item_margin"
+		/>
 
 </LinearLayout>

@@ -220,7 +220,12 @@ public class DoodleActivity extends AppCompatActivity
 	@Override
 	public void onTabReselected(TabLayout.Tab tab) {
 		updateModeTabDrawables();
-		showTabItemPopup();
+
+		if (tabPopup == null) {
+			showTabItemPopup();
+		} else {
+			dismissTabItemPopup(false);
+		}
 	}
 
 	@Override

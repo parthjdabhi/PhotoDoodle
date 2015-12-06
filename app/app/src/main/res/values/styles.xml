@@ -10,6 +10,7 @@
 		<item name="colorAccent">@color/accent</item>
 
 		<item name="android:windowBackground">@color/windowBackgroundColor</item>
+		<item name="android:textColor">@color/textColor</item>
 	</style>
 
 
@@ -26,12 +27,14 @@
 		<item name="android:textColor">@color/actionBarText</item>
 	</style>
 
-	<style name="DoodleToolbarImageButtonStyle" parent="Widget.AppCompat.Button.Borderless">
+	<style name="PopupImageButtonStyle" parent="Widget.AppCompat.Button.Borderless">
 		<item name="android:layout_width">@dimen/doodle_drawing_tool_icon_size</item>
 		<item name="android:layout_height">@dimen/doodle_drawing_tool_icon_size</item>
+		<item name="android:tint">@color/popup_item_tint</item>
 	</style>
 
-	<style name="DoodleToolbarTextButtonStyle" parent="Widget.AppCompat.Button.Borderless">
+	<style name="PopupTextButtonStyle" parent="Widget.AppCompat.Button.Borderless">
+		<item name="android:textColor">@color/popup_item_text_color</item>
 	</style>
 
 </resources>

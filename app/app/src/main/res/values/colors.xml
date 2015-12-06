@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="primary">#00CAC6</color>
-	<color name="primary_dark">#007371</color>
-	<color name="primary_light">#b0f5f4</color>
-	<color name="accent">#A400C9</color>
-	<color name="accent_light">#FFC37C</color>
+	<color name="primary">#7D3D8C</color>
+	<color name="primary_dark">#43164D</color>
+	<color name="primary_light">#BE61D3</color>
+	<color name="accent">#00E6FF</color>
+	<color name="accent_light">#9DF5FF</color>
 	<color name="windowBackgroundColor">#F0F0F0</color>
 	<color name="actionBarText">#ffffffff</color>
 	<color name="actionBarIconColor">#ffffffff</color>
+	<color name="textColor">#4A4A4A</color>
+	<color name="popup_item_tint">#4A4A4A</color>
+	<color name="popup_item_text_color">#4A4A4A</color>
 	<color name="selected_popup_item_background">#44222222</color>
 </resources>

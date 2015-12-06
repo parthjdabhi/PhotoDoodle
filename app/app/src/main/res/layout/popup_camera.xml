@@ -11,7 +11,7 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:src="@drawable/icon_popup_photo"
-		style="@style/DoodleToolbarImageButtonStyle"
+		style="@style/PopupImageButtonStyle"
 		android:layout_gravity="center_horizontal|center_vertical"
 		android:contentDescription="@string/tool_name_take_photo"
 		android:layout_margin="@dimen/popup_item_margin"
@@ -19,7 +19,7 @@
 
 	<Button
 		android:id="@+id/clearPhotoButton"
-		style="@style/DoodleToolbarTextButtonStyle"
+		style="@style/PopupTextButtonStyle"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_gravity="center_horizontal|center_vertical"

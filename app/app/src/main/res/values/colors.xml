@@ -8,8 +8,8 @@
 	<color name="windowBackgroundColor">#F0F0F0</color>
 	<color name="actionBarText">#ffffffff</color>
 	<color name="actionBarIconColor">#ffffffff</color>
-	<color name="textColor">#4A4A4A</color>
-	<color name="popup_item_tint">#4A4A4A</color>
-	<color name="popup_item_text_color">#4A4A4A</color>
-	<color name="selected_popup_item_background">#44222222</color>
+	<color name="textColor">#62563F</color>
+	<color name="popup_item_tint">#62563F</color>
+	<color name="popup_item_text_color">#62563F</color>
+	<color name="selected_popup_item_background">#4462563F</color>
 </resources>

@@ -23,4 +23,8 @@
 	<string name="no_camera_dialog_message">This device can\'t take photos, either it has no camera app or it has no camera device.</string>
 	<string name="no_camera_dialog_positive_button_title">Shucks</string>
 
+	<string name="dialog_rename_document_title">Rename</string>
+	<string name="untitled_document">Untitled PhotoDoodle</string>
+
+
 </resources>

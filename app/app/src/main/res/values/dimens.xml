@@ -9,4 +9,7 @@
 
 	<dimen name="popup_item_margin">8dp</dimen>
 
+	<dimen name="dialog_horizontal_padding">20dp</dimen>
+	<dimen name="dialog_vertical_padding">16dp</dimen>
+
 </resources>

@@ -17,9 +17,11 @@ import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,7 +29,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import org.zakariya.photodoodle.R;
 import org.zakariya.photodoodle.model.Brush;
@@ -40,6 +44,7 @@ import java.io.File;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import icepick.Icepick;
 import icepick.State;
 
@@ -54,6 +59,8 @@ public class DoodleActivity extends AppCompatActivity
 
 	enum BrushType {PENCIL, BRUSH, LARGE_ERASER, SMALL_ERASER}
 
+	@Bind(R.id.titleTextView)
+	TextView titleTextView;
 
 	@Bind(R.id.toolbar)
 	Toolbar toolbar;
@@ -71,6 +78,9 @@ public class DoodleActivity extends AppCompatActivity
 	int selectedBrush = BrushType.PENCIL.ordinal();
 
 	@State
+	String documentName;
+
+	@State
 	File photoFile;
 
 	PhotoDoodle doodle;
@@ -82,7 +92,7 @@ public class DoodleActivity extends AppCompatActivity
 
 	boolean suppressTabPopup;
 	PopupWindow tabPopup;
-	Handler tabPopupDismissDelayHandler;
+	Handler tabPopupDismissDelayHandler = new Handler(Looper.getMainLooper());
 
 	DrawPopupController drawPopupController;
 	CameraPopupController cameraPopupController;
@@ -91,13 +101,26 @@ public class DoodleActivity extends AppCompatActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		setContentView(R.layout.activity_doodle);
 		ButterKnife.bind(this);
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
-		tabPopupDismissDelayHandler = new Handler(Looper.getMainLooper());
-
 		setSupportActionBar(toolbar);
+
+		if (TextUtils.isEmpty(documentName)){
+			documentName = getString(R.string.untitled_document);
+		}
+
+		setDocumentName(getDocumentName());
+		
+
+		// we are providing our own titleTextView so hide the built-in one
+		ActionBar actionBar = getSupportActionBar();
+		if (actionBar != null) {
+			actionBar.setDisplayShowTitleEnabled(false);
+		}
+
 		buildModeTabs();
 
 		doodle = new PhotoDoodle(this);
@@ -314,6 +337,40 @@ public class DoodleActivity extends AppCompatActivity
 		dismissTabItemPopup(true);
 	}
 
+	@OnClick(R.id.titleTextView)
+	public void onTitleTap() {
+		queryRenameDocument(titleTextView.getText().toString());
+	}
+
+	public void setDocumentName(String documentName) {
+		this.documentName = documentName;
+		titleTextView.setText(documentName);
+	}
+
+	public String getDocumentName() {
+		return documentName;
+	}
+
+	public void queryRenameDocument(String oldName) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+		LayoutInflater inflater = LayoutInflater.from(builder.getContext());
+		View view = inflater.inflate(R.layout.dialog_document_rename, null);
+		final EditText editText = (EditText) view.findViewById(R.id.editText);
+
+		builder
+				.setTitle(R.string.dialog_rename_document_title)
+				.setView(view)
+				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						setDocumentName(editText.getText().toString());
+					}
+				})
+				.setNegativeButton(android.R.string.cancel,null)
+				.show();
+	}
+
 	public void setSelectedBrush(BrushType selectedBrush) {
 		this.selectedBrush = selectedBrush.ordinal();
 		switch (selectedBrush) {
@@ -366,12 +423,12 @@ public class DoodleActivity extends AppCompatActivity
 
 		cameraTabIcon = getResources().getDrawable(R.drawable.icon_tab_camera);
 		cameraTabIcon = DrawableCompat.wrap(cameraTabIcon);
-		DrawableCompat.setTint(cameraTabIcon,getResources().getColor(R.color.actionBarIconColor));
+		DrawableCompat.setTint(cameraTabIcon, getResources().getColor(R.color.actionBarIconColor));
 		cameraTab.setIcon(cameraTabIcon);
 
 		drawingTabIcon = getResources().getDrawable(R.drawable.icon_tab_draw);
 		drawingTabIcon = DrawableCompat.wrap(drawingTabIcon);
-		DrawableCompat.setTint(drawingTabIcon,getResources().getColor(R.color.actionBarIconColor));
+		DrawableCompat.setTint(drawingTabIcon, getResources().getColor(R.color.actionBarIconColor));
 		drawingTab.setIcon(drawingTabIcon);
 
 		modeTabs.addTab(cameraTab);

@@ -1,7 +1,6 @@
 #Currently
 
-Getting ride of DoodleFragment, moving DoodleView into DoodleActivity
-Moving management to DoodleActivityPresenter???
+Make doodle title in AppBar an EditText, or editable on tap
 
 
 #Alpha Blending

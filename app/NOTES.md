@@ -11,8 +11,6 @@ Since this is expensive, should only be active when alpha < 255
 - staticPathBitmap - gets the static paths drawn into it in full alpha
 - pathCompositeBitmap - livePathBitmap and staticPathBitmap are drawn at full alpha, then, pathCompositeBitmap is drawn to screen (later to backing store when stroke is complete) at the stroke's alpha.
 
-
-
 #Chunking
 
 Line caps cause overlap-darkening at chunk intersections when drawing in partial alpha. this should not be a surprise.

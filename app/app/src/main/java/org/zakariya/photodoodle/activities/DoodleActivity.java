@@ -510,7 +510,6 @@ public class DoodleActivity extends AppCompatActivity
 	private boolean dismissTabItemPopup(boolean delay) {
 		if (tabPopup != null) {
 			if (delay) {
-
 				tabPopupDismissDelayHandler.postDelayed(new Runnable() {
 					@Override
 					public void run() {

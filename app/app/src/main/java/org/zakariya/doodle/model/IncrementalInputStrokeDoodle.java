@@ -381,7 +381,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		return matrix;
 	}
 
-	private void renderDrawingSteps() {
+	protected void renderDrawingSteps() {
 		if (bitmap != null) {
 			bitmap.eraseColor(0x0);
 
@@ -401,7 +401,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		}
 	}
 
-	private static final class IntermediateDrawingStep implements Parcelable, KryoSerializable {
+	static final class IntermediateDrawingStep implements Parcelable, KryoSerializable {
 		Brush brush;
 		ArrayList<InputStroke> inputStrokes;
 

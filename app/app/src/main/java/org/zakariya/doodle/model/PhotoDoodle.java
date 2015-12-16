@@ -12,6 +12,15 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.MotionEvent;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InvalidObjectException;
+import java.util.ArrayList;
+
 import icepick.Icepick;
 import icepick.State;
 
@@ -27,6 +36,7 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 
 	private static final String TAG = "PhotoDoodle";
 	private static final String STATE_BITMAP = "bitmap";
+	private static final int COOKIE = 0xD00D;
 
 	Bitmap photo;
 
@@ -121,6 +131,50 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		}
 	}
 
+	public byte[] serialize() {
+
+		ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+		Output output = new Output(byteOutputStream);
+
+		Kryo kryo = new Kryo();
+		kryo.writeObject(output, COOKIE);
+		kryo.writeObject(output, drawingSteps);
+
+		if (photo != null) {
+			kryo.writeObject(output, true);
+			kryo.writeObject(output, photo);
+			kryo.writeObject(output, userTranslationOnCanvas);
+		} else {
+			// mark that we have no photo
+			kryo.writeObject(output, false);
+		}
+
+		return byteOutputStream.toByteArray();
+	}
+
+	public void inflate(byte [] bytes) throws InvalidObjectException {
+
+		ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
+		Input input = new Input(byteInputStream);
+		Kryo kryo = new Kryo();
+
+		int cookie = kryo.readObject(input,Integer.class);
+		if (cookie == COOKIE) {
+			//noinspection unchecked
+			drawingSteps = kryo.readObject(input, ArrayList.class);
+
+			boolean hasPhoto = kryo.readObject(input, Boolean.class);
+			if (hasPhoto) {
+				photo = kryo.readObject(input, Bitmap.class);
+				userTranslationOnCanvas = kryo.readObject(input, PointF.class);
+			}
+
+			renderDrawingSteps();
+
+		} else {
+			throw new InvalidObjectException("Missing COOKIE header (0x" + Integer.toString(COOKIE,16) + ")");
+		}
+	}
 
 	protected void onTouchEventMove(@NonNull MotionEvent event) {
 		switch (getInteractionMode()) {

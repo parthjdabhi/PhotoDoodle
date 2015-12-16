@@ -34,11 +34,11 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import org.zakariya.photodoodle.R;
-import org.zakariya.photodoodle.model.Brush;
-import org.zakariya.photodoodle.model.PhotoDoodle;
+import org.zakariya.doodle.model.Brush;
+import org.zakariya.doodle.model.PhotoDoodle;
 import org.zakariya.photodoodle.view.ColorPickerView;
 import org.zakariya.photodoodle.view.ColorSwatchView;
-import org.zakariya.photodoodle.view.DoodleView;
+import org.zakariya.doodle.view.DoodleView;
 
 import java.io.File;
 

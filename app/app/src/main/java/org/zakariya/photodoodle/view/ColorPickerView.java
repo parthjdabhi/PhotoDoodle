@@ -23,7 +23,7 @@ import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.Interpolator;
 
 import org.zakariya.photodoodle.R;
-import org.zakariya.photodoodle.geom.PointFUtil;
+import org.zakariya.doodle.geom.PointFUtil;
 
 /**
  * TODO: document your custom view class.

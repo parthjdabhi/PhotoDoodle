@@ -1,9 +1,9 @@
-package org.zakariya.photodoodle.geom;
+package org.zakariya.doodle.geom;
 
 import android.graphics.Path;
 import android.graphics.PointF;
 
-import org.zakariya.photodoodle.util.FloatBuffer;
+import org.zakariya.doodle.util.FloatBuffer;
 
 import java.util.ArrayList;
 

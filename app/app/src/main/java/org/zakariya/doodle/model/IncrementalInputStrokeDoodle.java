@@ -1,4 +1,4 @@
-package org.zakariya.photodoodle.model;
+package org.zakariya.doodle.model;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -22,9 +22,9 @@ import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-import org.zakariya.photodoodle.geom.IncrementalInputStrokeTessellator;
-import org.zakariya.photodoodle.geom.InputStroke;
-import org.zakariya.photodoodle.geom.InputStrokeTessellator;
+import org.zakariya.doodle.geom.IncrementalInputStrokeTessellator;
+import org.zakariya.doodle.geom.InputStroke;
+import org.zakariya.doodle.geom.InputStrokeTessellator;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;

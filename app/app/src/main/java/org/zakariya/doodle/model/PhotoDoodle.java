@@ -1,4 +1,4 @@
-package org.zakariya.photodoodle.model;
+package org.zakariya.doodle.model;
 
 import android.content.Context;
 import android.graphics.Bitmap;

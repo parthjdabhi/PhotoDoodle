@@ -1,4 +1,4 @@
-package org.zakariya.photodoodle.model.tests;
+package org.zakariya.doodle.model.tests;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -11,10 +11,10 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import org.zakariya.photodoodle.geom.InputStroke;
-import org.zakariya.photodoodle.geom.InputStrokeTessellator;
-import org.zakariya.photodoodle.geom.PointFUtil;
-import org.zakariya.photodoodle.model.Doodle;
+import org.zakariya.doodle.geom.InputStroke;
+import org.zakariya.doodle.geom.InputStrokeTessellator;
+import org.zakariya.doodle.geom.PointFUtil;
+import org.zakariya.doodle.model.Doodle;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

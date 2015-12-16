@@ -1,4 +1,4 @@
-package org.zakariya.photodoodle.geom;
+package org.zakariya.doodle.geom;
 
 import android.graphics.Path;
 import android.graphics.RectF;

@@ -1,8 +1,8 @@
-package org.zakariya.photodoodle.geom;
+package org.zakariya.doodle.geom;
 
 import android.graphics.PointF;
 
-import static org.zakariya.photodoodle.geom.PointFUtil.distance;
+import static org.zakariya.doodle.geom.PointFUtil.distance;
 
 /**
  * Created by shamyl on 10/4/15.

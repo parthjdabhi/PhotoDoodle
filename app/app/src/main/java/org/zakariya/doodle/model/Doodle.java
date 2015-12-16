@@ -1,4 +1,4 @@
-package org.zakariya.photodoodle.model;
+package org.zakariya.doodle.model;
 
 import android.graphics.Canvas;
 import android.graphics.RectF;
@@ -7,7 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 
-import org.zakariya.photodoodle.view.DoodleView;
+import org.zakariya.doodle.view.DoodleView;
 
 import java.lang.ref.WeakReference;
 

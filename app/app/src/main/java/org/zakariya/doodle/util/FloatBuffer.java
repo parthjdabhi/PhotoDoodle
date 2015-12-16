@@ -1,4 +1,4 @@
-package org.zakariya.photodoodle.util;
+package org.zakariya.doodle.util;
 
 import java.util.Arrays;
 
@@ -10,12 +10,14 @@ public class FloatBuffer {
 	private static final float GROWTH_FACTOR = 1.625f;
 	private float buffer[] = null;
 	private int size = 0;
+	private int initialBufferSize;
 
 	public FloatBuffer() {
 		this(16);
 	}
 
 	public FloatBuffer(int initialBufferSize) {
+		this.initialBufferSize = initialBufferSize;
 		buffer = new float[initialBufferSize];
 		this.size = 0;
 	}
@@ -57,6 +59,7 @@ public class FloatBuffer {
 	}
 
 	public void clear() {
+		buffer = new float[initialBufferSize];
 		size = 0;
 	}
 

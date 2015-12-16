@@ -1,4 +1,4 @@
-package org.zakariya.photodoodle.view;
+package org.zakariya.doodle.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -8,7 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
-import org.zakariya.photodoodle.model.Doodle;
+import org.zakariya.doodle.model.Doodle;
 
 /**
  * Created by shamyl on 8/9/15.

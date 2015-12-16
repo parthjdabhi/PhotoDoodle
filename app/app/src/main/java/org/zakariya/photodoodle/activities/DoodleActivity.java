@@ -113,7 +113,7 @@ public class DoodleActivity extends AppCompatActivity
 		}
 
 		setDocumentName(getDocumentName());
-		
+
 
 		// we are providing our own titleTextView so hide the built-in one
 		ActionBar actionBar = getSupportActionBar();
@@ -357,6 +357,8 @@ public class DoodleActivity extends AppCompatActivity
 		LayoutInflater inflater = LayoutInflater.from(builder.getContext());
 		View view = inflater.inflate(R.layout.dialog_document_rename, null);
 		final EditText editText = (EditText) view.findViewById(R.id.editText);
+		editText.setText(getDocumentName());
+		editText.selectAll();
 
 		builder
 				.setTitle(R.string.dialog_rename_document_title)

@@ -20,17 +20,17 @@ import io.realm.annotations.Required;
 public class DoodleDocument extends RealmObject {
 
 	@PrimaryKey
-	String uuid;
+	private String uuid;
 
 	@Required
-	String name;
+	private String name;
 
 	@Required
-	Date creationDate;
+	private Date creationDate;
 
-	Date modificationDate;
+	private Date modificationDate;
 
-	byte[] photoDoodleDocumentData;
+	private byte[] photoDoodleDocumentData;
 
 	/**
 	 * Create a new DoodleDocument with UUID, name and creationDate set.

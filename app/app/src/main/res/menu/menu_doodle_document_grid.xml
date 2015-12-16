@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+	<item android:id="@+id/menuItemNewDoodle"
+	      android:title="@string/doodle_document_grid_menu_new_doodle"
+	      android:orderInCategory="99"
+	      app:showAsAction="ifRoom"/>
+
+	<item android:id="@+id/menuItemSettings"
+	      android:title="@string/settings"
+	      android:orderInCategory="100"
+	      app:showAsAction="never"/>
+
+</menu>

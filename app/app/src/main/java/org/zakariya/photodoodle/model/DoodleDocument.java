@@ -42,6 +42,7 @@ public class DoodleDocument extends RealmObject {
 		DoodleDocument doc = new DoodleDocument();
 		doc.setUuid(UUID.randomUUID().toString());
 		doc.setCreationDate(new Date());
+		doc.setModificationDate(new Date());
 		doc.setName(name);
 
 		realm.beginTransaction();

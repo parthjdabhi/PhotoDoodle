@@ -29,5 +29,7 @@
 
 	<string name="doodle_document_grid_menu_new_doodle">New</string>
 
+	<string name="doodle_document_grid_empty_text">Oh no!\nYou really ought to get doodling.</string>
+
 
 </resources>

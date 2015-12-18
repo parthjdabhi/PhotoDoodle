@@ -401,7 +401,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		}
 	}
 
-	static final class IntermediateDrawingStep implements Parcelable, KryoSerializable {
+	public static final class IntermediateDrawingStep implements Parcelable, KryoSerializable {
 		Brush brush;
 		ArrayList<InputStroke> inputStrokes;
 
@@ -440,11 +440,11 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		};
 
 		private IntermediateDrawingStep(Parcel in) {
-			brush = in.readParcelable(null);
+			brush = in.readParcelable(Brush.class.getClassLoader());
 			int count = in.readInt();
 			inputStrokes = new ArrayList<>();
 			for (int i = 0; i < count; i++) {
-				InputStroke s = in.readParcelable(null);
+				InputStroke s = in.readParcelable(InputStroke.class.getClassLoader());
 				inputStrokes.add(s);
 			}
 		}

@@ -5,7 +5,12 @@ import android.support.annotation.Nullable;
 
 import org.zakariya.doodle.model.PhotoDoodle;
 
-import java.io.InvalidObjectException;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Date;
 import java.util.UUID;
 
@@ -30,8 +35,6 @@ public class PhotoDoodleDocument extends RealmObject {
 
 	private Date modificationDate;
 
-	private byte[] photoDoodleDocumentData;
-
 	/**
 	 * Create a new PhotoDoodleDocument with UUID, name and creationDate set.
 	 *
@@ -53,38 +56,69 @@ public class PhotoDoodleDocument extends RealmObject {
 		return doc;
 	}
 
+	/**
+	 * Delete the document from the Realm
+	 * @param context the context
+	 * @param realm the realm
+	 * @param document the document to delete
+	 */
+	public static void delete(Context context, Realm realm, PhotoDoodleDocument document) {
+		File file = getPhotoDoodleSaveFile(context, document);
+		if (file.exists()) {
+			//noinspection ResultOfMethodCallIgnored
+			file.delete();
+		}
+
+		realm.beginTransaction();
+		document.removeFromRealm();
+		realm.commitTransaction();
+	}
+
 	@Nullable
 	public static PhotoDoodleDocument getPhotoDoodleDocumentByUuid(Realm realm, String uuid) {
 		return realm.where(PhotoDoodleDocument.class).equalTo("uuid", uuid).findFirst();
 	}
 
 	/**
-	 * Assign a PhotoDoodle to this PhotoDoodleDocument by serializing it to photoDoodleDocumentData byte array
-	 *
-	 * @param realm  the realm to act in
-	 * @param doc    the document to which to assign the PhotoDoodle
-	 * @param doodle the PhotoDoodle
+	 * Get the file used by a PhotoDoodleDocument to save its doodle (the doodle is not saved in the realm because it can be big)
+	 * @param context the context
+	 * @param document the document
+	 * @return a File object referring to the document's doodle's save data. May not exist if nothing has been saved
 	 */
-	public static void setPhotoDoodleDocument(Realm realm, PhotoDoodleDocument doc, PhotoDoodle doodle) {
-		byte[] bytes = doodle.serialize();
+	public static File getPhotoDoodleSaveFile(Context context, PhotoDoodleDocument document) {
+		return new File(context.getFilesDir(), document.getUuid() + ".doodle");
+	}
 
-		realm.beginTransaction();
-		doc.setPhotoDoodleDocumentData(bytes);
-		doc.setModificationDate(new Date());
-		realm.commitTransaction();
+	public static void savePhotoDoodle(Context context, PhotoDoodleDocument document, PhotoDoodle doodle) {
+		File outputFile = getPhotoDoodleSaveFile(context, document);
+		try {
+			FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
+			BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+			doodle.serialize(bufferedOutputStream);
+			fileOutputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Nullable
-	public static PhotoDoodle getPhotoDoodleDocument(Context context, PhotoDoodleDocument doc) {
-		try {
-			PhotoDoodle doodle = new PhotoDoodle(context);
-			doodle.inflate(doc.getPhotoDoodleDocumentData());
-			return doodle;
-		} catch (InvalidObjectException e) {
-			e.printStackTrace();
-			return null;
+	public static PhotoDoodle loadPhotoDoodle(Context context, PhotoDoodleDocument document) {
+		PhotoDoodle doodle = new PhotoDoodle(context);
+		File inputFile = getPhotoDoodleSaveFile(context, document);
+		if (inputFile.exists()) {
+			try {
+				FileInputStream inputStream = new FileInputStream(inputFile);
+				BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+				doodle.inflate(bufferedInputStream);
+				inputStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
+
+		return doodle;
 	}
+
 
 	/**
 	 * Set the document's modification date to now.
@@ -128,13 +162,5 @@ public class PhotoDoodleDocument extends RealmObject {
 
 	public void setModificationDate(Date modificationDate) {
 		this.modificationDate = modificationDate;
-	}
-
-	public byte[] getPhotoDoodleDocumentData() {
-		return photoDoodleDocumentData;
-	}
-
-	public void setPhotoDoodleDocumentData(byte[] photoDoodleDocumentData) {
-		this.photoDoodleDocumentData = photoDoodleDocumentData;
 	}
 }

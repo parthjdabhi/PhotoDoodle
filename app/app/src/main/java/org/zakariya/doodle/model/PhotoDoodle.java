@@ -16,9 +16,9 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.InvalidObjectException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 import icepick.Icepick;
@@ -131,10 +131,8 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		}
 	}
 
-	public byte[] serialize() {
-
-		ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
-		Output output = new Output(byteOutputStream);
+	public void serialize(OutputStream out) {
+		Output output = new Output(out);
 
 		Kryo kryo = new Kryo();
 		kryo.writeObject(output, COOKIE);
@@ -150,13 +148,10 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		}
 
 		output.close();
-		return byteOutputStream.toByteArray();
 	}
 
-	public void inflate(byte [] bytes) throws InvalidObjectException {
-
-		ByteArrayInputStream byteInputStream = new ByteArrayInputStream(bytes);
-		Input input = new Input(byteInputStream);
+	public void inflate(InputStream in) throws InvalidObjectException {
+		Input input = new Input(in);
 		Kryo kryo = new Kryo();
 
 		int cookie = kryo.readObject(input,Integer.class);

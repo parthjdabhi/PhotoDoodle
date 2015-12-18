@@ -1,6 +1,7 @@
 #Currently
 
-Make doodle title in AppBar an EditText, or editable on tap
+Theme dialogs
+http://www.materialdoc.com/alerts/
 
 #TODO
 use Camera2 API to integrate photo taking directly into the DoodleActivity (or more likely a PhotoView)

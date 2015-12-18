@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+<org.zakariya.photodoodle.view.SquareFrameLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical"
+	android:background="?attr/selectableItemBackground">
 
 	<ImageView
 		android:id="@+id/imageView"
@@ -16,18 +18,18 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_gravity="bottom"
-		android:orientation="vertical"
-		android:background="#AA222222">
+		android:background="#AA222222"
+		android:orientation="vertical">
 
 		<TextView
 			android:id="@+id/nameTextView"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal|bottom"
-			android:textAlignment="center"
-			android:ellipsize="end"
-			android:textColor="@android:color/white"
 			android:layout_margin="4dp"
+			android:ellipsize="end"
+			android:textAlignment="center"
+			android:textColor="@android:color/white"
 			tools:text="Name"/>
 
 		<TextView
@@ -35,10 +37,10 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal|bottom"
-			android:textAlignment="center"
-			android:ellipsize="end"
-			android:textColor="@android:color/white"
 			android:layout_margin="4dp"
+			android:ellipsize="end"
+			android:textAlignment="center"
+			android:textColor="@android:color/white"
 			tools:text="Date"/>
 
 		<TextView
@@ -46,13 +48,13 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal|bottom"
-			android:textAlignment="center"
-			android:ellipsize="end"
-			android:textColor="@android:color/white"
 			android:layout_margin="4dp"
+			android:ellipsize="end"
+			android:textAlignment="center"
+			android:textColor="@android:color/white"
 			tools:text="UUID"/>
 
 	</LinearLayout>
 
 
-</FrameLayout>
+</org.zakariya.photodoodle.view.SquareFrameLayout>

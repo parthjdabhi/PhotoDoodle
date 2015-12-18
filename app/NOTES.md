@@ -2,6 +2,9 @@
 
 Make doodle title in AppBar an EditText, or editable on tap
 
+#TODO
+use Camera2 API to integrate photo taking directly into the DoodleActivity (or more likely a PhotoView)
+
 
 #Alpha Blending
 Will require 3 new full-screen bitmaps. 

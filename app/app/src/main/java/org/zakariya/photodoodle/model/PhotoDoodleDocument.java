@@ -17,7 +17,7 @@ import io.realm.annotations.Required;
 /**
  * Created by shamyl on 12/16/15.
  */
-public class DoodleDocument extends RealmObject {
+public class PhotoDoodleDocument extends RealmObject {
 
 	@PrimaryKey
 	private String uuid;
@@ -33,13 +33,14 @@ public class DoodleDocument extends RealmObject {
 	private byte[] photoDoodleDocumentData;
 
 	/**
-	 * Create a new DoodleDocument with UUID, name and creationDate set.
+	 * Create a new PhotoDoodleDocument with UUID, name and creationDate set.
+	 *
 	 * @param realm the realm into which to assign the new document
-	 * @param name the name of the document, e.g., "Untitle Document"
-	 * @return a new DoodleDocument with unique UUID, in the realm and ready to use
+	 * @param name  the name of the document, e.g., "Untitle Document"
+	 * @return a new PhotoDoodleDocument with unique UUID, in the realm and ready to use
 	 */
-	public static DoodleDocument create(Realm realm, String name) {
-		DoodleDocument doc = new DoodleDocument();
+	public static PhotoDoodleDocument create(Realm realm, String name) {
+		PhotoDoodleDocument doc = new PhotoDoodleDocument();
 		doc.setUuid(UUID.randomUUID().toString());
 		doc.setCreationDate(new Date());
 		doc.setModificationDate(new Date());
@@ -52,14 +53,20 @@ public class DoodleDocument extends RealmObject {
 		return doc;
 	}
 
+	@Nullable
+	public static PhotoDoodleDocument getPhotoDoodleDocumentByUuid(Realm realm, String uuid) {
+		return realm.where(PhotoDoodleDocument.class).equalTo("uuid", uuid).findFirst();
+	}
+
 	/**
-	 * Assign a PhotoDoodle to this DoodleDocument by serializing it to photoDoodleDocumentData byte array
-	 * @param realm the realm to act in
-	 * @param doc the document to which to assign the PhotoDoodle
+	 * Assign a PhotoDoodle to this PhotoDoodleDocument by serializing it to photoDoodleDocumentData byte array
+	 *
+	 * @param realm  the realm to act in
+	 * @param doc    the document to which to assign the PhotoDoodle
 	 * @param doodle the PhotoDoodle
 	 */
-	public static void setPhotoDoodleDocument(Realm realm, DoodleDocument doc, PhotoDoodle doodle) {
-		byte [] bytes = doodle.serialize();
+	public static void setPhotoDoodleDocument(Realm realm, PhotoDoodleDocument doc, PhotoDoodle doodle) {
+		byte[] bytes = doodle.serialize();
 
 		realm.beginTransaction();
 		doc.setPhotoDoodleDocumentData(bytes);
@@ -68,7 +75,7 @@ public class DoodleDocument extends RealmObject {
 	}
 
 	@Nullable
-	public static PhotoDoodle getPhotoDoodleDocument(Context context, DoodleDocument doc) {
+	public static PhotoDoodle getPhotoDoodleDocument(Context context, PhotoDoodleDocument doc) {
 		try {
 			PhotoDoodle doodle = new PhotoDoodle(context);
 			doodle.inflate(doc.getPhotoDoodleDocumentData());
@@ -81,10 +88,11 @@ public class DoodleDocument extends RealmObject {
 
 	/**
 	 * Set the document's modification date to now.
+	 *
 	 * @param realm the realm to act in
-	 * @param doc the document to mark modification date on
+	 * @param doc   the document to mark modification date on
 	 */
-	public static void markModified(Realm realm, DoodleDocument doc) {
+	public static void markModified(Realm realm, PhotoDoodleDocument doc) {
 		realm.beginTransaction();
 		doc.setModificationDate(new Date());
 		realm.commitTransaction();

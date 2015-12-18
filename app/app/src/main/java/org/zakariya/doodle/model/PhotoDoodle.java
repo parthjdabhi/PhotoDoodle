@@ -149,6 +149,7 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 			kryo.writeObject(output, false);
 		}
 
+		output.close();
 		return byteOutputStream.toByteArray();
 	}
 

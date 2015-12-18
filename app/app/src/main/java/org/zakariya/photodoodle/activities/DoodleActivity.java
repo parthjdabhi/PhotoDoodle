@@ -21,7 +21,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,28 +32,30 @@ import android.widget.EditText;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import org.zakariya.photodoodle.R;
 import org.zakariya.doodle.model.Brush;
 import org.zakariya.doodle.model.PhotoDoodle;
+import org.zakariya.doodle.view.DoodleView;
+import org.zakariya.photodoodle.R;
+import org.zakariya.photodoodle.model.PhotoDoodleDocument;
 import org.zakariya.photodoodle.view.ColorPickerView;
 import org.zakariya.photodoodle.view.ColorSwatchView;
-import org.zakariya.doodle.view.DoodleView;
 
 import java.io.File;
+import java.io.InvalidObjectException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import icepick.Icepick;
 import icepick.State;
+import io.realm.Realm;
 
 public class DoodleActivity extends AppCompatActivity
 		implements TabLayout.OnTabSelectedListener, CameraPopupController.Callbacks, DrawPopupController.Callbacks {
 
+	public static final String EXTRA_DOODLE_DOCUMENT_UUID = "DoodleActivity.EXTRA_DOODLE_DOCUMENT_UUID";
+
 	private static final String TAG = "DoodleActivity";
-
-	private static final String DOODLE_STATE = "DOODLE_STATE";
-
 	private static final int REQUEST_TAKE_PHOTO = 1;
 
 	enum BrushType {PENCIL, BRUSH, LARGE_ERASER, SMALL_ERASER}
@@ -75,14 +76,16 @@ public class DoodleActivity extends AppCompatActivity
 	int color = 0xFF000000;
 
 	@State
-	int selectedBrush = BrushType.PENCIL.ordinal();
+	String documentUUID;
 
 	@State
-	String documentName;
+	int selectedBrush = BrushType.PENCIL.ordinal();
 
 	@State
 	File photoFile;
 
+	Realm realm;
+	PhotoDoodleDocument photoDoodleDocument;
 	PhotoDoodle doodle;
 
 	TabLayout.Tab cameraTab;
@@ -104,18 +107,11 @@ public class DoodleActivity extends AppCompatActivity
 
 		setContentView(R.layout.activity_doodle);
 		ButterKnife.bind(this);
-		Icepick.restoreInstanceState(this, savedInstanceState);
 
+		//
+		// setup the toolbar - note: we are providing our own titleTextView so hide the built-in title
+		//
 		setSupportActionBar(toolbar);
-
-		if (TextUtils.isEmpty(documentName)){
-			documentName = getString(R.string.untitled_document);
-		}
-
-		setDocumentName(getDocumentName());
-
-
-		// we are providing our own titleTextView so hide the built-in one
 		ActionBar actionBar = getSupportActionBar();
 		if (actionBar != null) {
 			actionBar.setDisplayShowTitleEnabled(false);
@@ -123,34 +119,60 @@ public class DoodleActivity extends AppCompatActivity
 
 		buildModeTabs();
 
-		doodle = new PhotoDoodle(this);
-		doodle.setDrawDebugPositioningOverlay(false);
+		//
+		//  Load the PhotoDoodleDocument
+		//
 
-		if (savedInstanceState != null) {
-			Bundle doodleState = savedInstanceState.getBundle(DOODLE_STATE);
-			if (doodleState != null) {
-				doodle.onCreate(doodleState);
-			}
+		if (savedInstanceState == null) {
+			documentUUID = getIntent().getStringExtra(EXTRA_DOODLE_DOCUMENT_UUID);
+		} else {
+			Icepick.restoreInstanceState(this, savedInstanceState);
 		}
 
+		realm = Realm.getInstance(this);
+		photoDoodleDocument = PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, documentUUID);
+		setDocumentName(getDocumentName());
+
+		//
+		//  Create the PhotoDoodle - load previously saved document, if any
+		//
+
+		doodle = new PhotoDoodle(this);
+		byte[] doodleData = photoDoodleDocument.getPhotoDoodleDocumentData();
+		if (doodleData != null && doodleData.length > 0) {
+			try {
+				Log.d(TAG, "onCreate: doodleData.length: " + doodleData.length);
+				doodle.inflate(doodleData);
+			} catch (InvalidObjectException e) {
+				e.printStackTrace();
+			}
+		} else {
+			Log.d(TAG, "onCreate: doodleData is empty, starting fresh doodle.");
+		}
+
+		doodle.setDrawDebugPositioningOverlay(false);
 		doodleView.setDoodle(doodle);
 
 		setColor(color);
 		setSelectedBrush(BrushType.values()[selectedBrush]);
 		setInteractionMode(doodle.getInteractionMode());
 
-		// be tidy - the photo file may have been left over after a crash
+		//
+		// be tidy - in case a photo temp file survived a crash or whatever
+		//
 		deletePhotoTempFile();
 	}
 
 	@Override
+	protected void onDestroy() {
+		realm.close();
+		super.onDestroy();
+	}
+
+	@Override
 	protected void onSaveInstanceState(Bundle outState) {
+		saveDoodleDataToDocumentStore();
 		Icepick.saveInstanceState(this, outState);
-
-		Bundle doodleState = new Bundle();
-		doodle.onSaveInstanceState(doodleState);
-		outState.putBundle(DOODLE_STATE, doodleState);
-
 		super.onSaveInstanceState(outState);
 	}
 
@@ -176,6 +198,11 @@ public class DoodleActivity extends AppCompatActivity
 		}
 	}
 
+	@Override
+	protected void onStop() {
+		saveDoodleDataToDocumentStore();
+		super.onStop();
+	}
 
 	@Override
 	public void onBackPressed() {
@@ -343,12 +370,15 @@ public class DoodleActivity extends AppCompatActivity
 	}
 
 	public void setDocumentName(String documentName) {
-		this.documentName = documentName;
+		realm.beginTransaction();
+		photoDoodleDocument.setName(documentName);
+		realm.commitTransaction();
+
 		titleTextView.setText(documentName);
 	}
 
 	public String getDocumentName() {
-		return documentName;
+		return photoDoodleDocument.getName();
 	}
 
 	public void queryRenameDocument(String oldName) {
@@ -369,7 +399,7 @@ public class DoodleActivity extends AppCompatActivity
 						setDocumentName(editText.getText().toString());
 					}
 				})
-				.setNegativeButton(android.R.string.cancel,null)
+				.setNegativeButton(android.R.string.cancel, null)
 				.show();
 	}
 
@@ -585,5 +615,18 @@ public class DoodleActivity extends AppCompatActivity
 				Log.e(TAG, "Unable to delete the photo temp save file at " + photoTempFile);
 			}
 		}
+	}
+
+	private void saveDoodleDataToDocumentStore() {
+		byte [] doodleData = doodle.serialize();
+		realm.beginTransaction();
+		if (doodleData != null && doodleData.length > 0) {
+			Log.d(TAG, "saveDoodleDataToDocumentStore: doodleData.length: " + doodleData.length);
+			photoDoodleDocument.setPhotoDoodleDocumentData(doodleData);
+		} else {
+			Log.d(TAG, "saveDoodleDataToDocumentStore: doodleData.length == 0 - writing null to store.");
+			photoDoodleDocument.setPhotoDoodleDocumentData(null);
+		}
+		realm.commitTransaction();
 	}
 }

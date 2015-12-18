@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.zakariya.photodoodle.R;
-import org.zakariya.photodoodle.model.DoodleDocument;
+import org.zakariya.photodoodle.model.PhotoDoodleDocument;
 
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
@@ -30,7 +30,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		 * Called when an item is clicked
 		 * @param document the document represented by this item
 		 */
-		void onDoodleDocumentClick(DoodleDocument document);
+		void onDoodleDocumentClick(PhotoDoodleDocument document);
 	}
 
 	public interface OnLongClickListener {
@@ -39,11 +39,11 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		 * @param document the document represented by this item
 		 * @return true if the long click is handled, false otherwise
 		 */
-		boolean onDoodleDocumentLongClick(DoodleDocument document);
+		boolean onDoodleDocumentLongClick(PhotoDoodleDocument document);
 	}
 
 	public class ViewHolder extends RecyclerView.ViewHolder {
-		public DoodleDocument doodleDocument;
+		public PhotoDoodleDocument photoDoodleDocument;
 		public View rootView;
 		public ImageView imageView;
 		public TextView nameTextView;
@@ -62,13 +62,13 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 
 	Context context;
 	View emptyView;
-	RealmResults<DoodleDocument> realmResults;
+	RealmResults<PhotoDoodleDocument> realmResults;
 	private final RealmChangeListener realmChangeListener;
 	DateFormat dateFormatter;
 	WeakReference<OnClickListener> weakOnClickListener;
 	WeakReference<OnLongClickListener> weakOnLongClickListener;
 
-	public DoodleDocumentAdapter(Context context, RealmResults<DoodleDocument> realmResults, View emptyView) {
+	public DoodleDocumentAdapter(Context context, RealmResults<PhotoDoodleDocument> realmResults, View emptyView) {
 		this.context = context;
 		this.realmResults = realmResults;
 		this.emptyView = emptyView;
@@ -113,7 +113,9 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		return weakOnLongClickListener != null ? weakOnLongClickListener.get() : null;
 	}
 
-
+	/**
+	 * Your activity/fragment needs to call this to unregister it from listening to realm changes
+	 */
 	public void onDestroy() {
 		Realm.getInstance(context).removeChangeListener(realmChangeListener);
 	}
@@ -131,7 +133,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		holder.rootView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				DoodleDocument doc = holder.doodleDocument;
+				PhotoDoodleDocument doc = holder.photoDoodleDocument;
 				OnClickListener listener = getOnClickListener();
 				if (doc != null && listener != null) {
 					listener.onDoodleDocumentClick(doc);
@@ -143,7 +145,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		holder.rootView.setOnLongClickListener(new View.OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
-				DoodleDocument doc = holder.doodleDocument;
+				PhotoDoodleDocument doc = holder.photoDoodleDocument;
 				OnLongClickListener listener = getOnLongClickListener();
 				return doc != null && listener != null && listener.onDoodleDocumentLongClick(doc);
 			}
@@ -155,8 +157,8 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 	@Override
 	public void onBindViewHolder(ViewHolder holder, int position) {
 
-		DoodleDocument doc = realmResults.get(position);
-		holder.doodleDocument = doc;
+		PhotoDoodleDocument doc = realmResults.get(position);
+		holder.photoDoodleDocument = doc;
 
 		holder.nameTextView.setText(doc.getName());
 

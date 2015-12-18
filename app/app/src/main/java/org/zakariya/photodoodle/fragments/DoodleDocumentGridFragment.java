@@ -18,7 +18,7 @@ import android.view.ViewGroup;
 import org.zakariya.photodoodle.R;
 import org.zakariya.photodoodle.activities.DoodleActivity;
 import org.zakariya.photodoodle.adapters.DoodleDocumentAdapter;
-import org.zakariya.photodoodle.model.DoodleDocument;
+import org.zakariya.photodoodle.model.PhotoDoodleDocument;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -44,6 +44,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	@Bind(R.id.emptyView)
 	View emptyView;
 
+	Realm realm;
 	RecyclerView.LayoutManager layoutManager;
 	DoodleDocumentAdapter adapter;
 
@@ -55,11 +56,13 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
+		realm = Realm.getInstance(getContext());
 	}
 
 	@Override
 	public void onDestroy() {
 		adapter.onDestroy();
+		realm.close();
 		super.onDestroy();
 	}
 
@@ -93,7 +96,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		layoutManager = new GridLayoutManager(getContext(), 2);
 		recyclerView.setLayoutManager(layoutManager);
 
-		RealmResults<DoodleDocument> docs = Realm.getInstance(getContext()).allObjectsSorted(DoodleDocument.class, "modificationDate", Sort.DESCENDING);
+		RealmResults<PhotoDoodleDocument> docs = realm.allObjectsSorted(PhotoDoodleDocument.class, "modificationDate", Sort.DESCENDING);
 		adapter = new DoodleDocumentAdapter(getContext(), docs, emptyView);
 		adapter.setOnClickListener(this);
 		adapter.setOnLongClickListener(this);
@@ -105,24 +108,25 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 
 	@OnClick(R.id.fab)
 	public void createNewPhotoDoodle() {
-		DoodleDocument doc = DoodleDocument.create(Realm.getInstance(getContext()),getString(R.string.untitled_document));
-		//editPhotoDoodle(doc);
+		PhotoDoodleDocument doc = PhotoDoodleDocument.create(realm, getString(R.string.untitled_document));
+		editPhotoDoodle(doc);
 	}
 
 	@Override
-	public void onDoodleDocumentClick(DoodleDocument document) {
+	public void onDoodleDocumentClick(PhotoDoodleDocument document) {
 		Log.i(TAG, "onDoodleDocumentClick: " + document.getUuid());
+		editPhotoDoodle(document);
 	}
 
 	@Override
-	public boolean onDoodleDocumentLongClick(DoodleDocument document) {
+	public boolean onDoodleDocumentLongClick(PhotoDoodleDocument document) {
 		Log.i(TAG, "onDoodleDocumentLongClick: " + document.getUuid());
 		return true;
 	}
 
-	public void editPhotoDoodle(DoodleDocument doc) {
+	public void editPhotoDoodle(PhotoDoodleDocument doc) {
 		Intent intent = new Intent(getContext(), DoodleActivity.class);
-
+		intent.putExtra(DoodleActivity.EXTRA_DOODLE_DOCUMENT_UUID,doc.getUuid());
 		startActivity(intent);
 	}
 

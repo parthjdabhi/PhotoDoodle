@@ -146,7 +146,7 @@ public class DoodleActivity extends AppCompatActivity
 				photoDoodle.onCreate(doodleState);
 			}
 		} else {
-			photoDoodle = PhotoDoodleDocument.loadPhotoDoodle(this,photoDoodleDocument);
+			photoDoodle = PhotoDoodleDocument.loadPhotoDoodle(this, photoDoodleDocument);
 		}
 
 		photoDoodle.setDrawDebugPositioningOverlay(false);
@@ -204,7 +204,7 @@ public class DoodleActivity extends AppCompatActivity
 	@Override
 	protected void onStop() {
 
-		PhotoDoodleDocument.savePhotoDoodle(this,photoDoodleDocument, photoDoodle);
+		PhotoDoodleDocument.savePhotoDoodle(this, photoDoodleDocument, photoDoodle);
 
 		super.onStop();
 	}

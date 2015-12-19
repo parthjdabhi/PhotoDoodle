@@ -2,6 +2,7 @@ package org.zakariya.doodle.model;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -10,12 +11,14 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InvalidObjectException;
 import java.io.OutputStream;
@@ -34,14 +37,11 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		DRAW
 	}
 
-	private static final String TAG = "PhotoDoodle";
-	private static final String STATE_BITMAP = "bitmap";
-	private static final int COOKIE = 0xD00D;
+	static final String TAG = "PhotoDoodle";
+	static final int COOKIE = 0xD00D;
 
-	Bitmap photo;
-
-	private Matrix photoMatrix;
-	private Paint photoPaint;
+	@State
+	byte[] photoJpegData;
 
 	@State
 	int interactionMode = InteractionMode.DRAW.ordinal();
@@ -49,6 +49,10 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 	@State
 	PointF userTranslationOnCanvas = new PointF();
 
+	// transient data
+	Bitmap photo;
+	Matrix photoMatrix;
+	Paint photoPaint;
 	PointF touchStartPosition;
 
 	public PhotoDoodle(Context context) {
@@ -65,18 +69,13 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
-
-		setPhoto((Bitmap) savedInstanceState.getParcelable(STATE_BITMAP));
+		setPhotoJpegData(photoJpegData);
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		Icepick.saveInstanceState(this, outState);
-
-		if (photo != null) {
-			outState.putParcelable(STATE_BITMAP, photo);
-		}
 	}
 
 	@Override
@@ -138,10 +137,10 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		kryo.writeObject(output, COOKIE);
 		kryo.writeObject(output, drawingSteps);
 
-		if (photo != null) {
+		if (photoJpegData != null && photoJpegData.length > 0) {
 			kryo.writeObject(output, true);
-			kryo.writeObject(output, photo);
 			kryo.writeObject(output, userTranslationOnCanvas);
+			kryo.writeObject(output, photoJpegData);
 		} else {
 			// mark that we have no photo
 			kryo.writeObject(output, false);
@@ -154,21 +153,21 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		Input input = new Input(in);
 		Kryo kryo = new Kryo();
 
-		int cookie = kryo.readObject(input,Integer.class);
+		int cookie = kryo.readObject(input, Integer.class);
 		if (cookie == COOKIE) {
 			//noinspection unchecked
 			drawingSteps = kryo.readObject(input, ArrayList.class);
 
 			boolean hasPhoto = kryo.readObject(input, Boolean.class);
 			if (hasPhoto) {
-				photo = kryo.readObject(input, Bitmap.class);
 				userTranslationOnCanvas = kryo.readObject(input, PointF.class);
+				setPhotoJpegData(kryo.readObject(input, byte[].class));
 			}
 
 			renderDrawingSteps();
 
 		} else {
-			throw new InvalidObjectException("Missing COOKIE header (0x" + Integer.toString(COOKIE,16) + ")");
+			throw new InvalidObjectException("Missing COOKIE header (0x" + Integer.toString(COOKIE, 16) + ")");
 		}
 	}
 
@@ -196,7 +195,26 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 	}
 
 	public void clearPhoto() {
-		setPhoto(null);
+		setPhotoJpegData(null);
+	}
+
+	public void setPhotoJpegData(@Nullable byte[] photoData) {
+		this.photoJpegData = photoData;
+		if (this.photoJpegData != null && this.photoJpegData.length > 0) {
+			photo = BitmapFactory.decodeByteArray(this.photoJpegData, 0, this.photoJpegData.length);
+			setBackgroundColor(0x0);
+			updatePhotoMatrix();
+		} else {
+			photo = null;
+			photoJpegData = null;
+			setBackgroundColor(0xFFFFFFFF);
+		}
+
+		invalidate();
+	}
+
+	public byte[] getPhotoJpegData() {
+		return photoJpegData;
 	}
 
 	public Bitmap getPhoto() {
@@ -204,12 +222,9 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 	}
 
 	public void setPhoto(Bitmap photo) {
-		this.photo = photo;
-		setBackgroundColor(photo != null ? 0x0 : 0xFFFFFFFF);
-		if (photo != null) {
-			updatePhotoMatrix();
-		}
-		invalidate();
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		photo.compress(Bitmap.CompressFormat.JPEG,100,byteArrayOutputStream);
+		setPhotoJpegData(byteArrayOutputStream.toByteArray());
 	}
 
 	public InteractionMode getInteractionMode() {
@@ -220,8 +235,7 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		this.interactionMode = interactionMode.ordinal();
 	}
 
-
-	private void updatePhotoMatrix() {
+	void updatePhotoMatrix() {
 
 		photoMatrix.reset();
 

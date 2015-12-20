@@ -105,6 +105,14 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 	}
 
 	@Nullable
+	public Bitmap getThumbnail(PhotoDoodleDocument document, int width, int height) {
+		final String documentUuid = document.getUuid();
+		final long modificationTimestampSeconds = document.getModificationDate().getTime() / 1000;
+		String taskId = generateRenderTaskKey(documentUuid, modificationTimestampSeconds, width, height);
+		return cache.get(taskId);
+	}
+
+	@Nullable
 	public RenderTask renderThumbnail(final PhotoDoodleDocument document, final int width, final int height, final Callbacks callbacks) {
 
 		if (handler == null) {

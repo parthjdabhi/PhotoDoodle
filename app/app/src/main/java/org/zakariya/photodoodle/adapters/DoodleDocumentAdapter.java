@@ -202,33 +202,51 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 
 		holder.uuidTextView.setText(doc.getUuid());
 
-		holder.loadingImageView.setAlpha(1f);
-		holder.loadingImageView.setVisibility(View.VISIBLE);
 
 		// now generate a thumbnail
 		// TODO: Compute ideal thumbnail size. MeasuredWidth doesn't work, maybe need treeViewObserver...
 		int width = 256;
 		int height = 256;
 
-		holder.thumbnailRenderTask = DoodleThumbnailRenderer.getInstance().renderThumbnail(doc, width, height, new DoodleThumbnailRenderer.Callbacks() {
-			@Override
-			public void onThumbnailReady(Bitmap thumbnail) {
+		DoodleThumbnailRenderer thumbnailer = DoodleThumbnailRenderer.getInstance();
+		Bitmap thumbnail = thumbnailer.getThumbnail(doc,width,height);
+		if (thumbnail != null) {
+			//
+			//  The thumbnail is available, run with it
+			//
 
-				holder.imageView.setImageBitmap(thumbnail);
-				holder.loadingImageView.animate()
-						.alpha(0)
-						.setDuration(crossfadeDuration)
-						.setListener(new AnimatorListenerAdapter() {
-							@Override
-							public void onAnimationEnd(Animator animation) {
-								holder.loadingImageView.setVisibility(View.GONE);
-								super.onAnimationEnd(animation);
-							}
-						});
+			holder.thumbnailRenderTask = null;
+			holder.loadingImageView.setVisibility(View.GONE);
+			holder.imageView.setImageBitmap(thumbnail);
 
+		} else {
 
-			}
-		});
+			//
+			//  Thumbnail has to be rendered. Show the loading image view and fire off a request
+			//
+
+			holder.loadingImageView.setAlpha(1f);
+			holder.loadingImageView.setVisibility(View.VISIBLE);
+
+			holder.thumbnailRenderTask = DoodleThumbnailRenderer.getInstance().renderThumbnail(doc, width, height, new DoodleThumbnailRenderer.Callbacks() {
+				@Override
+				public void onThumbnailReady(Bitmap thumbnail) {
+
+					holder.imageView.setImageBitmap(thumbnail);
+					holder.loadingImageView.animate()
+							.alpha(0)
+							.setDuration(crossfadeDuration)
+							.setListener(new AnimatorListenerAdapter() {
+								@Override
+								public void onAnimationEnd(Animator animation) {
+									holder.loadingImageView.setVisibility(View.GONE);
+									super.onAnimationEnd(animation);
+								}
+							});
+				}
+			});
+		}
+
 	}
 
 	@Override

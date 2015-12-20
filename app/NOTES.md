@@ -1,6 +1,6 @@
 #Currently
 
-Change my recyclerview adapter to NOT track realm changes and blindly reload, but to have addDocument/removeDocument/setDocuments functionality
+Make recyclerview animate addition/removal/movement of items
 Make thumbnail renderer render at correct dimensions
 Try to find any memory leaks
 

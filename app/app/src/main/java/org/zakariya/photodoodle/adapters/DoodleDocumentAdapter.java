@@ -196,7 +196,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		int width = 256;
 		int height = 256;
 
-		holder.thumbnailRenderTask = DoodleThumbnailRenderer.getInstance().renderThumbnail(context, doc, width, height, new DoodleThumbnailRenderer.Callbacks() {
+		holder.thumbnailRenderTask = DoodleThumbnailRenderer.getInstance().renderThumbnail(doc, width, height, new DoodleThumbnailRenderer.Callbacks() {
 			@Override
 			public void onThumbnailReady(Bitmap thumbnail) {
 

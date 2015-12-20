@@ -41,6 +41,7 @@ import org.zakariya.photodoodle.view.ColorPickerView;
 import org.zakariya.photodoodle.view.ColorSwatchView;
 
 import java.io.File;
+import java.util.Date;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -389,6 +390,10 @@ public class DoodleActivity extends AppCompatActivity
 		if (photoDoodle.isDirty()) {
 			PhotoDoodleDocument.savePhotoDoodle(this, photoDoodleDocument, photoDoodle);
 			photoDoodle.setDirty(false);
+
+			// mark that the document was modified
+			PhotoDoodleDocument.markModified(realm, photoDoodleDocument);
+
 			return true;
 		} else {
 			return false;
@@ -396,9 +401,12 @@ public class DoodleActivity extends AppCompatActivity
 	}
 
 	public void setDocumentName(String documentName) {
-		realm.beginTransaction();
-		photoDoodleDocument.setName(documentName);
-		realm.commitTransaction();
+		if (!documentName.equals(photoDoodleDocument.getName())){
+			realm.beginTransaction();
+			photoDoodleDocument.setName(documentName);
+			photoDoodleDocument.setModificationDate(new Date());
+			realm.commitTransaction();
+		}
 
 		titleTextView.setText(documentName);
 	}

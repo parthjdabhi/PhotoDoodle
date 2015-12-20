@@ -1,6 +1,11 @@
 #Currently
 
-When dismissing DoodleActivity, and saving the doodle data to the file, the DoodleThumbnailRenderer is notified that the doc was dirty, and needs to be updated. Trouble is, there seems to be a threading
+Add an LRU cache to my thumbnail renderer
+Change my recyclerview adapter to NOT track realm changes and blindly reload, but to have addDocument/removeDocument/setDocuments functionality
+Make thumbnail renderer render at correct dimensions
+Try to find any memory leaks
+
+
 
 Theme dialogs
 http://www.materialdoc.com/alerts/

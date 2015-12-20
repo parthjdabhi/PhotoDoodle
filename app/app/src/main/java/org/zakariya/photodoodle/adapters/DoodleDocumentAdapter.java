@@ -18,10 +18,12 @@ import org.zakariya.photodoodle.util.DoodleThumbnailRenderer;
 
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
 /**
@@ -75,30 +77,43 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 	Context context;
 	Realm realm;
 	View emptyView;
-	RealmResults<PhotoDoodleDocument> realmResults;
-	private final RealmChangeListener realmChangeListener;
+	ArrayList<PhotoDoodleDocument> photoDoodleDocuments;
 	DateFormat dateFormatter;
 	WeakReference<OnClickListener> weakOnClickListener;
 	WeakReference<OnLongClickListener> weakOnLongClickListener;
 	int crossfadeDuration;
 
-	public DoodleDocumentAdapter(Context context, RealmResults<PhotoDoodleDocument> realmResults, View emptyView) {
-		this.context = context;
-		this.realmResults = realmResults;
-		this.emptyView = emptyView;
+	Comparator<PhotoDoodleDocument> sortComparator = new Comparator<PhotoDoodleDocument>() {
+		@Override
+		public int compare(PhotoDoodleDocument lhs, PhotoDoodleDocument rhs) {
+			long leftModDate = lhs.getModificationDate().getTime();
+			long rightModDate = rhs.getModificationDate().getTime();
+			long delta = rightModDate - leftModDate;
 
-		realmChangeListener = new RealmChangeListener() {
-			@Override
-			public void onChange() {
-				updateEmptyView();
-				notifyDataSetChanged();
+			// this dance is to avoid long->int precision loss
+			if (delta < 0) {
+				return -1;
+			} else if (delta > 0) {
+				return 1;
 			}
-		};
+			return 0;
+		}
+	};
 
+	public DoodleDocumentAdapter(Context context, RealmResults<PhotoDoodleDocument> items, View emptyView) {
+		this.context = context;
+		this.emptyView = emptyView;
 		realm = Realm.getInstance(context);
-		realm.addChangeListener(realmChangeListener);
 		dateFormatter = DateFormat.getDateTimeInstance();
 		crossfadeDuration = context.getResources().getInteger(android.R.integer.config_shortAnimTime);
+		photoDoodleDocuments = new ArrayList<>();
+
+		// we're using a manually-managed ArrayList. We lose automatic tracking, but
+		// gain nice add/remove/reorder animations if we are careful
+		for (PhotoDoodleDocument doc : items) {
+			photoDoodleDocuments.add(doc);
+		}
+
 		updateEmptyView();
 	}
 
@@ -129,15 +144,14 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 	}
 
 	/**
-	 * Your activity/fragment needs to call this to unregister it from listening to realm changes
+	 * Your activity/fragment needs to call this to clean up the internal Realm instance
 	 */
 	public void onDestroy() {
-		realm.removeChangeListener(realmChangeListener);
 		realm.close();
 	}
 
 	void updateEmptyView() {
-		emptyView.setVisibility(realmResults.isEmpty() ? View.VISIBLE : View.GONE);
+		emptyView.setVisibility(photoDoodleDocuments.isEmpty() ? View.VISIBLE : View.GONE);
 	}
 
 	@Override
@@ -178,7 +192,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 			holder.thumbnailRenderTask = null;
 		}
 
-		PhotoDoodleDocument doc = realmResults.get(position);
+		PhotoDoodleDocument doc = photoDoodleDocuments.get(position);
 		holder.photoDoodleDocument = doc;
 
 		holder.nameTextView.setText(doc.getName());
@@ -219,19 +233,79 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 
 	@Override
 	public int getItemCount() {
-		return realmResults.size();
+		return photoDoodleDocuments.size();
 	}
 
-	public void notifyItemChanged(PhotoDoodleDocument document) {
+	public void setItems(RealmResults<PhotoDoodleDocument> items) {
+		photoDoodleDocuments.clear();
+		for (PhotoDoodleDocument doc : items) {
+			this.photoDoodleDocuments.add(doc);
+		}
 
-		// can't use realmResults.indexOf - it's not implemented :(
-		String uuid = document.getUuid();
-		for (int i = 0; i < realmResults.size(); i++) {
-			PhotoDoodleDocument doc = realmResults.get(i);
+		sortDocuments();
+		notifyDataSetChanged();
+	}
+
+	/**
+	 * Add a document to the list
+	 * @param doc the document
+	 */
+	public void addItem(PhotoDoodleDocument doc) {
+		photoDoodleDocuments.add(0,doc);
+		sortDocuments();
+		int index = getIndexOfItem(doc);
+		if (index >= 0) {
+			notifyItemInserted(index);
+		} else {
+			notifyDataSetChanged();
+		}
+	}
+
+	/**
+	 * Remove a document from the list.
+	 * @param doc the document to remove
+	 */
+	public void removeItem(PhotoDoodleDocument doc) {
+		int index = getIndexOfItem(doc);
+		if (index >= 0) {
+			photoDoodleDocuments.remove(index);
+			notifyItemRemoved(index);
+		}
+	}
+
+	/**
+	 * When a document is edited, it goes to the top of the list. Call this to re-sort storage and move the item.
+	 * @param doc the edited document
+	 */
+	public void itemWasUpdated(PhotoDoodleDocument doc) {
+		int previousIndex = getIndexOfItem(doc);
+		if (previousIndex >= 0) {
+			sortDocuments();
+			int newIndex = getIndexOfItem(doc);
+			if (newIndex != previousIndex) {
+				notifyItemMoved(previousIndex,newIndex);
+			}
+			notifyItemChanged(newIndex);
+		}
+	}
+
+	private void sortDocuments() {
+		Collections.sort(photoDoodleDocuments, sortComparator);
+	}
+
+	private int getIndexOfItem(String uuid) {
+		// we need to compare UUIDs because object === checks might not work with Realm objects
+		for (int i = 0; i < photoDoodleDocuments.size(); i++) {
+			PhotoDoodleDocument doc = photoDoodleDocuments.get(i);
 			if (doc.getUuid().equals(uuid)) {
-				notifyItemChanged(i);
-				break;
+				return i;
 			}
 		}
+
+		return -1;
+	}
+
+	private int getIndexOfItem(PhotoDoodleDocument document) {
+		return getIndexOfItem(document.getUuid());
 	}
 }

@@ -22,10 +22,6 @@ public class PhotoDoodleApplication extends android.app.Application {
 		return instance;
 	}
 
-	private void initSingletons(){
-		DoodleThumbnailRenderer.init(this);
-	}
-
 	@Override
 	public void onTrimMemory(int level) {
 		super.onTrimMemory(level);
@@ -42,5 +38,9 @@ public class PhotoDoodleApplication extends android.app.Application {
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 		DoodleThumbnailRenderer.getInstance().onConfigurationChanged(newConfig);
+	}
+
+	private void initSingletons() {
+		DoodleThumbnailRenderer.init(this);
 	}
 }

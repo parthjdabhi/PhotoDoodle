@@ -79,17 +79,21 @@ public class DoodleActivity extends AppCompatActivity
 	@State
 	int color = 0xFF000000;
 
-	@State
-	String documentUUID;
 
 	@State
 	int selectedBrush = BrushType.PENCIL.ordinal();
 
 	@State
+	String documentUuid;
+
+	@State
+	long documentModificationTime = 0;
+
+	@State
 	File photoFile;
 
 	Realm realm;
-	PhotoDoodleDocument photoDoodleDocument;
+	PhotoDoodleDocument document;
 	PhotoDoodle photoDoodle;
 
 	TabLayout.Tab cameraTab;
@@ -127,15 +131,27 @@ public class DoodleActivity extends AppCompatActivity
 		//  Load the PhotoDoodleDocument
 		//
 
+		realm = Realm.getInstance(this);
 		if (savedInstanceState == null) {
-			documentUUID = getIntent().getStringExtra(EXTRA_DOODLE_DOCUMENT_UUID);
+			documentUuid = getIntent().getStringExtra(EXTRA_DOODLE_DOCUMENT_UUID);
+			document = PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, documentUuid);
+
+			if (document == null) {
+				throw new IllegalArgumentException("Document UUID didn't refer to an existing PhotoDoodleDocument");
+			}
+
+			documentModificationTime = document.getModificationDate().getTime();
 		} else {
 			Icepick.restoreInstanceState(this, savedInstanceState);
+			document = PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, documentUuid);
+
+			if (document == null) {
+				throw new IllegalArgumentException("Document UUID didn't refer to an existing PhotoDoodleDocument");
+			}
 		}
 
-		realm = Realm.getInstance(this);
-		photoDoodleDocument = PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, documentUUID);
-		setDocumentName(getDocumentName());
+		// update title
+		titleTextView.setText(document.getName());
 
 		//
 		//  Create the PhotoDoodle. If this is result of a state restoration
@@ -150,7 +166,7 @@ public class DoodleActivity extends AppCompatActivity
 				photoDoodle.onCreate(doodleState);
 			}
 		} else {
-			photoDoodle = PhotoDoodleDocument.loadPhotoDoodle(this, photoDoodleDocument);
+			photoDoodle = PhotoDoodleDocument.loadPhotoDoodle(this, document);
 		}
 
 		photoDoodle.setDrawDebugPositioningOverlay(false);
@@ -215,9 +231,11 @@ public class DoodleActivity extends AppCompatActivity
 	public void onBackPressed() {
 		if (!dismissTabItemPopup(false)) {
 
+			boolean edited = saveDoodleIfEdited() || (document.getModificationDate().getTime() > documentModificationTime);
+
 			Intent resultData = new Intent();
-			resultData.putExtra(RESULT_DID_EDIT_DOODLE, saveDoodleIfEdited());
-			resultData.putExtra(RESULT_DOODLE_DOCUMENT_UUID,photoDoodleDocument.getUuid());
+			resultData.putExtra(RESULT_DID_EDIT_DOODLE, edited);
+			resultData.putExtra(RESULT_DOODLE_DOCUMENT_UUID, document.getUuid());
 			setResult(RESULT_OK, resultData);
 
 			super.onBackPressed();
@@ -384,15 +402,16 @@ public class DoodleActivity extends AppCompatActivity
 
 	/**
 	 * If the doodle is dirty (edits were made) saves it to its file, and returns true.
+	 *
 	 * @return true if the doodle had edits and needed to be saved
 	 */
 	public boolean saveDoodleIfEdited() {
 		if (photoDoodle.isDirty()) {
-			PhotoDoodleDocument.savePhotoDoodle(this, photoDoodleDocument, photoDoodle);
+			PhotoDoodleDocument.savePhotoDoodle(this, document, photoDoodle);
 			photoDoodle.setDirty(false);
 
 			// mark that the document was modified
-			PhotoDoodleDocument.markModified(realm, photoDoodleDocument);
+			PhotoDoodleDocument.markModified(realm, document);
 
 			return true;
 		} else {
@@ -401,10 +420,10 @@ public class DoodleActivity extends AppCompatActivity
 	}
 
 	public void setDocumentName(String documentName) {
-		if (!documentName.equals(photoDoodleDocument.getName())){
+		if (!documentName.equals(document.getName())) {
 			realm.beginTransaction();
-			photoDoodleDocument.setName(documentName);
-			photoDoodleDocument.setModificationDate(new Date());
+			document.setName(documentName);
+			document.setModificationDate(new Date());
 			realm.commitTransaction();
 		}
 
@@ -412,7 +431,7 @@ public class DoodleActivity extends AppCompatActivity
 	}
 
 	public String getDocumentName() {
-		return photoDoodleDocument.getName();
+		return document.getName();
 	}
 
 	public void queryRenameDocument(String oldName) {

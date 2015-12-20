@@ -1,6 +1,5 @@
 #Currently
 
-Add an LRU cache to my thumbnail renderer
 Change my recyclerview adapter to NOT track realm changes and blindly reload, but to have addDocument/removeDocument/setDocuments functionality
 Make thumbnail renderer render at correct dimensions
 Try to find any memory leaks

@@ -1,10 +1,12 @@
 package org.zakariya.photodoodle.fragments;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -118,7 +120,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 					Log.i(TAG, "onActivityResult: uuid: " + uuid + " didEdit: " + didEdit);
 
 					if (didEdit && !TextUtils.isEmpty(uuid)) {
-						adapter.notifyItemChanged(PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, uuid));
+						adapter.itemWasUpdated(PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, uuid));
 					}
 				}
 				break;
@@ -130,6 +132,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	@OnClick(R.id.fab)
 	public void createNewPhotoDoodle() {
 		PhotoDoodleDocument doc = PhotoDoodleDocument.create(realm, getString(R.string.untitled_document));
+		adapter.addItem(doc);
 		editPhotoDoodle(doc);
 	}
 
@@ -140,11 +143,33 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 
 	@Override
 	public boolean onDoodleDocumentLongClick(PhotoDoodleDocument document) {
-		Log.i(TAG, "onDoodleDocumentLongClick: " + document.getUuid());
+		queryDeletePhotoDoodle(document);
 		return true;
 	}
 
-	public void editPhotoDoodle(PhotoDoodleDocument doc) {
+	void queryDeletePhotoDoodle(final PhotoDoodleDocument document) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+		builder.setTitle(R.string.dialog_delete_document)
+				.setMessage(getString(R.string.dialog_delete_document_message, document.getName()))
+				.setNeutralButton(android.R.string.cancel, null)
+				.setPositiveButton(R.string.dialog_delete_document_destructive_button_title, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						deletePhotoDoodle(document);
+					}
+				})
+				.show();
+	}
+
+	void deletePhotoDoodle(PhotoDoodleDocument doc) {
+		adapter.removeItem(doc);
+
+		realm.beginTransaction();
+		doc.removeFromRealm();
+		realm.commitTransaction();
+	}
+
+	void editPhotoDoodle(PhotoDoodleDocument doc) {
 		Intent intent = new Intent(getContext(), DoodleActivity.class);
 		intent.putExtra(DoodleActivity.EXTRA_DOODLE_DOCUMENT_UUID, doc.getUuid());
 		startActivityForResult(intent, REQUEST_EDIT_DOODLE);

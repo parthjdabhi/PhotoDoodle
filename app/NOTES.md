@@ -1,6 +1,5 @@
 #Currently
 
-Make recyclerview animate addition/removal/movement of items
 Make thumbnail renderer render at correct dimensions
 Try to find any memory leaks
 

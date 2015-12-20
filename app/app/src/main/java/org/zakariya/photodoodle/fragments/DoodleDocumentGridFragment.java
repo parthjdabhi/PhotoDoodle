@@ -144,6 +144,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 				@Override
 				public void run() {
 					adapter.itemWasUpdated(PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, editedDocumentUuid));
+					recyclerView.smoothScrollToPosition(0);
 					editedDocumentUuid = null;
 				}
 			}, 500);
@@ -154,6 +155,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	public void createNewPhotoDoodle() {
 		PhotoDoodleDocument doc = PhotoDoodleDocument.create(realm, getString(R.string.untitled_document));
 		adapter.addItem(doc);
+		recyclerView.smoothScrollToPosition(0);
 		editPhotoDoodle(doc);
 	}
 

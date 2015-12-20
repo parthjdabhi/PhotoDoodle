@@ -3,6 +3,8 @@ package org.zakariya.photodoodle.fragments;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -51,6 +53,8 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	Realm realm;
 	RecyclerView.LayoutManager layoutManager;
 	DoodleDocumentAdapter adapter;
+	String editedDocumentUuid;
+	Handler delayedUpdateHandler;
 
 	public DoodleDocumentGridFragment() {
 		setHasOptionsMenu(true);
@@ -61,6 +65,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
 		realm = Realm.getInstance(getContext());
+		delayedUpdateHandler = new Handler(Looper.getMainLooper());
 	}
 
 	@Override
@@ -116,17 +121,33 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 			case REQUEST_EDIT_DOODLE:
 				if (resultCode == DoodleActivity.RESULT_OK) {
 					boolean didEdit = data.getBooleanExtra(DoodleActivity.RESULT_DID_EDIT_DOODLE, false);
-					String uuid = data.getStringExtra(DoodleActivity.RESULT_DOODLE_DOCUMENT_UUID);
+					final String uuid = data.getStringExtra(DoodleActivity.RESULT_DOODLE_DOCUMENT_UUID);
 					Log.i(TAG, "onActivityResult: uuid: " + uuid + " didEdit: " + didEdit);
 
 					if (didEdit && !TextUtils.isEmpty(uuid)) {
-						adapter.itemWasUpdated(PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, uuid));
+						editedDocumentUuid = uuid;
+					} else {
+						editedDocumentUuid = null;
 					}
 				}
 				break;
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (!TextUtils.isEmpty(editedDocumentUuid)) {
+			delayedUpdateHandler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					adapter.itemWasUpdated(PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, editedDocumentUuid));
+					editedDocumentUuid = null;
+				}
+			}, 500);
+		}
 	}
 
 	@OnClick(R.id.fab)

@@ -9,7 +9,6 @@ import android.graphics.Canvas;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.util.LruCache;
 
 import org.zakariya.doodle.model.PhotoDoodle;
@@ -125,13 +124,11 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 
 		Bitmap thumbnail = cache.get(taskId);
 		if (thumbnail != null) {
-
-			Log.i(TAG, "renderThumbnail: thumbnail for id: " + taskId + " exists in cache, re-using!");
 			callbacks.onThumbnailReady(thumbnail);
 			return null;
 
 		} else {
-			Log.i(TAG, "renderThumbnail: submitting task id: " + taskId);
+//			Log.i(TAG, "renderThumbnail: submitting task id: " + taskId);
 
 			RenderTask task = new RenderTask();
 			addRenderTask(taskId, task);
@@ -178,7 +175,7 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 			realm.close();
 
 			// cache it
-			cache.put(taskId,bitmap);
+			cache.put(taskId, bitmap);
 
 			// notify on main thread
 			handler.post(new Runnable() {
@@ -187,10 +184,10 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 					RenderTask task = getRenderTask(taskId);
 					if (task != null) {
 						if (!task.isCanceled()) {
-							Log.i(TAG, "performRenderThumbnail: run: sending bitmap to callback");
+							//Log.i(TAG, "performRenderThumbnail: run: sending bitmap to callback");
 							callbacks.onThumbnailReady(bitmap);
 						} else {
-							Log.i(TAG, "performRenderThumbnail: run: task was canceled");
+							//Log.i(TAG, "performRenderThumbnail: run: task was canceled");
 						}
 						clearRenderTask(taskId);
 					}

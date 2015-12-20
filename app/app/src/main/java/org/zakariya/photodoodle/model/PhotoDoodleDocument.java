@@ -46,14 +46,13 @@ public class PhotoDoodleDocument extends RealmObject {
 	 * @return a new PhotoDoodleDocument with unique UUID, in the realm and ready to use
 	 */
 	public static PhotoDoodleDocument create(Realm realm, String name) {
-		PhotoDoodleDocument doc = new PhotoDoodleDocument();
+
+		realm.beginTransaction();
+		PhotoDoodleDocument doc = realm.createObject(PhotoDoodleDocument.class);
 		doc.setUuid(UUID.randomUUID().toString());
 		doc.setCreationDate(new Date());
 		doc.setModificationDate(new Date());
 		doc.setName(name);
-
-		realm.beginTransaction();
-		realm.copyToRealm(doc);
 		realm.commitTransaction();
 
 		return doc;

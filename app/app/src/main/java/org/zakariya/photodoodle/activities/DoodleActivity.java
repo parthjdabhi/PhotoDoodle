@@ -53,6 +53,9 @@ public class DoodleActivity extends AppCompatActivity
 		implements TabLayout.OnTabSelectedListener, CameraPopupController.Callbacks, DrawPopupController.Callbacks {
 
 	public static final String EXTRA_DOODLE_DOCUMENT_UUID = "DoodleActivity.EXTRA_DOODLE_DOCUMENT_UUID";
+	public static final String RESULT_DID_EDIT_DOODLE = "DoodleActivity.RESULT_DID_EDIT_DOODLE";
+	public static final String RESULT_DOODLE_DOCUMENT_UUID = "DoodleActivity.RESULT_DOODLE_DOCUMENT_UUID";
+
 	private static final String STATE_DOODLE = "DoodleActivity.STATE_DOODLE";
 
 	private static final String TAG = "DoodleActivity";
@@ -202,16 +205,20 @@ public class DoodleActivity extends AppCompatActivity
 	}
 
 	@Override
-	protected void onStop() {
-
-		PhotoDoodleDocument.savePhotoDoodle(this, photoDoodleDocument, photoDoodle);
-
-		super.onStop();
+	protected void onPause() {
+		saveDoodleIfEdited();
+		super.onPause();
 	}
 
 	@Override
 	public void onBackPressed() {
 		if (!dismissTabItemPopup(false)) {
+
+			Intent resultData = new Intent();
+			resultData.putExtra(RESULT_DID_EDIT_DOODLE, saveDoodleIfEdited());
+			resultData.putExtra(RESULT_DOODLE_DOCUMENT_UUID,photoDoodleDocument.getUuid());
+			setResult(RESULT_OK, resultData);
+
 			super.onBackPressed();
 		}
 	}
@@ -372,6 +379,20 @@ public class DoodleActivity extends AppCompatActivity
 	@OnClick(R.id.titleTextView)
 	public void onTitleTap() {
 		queryRenameDocument(titleTextView.getText().toString());
+	}
+
+	/**
+	 * If the doodle is dirty (edits were made) saves it to its file, and returns true.
+	 * @return true if the doodle had edits and needed to be saved
+	 */
+	public boolean saveDoodleIfEdited() {
+		if (photoDoodle.isDirty()) {
+			PhotoDoodleDocument.savePhotoDoodle(this, photoDoodleDocument, photoDoodle);
+			photoDoodle.setDirty(false);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public void setDocumentName(String documentName) {

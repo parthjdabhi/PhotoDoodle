@@ -1,6 +1,9 @@
 package org.zakariya.photodoodle.adapters;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,6 +14,7 @@ import android.widget.TextView;
 
 import org.zakariya.photodoodle.R;
 import org.zakariya.photodoodle.model.PhotoDoodleDocument;
+import org.zakariya.photodoodle.util.DoodleThumbnailRenderer;
 
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
@@ -25,9 +29,12 @@ import io.realm.RealmResults;
  */
 public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAdapter.ViewHolder> {
 
+	private static final String TAG = DoodleDocumentAdapter.class.getSimpleName();
+
 	public interface OnClickListener {
 		/**
 		 * Called when an item is clicked
+		 *
 		 * @param document the document represented by this item
 		 */
 		void onDoodleDocumentClick(PhotoDoodleDocument document);
@@ -36,6 +43,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 	public interface OnLongClickListener {
 		/**
 		 * Called when an item is long clicked
+		 *
 		 * @param document the document represented by this item
 		 * @return true if the long click is handled, false otherwise
 		 */
@@ -46,14 +54,18 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		public PhotoDoodleDocument photoDoodleDocument;
 		public View rootView;
 		public ImageView imageView;
+		public ImageView loadingImageView;
 		public TextView nameTextView;
 		public TextView dateTextView;
 		public TextView uuidTextView;
+
+		DoodleThumbnailRenderer.RenderTask thumbnailRenderTask;
 
 		public ViewHolder(View v) {
 			super(v);
 			rootView = v;
 			imageView = (ImageView) v.findViewById(R.id.imageView);
+			loadingImageView = (ImageView) v.findViewById(R.id.loadingImageView);
 			nameTextView = (TextView) v.findViewById(R.id.nameTextView);
 			dateTextView = (TextView) v.findViewById(R.id.dateTextView);
 			uuidTextView = (TextView) v.findViewById(R.id.uuidTextView);
@@ -61,12 +73,14 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 	}
 
 	Context context;
+	Realm realm;
 	View emptyView;
 	RealmResults<PhotoDoodleDocument> realmResults;
 	private final RealmChangeListener realmChangeListener;
 	DateFormat dateFormatter;
 	WeakReference<OnClickListener> weakOnClickListener;
 	WeakReference<OnLongClickListener> weakOnLongClickListener;
+	int crossfadeDuration;
 
 	public DoodleDocumentAdapter(Context context, RealmResults<PhotoDoodleDocument> realmResults, View emptyView) {
 		this.context = context;
@@ -81,9 +95,10 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 			}
 		};
 
-		Realm.getInstance(context).addChangeListener(realmChangeListener);
-
+		realm = Realm.getInstance(context);
+		realm.addChangeListener(realmChangeListener);
 		dateFormatter = DateFormat.getDateTimeInstance();
+		crossfadeDuration = context.getResources().getInteger(android.R.integer.config_shortAnimTime);
 		updateEmptyView();
 	}
 
@@ -117,7 +132,8 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 	 * Your activity/fragment needs to call this to unregister it from listening to realm changes
 	 */
 	public void onDestroy() {
-		Realm.getInstance(context).removeChangeListener(realmChangeListener);
+		realm.removeChangeListener(realmChangeListener);
+		realm.close();
 	}
 
 	void updateEmptyView() {
@@ -155,7 +171,12 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 	}
 
 	@Override
-	public void onBindViewHolder(ViewHolder holder, int position) {
+	public void onBindViewHolder(final ViewHolder holder, int position) {
+
+		if (holder.thumbnailRenderTask != null) {
+			holder.thumbnailRenderTask.cancel();
+			holder.thumbnailRenderTask = null;
+		}
 
 		PhotoDoodleDocument doc = realmResults.get(position);
 		holder.photoDoodleDocument = doc;
@@ -166,10 +187,51 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		holder.dateTextView.setText(dateFormatter.format(date));
 
 		holder.uuidTextView.setText(doc.getUuid());
+
+		holder.loadingImageView.setAlpha(1f);
+		holder.loadingImageView.setVisibility(View.VISIBLE);
+
+		// now generate a thumbnail
+		// TODO: Compute ideal thumbnail size. MeasuredWidth doesn't work, maybe need treeViewObserver...
+		int width = 256;
+		int height = 256;
+
+		holder.thumbnailRenderTask = DoodleThumbnailRenderer.getInstance().renderThumbnail(context, doc, width, height, new DoodleThumbnailRenderer.Callbacks() {
+			@Override
+			public void onThumbnailReady(Bitmap thumbnail) {
+
+				holder.imageView.setImageBitmap(thumbnail);
+				holder.loadingImageView.animate()
+						.alpha(0)
+						.setDuration(crossfadeDuration)
+						.setListener(new AnimatorListenerAdapter() {
+							@Override
+							public void onAnimationEnd(Animator animation) {
+								holder.loadingImageView.setVisibility(View.GONE);
+								super.onAnimationEnd(animation);
+							}
+						});
+
+
+			}
+		});
 	}
 
 	@Override
 	public int getItemCount() {
 		return realmResults.size();
+	}
+
+	public void notifyItemChanged(PhotoDoodleDocument document) {
+
+		// can't use realmResults.indexOf - it's not implemented :(
+		String uuid = document.getUuid();
+		for (int i = 0; i < realmResults.size(); i++) {
+			PhotoDoodleDocument doc = realmResults.get(i);
+			if (doc.getUuid().equals(uuid)) {
+				notifyItemChanged(i);
+				break;
+			}
+		}
 	}
 }

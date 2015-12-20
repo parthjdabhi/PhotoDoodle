@@ -17,6 +17,7 @@ public class DoodleView extends View {
 
 	private static final String TAG = "DoodleView";
 	private Doodle doodle;
+	private ViewTreeObserver.OnGlobalLayoutListener layoutListener;
 
 	public DoodleView(Context context) {
 		super(context);
@@ -39,12 +40,24 @@ public class DoodleView extends View {
 	protected void onAttachedToWindow() {
 		super.onAttachedToWindow();
 
-		getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-			@Override
-			public void onGlobalLayout() {
-				doodle.resize(getWidth(), getHeight());
-			}
-		});
+		if (layoutListener == null) {
+			layoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
+				@Override
+				public void onGlobalLayout() {
+					doodle.resize(getWidth(), getHeight());
+				}
+			};
+		}
+
+		getViewTreeObserver().addOnGlobalLayoutListener(layoutListener);
+	}
+
+	@Override
+	protected void onDetachedFromWindow() {
+		if (layoutListener != null) {
+			getViewTreeObserver().removeOnGlobalLayoutListener(layoutListener);
+		}
+		super.onDetachedFromWindow();
 	}
 
 	@Override

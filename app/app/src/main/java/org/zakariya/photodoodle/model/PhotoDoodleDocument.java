@@ -2,6 +2,7 @@ package org.zakariya.photodoodle.model;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import org.zakariya.doodle.model.PhotoDoodle;
 
@@ -23,6 +24,8 @@ import io.realm.annotations.Required;
  * Created by shamyl on 12/16/15.
  */
 public class PhotoDoodleDocument extends RealmObject {
+
+	private static final String TAG = PhotoDoodleDocument.class.getSimpleName();
 
 	@PrimaryKey
 	private String uuid;
@@ -92,16 +95,16 @@ public class PhotoDoodleDocument extends RealmObject {
 	public static void savePhotoDoodle(Context context, PhotoDoodleDocument document, PhotoDoodle doodle) {
 		File outputFile = getPhotoDoodleSaveFile(context, document);
 		try {
+			Log.i(TAG, "savePhotoDoodle: starting save");
 			FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
 			BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
 			doodle.serialize(bufferedOutputStream);
-			fileOutputStream.close();
+			Log.i(TAG, "savePhotoDoodle: finish save");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	@Nullable
 	public static PhotoDoodle loadPhotoDoodle(Context context, PhotoDoodleDocument document) {
 		PhotoDoodle doodle = new PhotoDoodle(context);
 		File inputFile = getPhotoDoodleSaveFile(context, document);

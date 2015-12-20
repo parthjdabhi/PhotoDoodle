@@ -27,7 +27,7 @@
 				android:layout_height="wrap_content"
 				android:layout_gravity="center_horizontal"
 				android:src="@drawable/icon_tab_draw"
-				android:tint="@color/textColorLight"/>
+				android:tint="@color/placeholderIconTint"/>
 
 			<TextView
 				style="@style/EmptyDoodleGridText"

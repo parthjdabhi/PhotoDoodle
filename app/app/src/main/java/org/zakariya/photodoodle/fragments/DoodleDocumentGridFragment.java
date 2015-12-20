@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,6 +35,7 @@ import io.realm.Sort;
 public class DoodleDocumentGridFragment extends Fragment implements DoodleDocumentAdapter.OnClickListener, DoodleDocumentAdapter.OnLongClickListener {
 
 	private static final String TAG = DoodleDocumentGridFragment.class.getSimpleName();
+	private static final int REQUEST_EDIT_DOODLE = 1;
 
 	@Bind(R.id.recyclerView)
 	RecyclerView recyclerView;
@@ -106,6 +108,25 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		return v;
 	}
 
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+			case REQUEST_EDIT_DOODLE:
+				if (resultCode == DoodleActivity.RESULT_OK) {
+					boolean didEdit = data.getBooleanExtra(DoodleActivity.RESULT_DID_EDIT_DOODLE, false);
+					String uuid = data.getStringExtra(DoodleActivity.RESULT_DOODLE_DOCUMENT_UUID);
+					Log.i(TAG, "onActivityResult: uuid: " + uuid + " didEdit: " + didEdit);
+
+					if (didEdit && !TextUtils.isEmpty(uuid)) {
+						adapter.notifyItemChanged(PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, uuid));
+					}
+				}
+				break;
+		}
+
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
 	@OnClick(R.id.fab)
 	public void createNewPhotoDoodle() {
 		PhotoDoodleDocument doc = PhotoDoodleDocument.create(realm, getString(R.string.untitled_document));
@@ -114,7 +135,6 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 
 	@Override
 	public void onDoodleDocumentClick(PhotoDoodleDocument document) {
-		Log.i(TAG, "onDoodleDocumentClick: " + document.getUuid());
 		editPhotoDoodle(document);
 	}
 
@@ -126,8 +146,8 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 
 	public void editPhotoDoodle(PhotoDoodleDocument doc) {
 		Intent intent = new Intent(getContext(), DoodleActivity.class);
-		intent.putExtra(DoodleActivity.EXTRA_DOODLE_DOCUMENT_UUID,doc.getUuid());
-		startActivity(intent);
+		intent.putExtra(DoodleActivity.EXTRA_DOODLE_DOCUMENT_UUID, doc.getUuid());
+		startActivityForResult(intent, REQUEST_EDIT_DOODLE);
 	}
 
 }

@@ -10,6 +10,7 @@
 	<color name="actionBarIconColor">#ffffffff</color>
 	<color name="textColor">#62563F</color>
 	<color name="textColorLight">#B0A899</color>
+	<color name="placeholderIconTint">#d4ccbe</color>
 	<color name="popup_item_tint">#62563F</color>
 	<color name="popup_item_text_color">#62563F</color>
 	<color name="selected_popup_item_background">#4462563F</color>

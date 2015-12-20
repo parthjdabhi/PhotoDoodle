@@ -11,10 +11,16 @@ import org.zakariya.doodle.view.DoodleView;
 
 import java.lang.ref.WeakReference;
 
+import icepick.Icepick;
+import icepick.State;
+
 /**
  * Created by shamyl on 8/11/15.
  */
 public abstract class Doodle {
+
+	@State
+	boolean dirty = false;
 
 	private Brush brush;
 	private int width, height;
@@ -50,9 +56,25 @@ public abstract class Doodle {
 
 	public abstract RectF getBoundingRect();
 
-	public abstract void clear();
+	public void clear() {
+		markDirty();
+	}
 
 	public abstract void draw(Canvas canvas);
+
+	public void draw(Canvas canvas, int width, int height) {
+		int oldWidth = getWidth();
+		int oldHeight = getHeight();
+		if (oldWidth != width || oldHeight != height) {
+			resize(width, height);
+			draw(canvas);
+			if (oldWidth > 0 && oldHeight > 0) {
+				resize(oldWidth, oldHeight);
+			}
+		} else {
+			draw(canvas);
+		}
+	}
 
 	public void resize(int newWidth, int newHeight) {
 		width = newWidth;
@@ -75,21 +97,26 @@ public abstract class Doodle {
 		return brush;
 	}
 
-	public void onSaveInstanceState(Bundle outState) {
+	public void onCreate(Bundle savedInstanceState) {
+		Icepick.restoreInstanceState(this, savedInstanceState);
 	}
 
-	public void onCreate(Bundle savedInstanceState) {
+	public void onSaveInstanceState(Bundle outState) {
+		Icepick.saveInstanceState(this, outState);
 	}
 
 	public boolean onTouchEvent(@NonNull MotionEvent event) {
 		switch (event.getAction()) {
 			case MotionEvent.ACTION_DOWN:
+				markDirty();
 				onTouchEventBegin(event);
 				return true;
 			case MotionEvent.ACTION_UP:
+				markDirty();
 				onTouchEventEnd(event);
 				return true;
 			case MotionEvent.ACTION_MOVE:
+				markDirty();
 				onTouchEventMove(event);
 				return true;
 		}
@@ -109,5 +136,28 @@ public abstract class Doodle {
 
 	public void setBackgroundColor(int backgroundColor) {
 		this.backgroundColor = backgroundColor;
+	}
+
+	/**
+	 * Mark that this Doodle was modified in some way (drawing, etc)
+	 */
+	public void markDirty() {
+		dirty = true;
+	}
+
+	/**
+	 * Set whether this Doodle has been modified
+	 * @param dirty if true, mark that this Doodle has been modified since it was loaded
+	 */
+	public void setDirty(boolean dirty) {
+		this.dirty = dirty;
+	}
+
+	/**
+	 * Check if this doodle was modified
+	 * @return
+	 */
+	public boolean isDirty() {
+		return dirty;
 	}
 }

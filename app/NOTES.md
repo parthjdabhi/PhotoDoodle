@@ -1,5 +1,7 @@
 #Currently
 
+When dismissing DoodleActivity, and saving the doodle data to the file, the DoodleThumbnailRenderer is notified that the doc was dirty, and needs to be updated. Trouble is, there seems to be a threading
+
 Theme dialogs
 http://www.materialdoc.com/alerts/
 

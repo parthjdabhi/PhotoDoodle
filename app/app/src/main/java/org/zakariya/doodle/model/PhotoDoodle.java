@@ -69,7 +69,11 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
+
+		// setting jpeg data marks this as dirty, so we don't want a rotation to flag us as dirty
+		boolean wasDirty = isDirty();
 		setPhotoJpegData(photoJpegData);
+		setDirty(wasDirty);
 	}
 
 	@Override
@@ -165,6 +169,7 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 			}
 
 			renderDrawingSteps();
+			setDirty(false);
 
 		} else {
 			throw new InvalidObjectException("Missing COOKIE header (0x" + Integer.toString(COOKIE, 16) + ")");
@@ -174,6 +179,7 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 	protected void onTouchEventMove(@NonNull MotionEvent event) {
 		switch (getInteractionMode()) {
 			case PHOTO:
+				markDirty();
 				userTranslationOnCanvas.x = (event.getX() - touchStartPosition.x) / canvasToScreenScale;
 				userTranslationOnCanvas.y = (event.getY() - touchStartPosition.y) / canvasToScreenScale;
 				updatePhotoMatrix();
@@ -195,11 +201,15 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 	}
 
 	public void clearPhoto() {
+		markDirty();
 		setPhotoJpegData(null);
 	}
 
 	public void setPhotoJpegData(@Nullable byte[] photoData) {
+
+		markDirty();
 		this.photoJpegData = photoData;
+
 		if (this.photoJpegData != null && this.photoJpegData.length > 0) {
 			photo = BitmapFactory.decodeByteArray(this.photoJpegData, 0, this.photoJpegData.length);
 			setBackgroundColor(0x0);

@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -26,7 +25,6 @@ import org.zakariya.doodle.geom.IncrementalInputStrokeTessellator;
 import org.zakariya.doodle.geom.InputStroke;
 import org.zakariya.doodle.geom.InputStrokeTessellator;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import icepick.Icepick;
@@ -86,12 +84,14 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		Icepick.saveInstanceState(this, outState);
+		super.onSaveInstanceState(outState);
 	}
 
 	@Override
@@ -104,6 +104,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	@Override
 	public void clear() {
+		super.clear();
 		clearDrawing();
 	}
 
@@ -229,6 +230,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	}
 
 	public void clearDrawing() {
+		markDirty();
 		incrementalInputStrokeTessellator = null;
 		drawingSteps.clear();
 		bitmap.eraseColor(0x0);
@@ -263,42 +265,6 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 	public void setDrawDebugPositioningOverlay(boolean drawDebugPositioningOverlay) {
 		this.drawDebugPositioningOverlay = drawDebugPositioningOverlay;
-	}
-
-
-	private static final String TEST_KRYO_SERIALIZATION_FILE = "KryoTest.bin";
-
-	@SuppressWarnings("unchecked")
-	public void TEST_saveAndReload() {
-		Log.i(TAG, "TEST_saveAndReload...");
-
-		// first, save to file
-		try (Output output = new Output(context.openFileOutput(TEST_KRYO_SERIALIZATION_FILE, Context.MODE_PRIVATE))) {
-			Kryo kryo = new Kryo();
-			kryo.writeObject(output, drawingSteps);
-		} catch (FileNotFoundException ex) {
-			Log.e(TAG, "Unable to open file for writing: " + ex);
-		}
-
-		Log.i(TAG, "TEST_saveAndReload - save complete. Loading...");
-		ArrayList<IntermediateDrawingStep> loadedDrawingSteps = null;
-
-		// now, re-open and load
-		try (Input input = new Input(context.openFileInput(TEST_KRYO_SERIALIZATION_FILE))) {
-			Kryo kryo = new Kryo();
-			loadedDrawingSteps = kryo.readObject(input, ArrayList.class);
-		} catch (FileNotFoundException ex) {
-			Log.e(TAG, "Unable to open file for reading: " + ex);
-		}
-
-		if (loadedDrawingSteps != null) {
-			Log.i(TAG, "loading drawing steps. original.size: " + drawingSteps.size() + " loaded.size: " + loadedDrawingSteps.size());
-			drawingSteps = loadedDrawingSteps;
-			renderDrawingSteps();
-		} else {
-			Log.e(TAG, "Unable to load drawing steps");
-		}
-
 	}
 
 	@Override

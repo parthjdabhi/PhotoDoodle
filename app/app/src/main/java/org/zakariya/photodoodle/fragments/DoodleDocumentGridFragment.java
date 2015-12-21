@@ -102,11 +102,12 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		View v = inflater.inflate(R.layout.fragment_doodle_document_grid, container, false);
 		ButterKnife.bind(this, v);
 
-		layoutManager = new GridLayoutManager(getContext(), 2);
+		int columns = 2;
+		layoutManager = new GridLayoutManager(getContext(), columns);
 		recyclerView.setLayoutManager(layoutManager);
 
 		RealmResults<PhotoDoodleDocument> docs = realm.allObjectsSorted(PhotoDoodleDocument.class, "modificationDate", Sort.DESCENDING);
-		adapter = new DoodleDocumentAdapter(getContext(), docs, emptyView);
+		adapter = new DoodleDocumentAdapter(getContext(), recyclerView, columns, docs, emptyView);
 		adapter.setOnClickListener(this);
 		adapter.setOnLongClickListener(this);
 		recyclerView.setAdapter(adapter);

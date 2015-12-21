@@ -74,6 +74,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		}
 	}
 
+	WeakReference<RecyclerView> weakRecyclerView;
 	Context context;
 	Realm realm;
 	View emptyView;
@@ -81,7 +82,9 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 	DateFormat dateFormatter;
 	WeakReference<OnClickListener> weakOnClickListener;
 	WeakReference<OnLongClickListener> weakOnLongClickListener;
+	int columns;
 	int crossfadeDuration;
+	int itemWidth;
 
 	Comparator<PhotoDoodleDocument> sortComparator = new Comparator<PhotoDoodleDocument>() {
 		@Override
@@ -100,9 +103,11 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		}
 	};
 
-	public DoodleDocumentAdapter(Context context, RealmResults<PhotoDoodleDocument> items, View emptyView) {
+	public DoodleDocumentAdapter(Context context, RecyclerView recyclerView, int columns, RealmResults<PhotoDoodleDocument> items, View emptyView) {
 		this.context = context;
 		this.emptyView = emptyView;
+		weakRecyclerView = new WeakReference<>(recyclerView);
+		this.columns = columns;
 		realm = Realm.getInstance(context);
 		dateFormatter = DateFormat.getDateTimeInstance();
 		crossfadeDuration = context.getResources().getInteger(android.R.integer.config_shortAnimTime);
@@ -187,6 +192,14 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 	@Override
 	public void onBindViewHolder(final ViewHolder holder, int position) {
 
+		if (itemWidth == 0) {
+			RecyclerView recyclerView = weakRecyclerView.get();
+			if (recyclerView != null) {
+				int totalWidth = recyclerView.getWidth();
+				itemWidth = Math.round((float) totalWidth / (float) columns);
+			}
+		}
+
 		if (holder.thumbnailRenderTask != null) {
 			holder.thumbnailRenderTask.cancel();
 			holder.thumbnailRenderTask = null;
@@ -202,14 +215,13 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 
 		holder.uuidTextView.setText(doc.getUuid());
 
-
-		// now generate a thumbnail
-		// TODO: Compute ideal thumbnail size. MeasuredWidth doesn't work, maybe need treeViewObserver...
-		int width = 256;
-		int height = 256;
+		// note: Out icons are square, so knowing item width is sufficient
+		int thumbnailWidth = itemWidth;
+		//noinspection SuspiciousNameCombination
+		int thumbnailHeight = itemWidth;
 
 		DoodleThumbnailRenderer thumbnailer = DoodleThumbnailRenderer.getInstance();
-		Bitmap thumbnail = thumbnailer.getThumbnail(doc,width,height);
+		Bitmap thumbnail = thumbnailer.getThumbnail(doc,thumbnailWidth,thumbnailHeight);
 		if (thumbnail != null) {
 			//
 			//  The thumbnail is available, run with it
@@ -228,7 +240,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 			holder.loadingImageView.setAlpha(1f);
 			holder.loadingImageView.setVisibility(View.VISIBLE);
 
-			holder.thumbnailRenderTask = DoodleThumbnailRenderer.getInstance().renderThumbnail(doc, width, height, new DoodleThumbnailRenderer.Callbacks() {
+			holder.thumbnailRenderTask = DoodleThumbnailRenderer.getInstance().renderThumbnail(doc, thumbnailWidth, thumbnailHeight, new DoodleThumbnailRenderer.Callbacks() {
 				@Override
 				public void onThumbnailReady(Bitmap thumbnail) {
 

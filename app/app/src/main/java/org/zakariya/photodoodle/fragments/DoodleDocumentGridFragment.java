@@ -26,6 +26,8 @@ import org.zakariya.photodoodle.activities.DoodleActivity;
 import org.zakariya.photodoodle.adapters.DoodleDocumentAdapter;
 import org.zakariya.photodoodle.model.PhotoDoodleDocument;
 
+import java.lang.ref.WeakReference;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -178,14 +180,18 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	}
 
 	void queryDeletePhotoDoodle(final PhotoDoodleDocument document) {
+		final WeakReference<DoodleDocumentGridFragment> weakThis = new WeakReference<>(this);
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-		builder.setTitle(R.string.dialog_delete_document)
-				.setMessage(getString(R.string.dialog_delete_document_message, document.getName()))
-				.setNeutralButton(android.R.string.cancel, null)
+		builder.setMessage(R.string.dialog_delete_document_message)
+				.setNegativeButton(android.R.string.cancel, null)
 				.setPositiveButton(R.string.dialog_delete_document_destructive_button_title, new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						deletePhotoDoodle(document);
+						DoodleDocumentGridFragment strongThis = weakThis.get();
+						if (strongThis != null) {
+							strongThis.deletePhotoDoodle(document);
+						}
 					}
 				})
 				.show();

@@ -27,9 +27,8 @@
 	<string name="dialog_rename_document_title">Rename</string>
 	<string name="untitled_document">Untitled PhotoDoodle</string>
 
-	<string name="dialog_delete_document">Delete</string>
-	<string name="dialog_delete_document_message">Delete doodle \"%1$s\"?</string>
-	<string name="dialog_delete_document_destructive_button_title">Delete</string>
+	<string name="dialog_delete_document_message">Discard doodle?</string>
+	<string name="dialog_delete_document_destructive_button_title">Discard</string>
 
 	<string name="doodle_document_grid_menu_new_doodle">New</string>
 

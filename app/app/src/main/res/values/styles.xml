@@ -3,6 +3,8 @@
 	<!-- Base application theme. -->
 	<style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
 		<item name="actionBarStyle">@style/ActionBarStyle</item>
+		<item name="alertDialogTheme">@style/AlertDialogStyle</item>
+
 
 		<!-- Set AppCompat’s color theme attrs -->
 		<item name="colorPrimary">@color/primary</item>
@@ -41,6 +43,11 @@
 		<item name="android:textColor">@color/textColorLight</item>
 		<item name="android:gravity">center</item>
 		<item name="android:layout_margin">48dp</item>
+	</style>
+
+	<style name="AlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+		<item name="colorAccent">@color/primary</item>
+		<item name="android:textColorPrimary">@color/textColor</item>
 	</style>
 
 </resources>

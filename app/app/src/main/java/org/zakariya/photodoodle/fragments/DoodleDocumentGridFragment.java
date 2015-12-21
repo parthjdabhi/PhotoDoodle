@@ -12,6 +12,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -102,7 +103,12 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		View v = inflater.inflate(R.layout.fragment_doodle_document_grid, container, false);
 		ButterKnife.bind(this, v);
 
-		int columns = 2;
+		// compute a good columns count such that items are no bigger than R.dimen.max_doodle_grid_item_size
+		DisplayMetrics metrics = getResources().getDisplayMetrics();
+		int displayWidth = metrics.widthPixels;
+		float maxItemSize = getResources().getDimension(R.dimen.max_doodle_grid_item_size);
+		int columns = (int)Math.ceil((float)displayWidth / (float)maxItemSize);
+
 		layoutManager = new GridLayoutManager(getContext(), columns);
 		recyclerView.setLayoutManager(layoutManager);
 

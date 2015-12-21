@@ -14,4 +14,6 @@
 
 	<dimen name="fabMargin">16dp</dimen>
 
+	<dimen name="max_doodle_grid_item_size">360dp</dimen>
+
 </resources>

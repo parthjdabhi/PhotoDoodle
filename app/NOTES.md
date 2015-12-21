@@ -1,9 +1,5 @@
 #Currently
 
-Make thumbnail renderer render at correct dimensions
-Try to find any memory leaks
-
-
 
 Theme dialogs
 http://www.materialdoc.com/alerts/

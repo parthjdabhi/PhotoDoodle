@@ -1,5 +1,8 @@
 package org.zakariya.photodoodle.activities;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,6 +12,7 @@ import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -21,6 +25,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.Fade;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,6 +34,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
@@ -37,6 +43,7 @@ import org.zakariya.doodle.model.PhotoDoodle;
 import org.zakariya.doodle.view.DoodleView;
 import org.zakariya.photodoodle.R;
 import org.zakariya.photodoodle.model.PhotoDoodleDocument;
+import org.zakariya.photodoodle.util.DoodleThumbnailRenderer;
 import org.zakariya.photodoodle.view.ColorPickerView;
 import org.zakariya.photodoodle.view.ColorSwatchView;
 
@@ -53,9 +60,14 @@ import io.realm.Realm;
 public class DoodleActivity extends AppCompatActivity
 		implements TabLayout.OnTabSelectedListener, CameraPopupController.Callbacks, DrawPopupController.Callbacks {
 
+	public static final String EXTRA_DOODLE_THUMBNAIL_ID = "DoodleActivity.EXTRA_DOODLE_THUMBNAIL_ID";
+	public static final String EXTRA_DOODLE_THUMBNAIL_WIDTH = "DoodleActivity.EXTRA_DOODLE_THUMBNAIL_WIDTH";
+	public static final String EXTRA_DOODLE_THUMBNAIL_HEIGHT = "DoodleActivity.EXTRA_DOODLE_THUMBNAIL_HEIGHT";
 	public static final String EXTRA_DOODLE_DOCUMENT_UUID = "DoodleActivity.EXTRA_DOODLE_DOCUMENT_UUID";
+
 	public static final String RESULT_DID_EDIT_DOODLE = "DoodleActivity.RESULT_DID_EDIT_DOODLE";
 	public static final String RESULT_DOODLE_DOCUMENT_UUID = "DoodleActivity.RESULT_DOODLE_DOCUMENT_UUID";
+	public static final String RESULT_UPDATED_DOODLE_THUMBNAIL_ID = "DoodleActivity.RESULT_UPDATED_DOODLE_THUMBNAIL_ID";
 
 	private static final String STATE_DOODLE = "DoodleActivity.STATE_DOODLE";
 
@@ -76,9 +88,11 @@ public class DoodleActivity extends AppCompatActivity
 	@Bind(R.id.doodleView)
 	DoodleView doodleView;
 
+	@Bind(R.id.doodlePlaceholderImageView)
+	ImageView doodlePlaceholderImageView;
+
 	@State
 	int color = 0xFF000000;
-
 
 	@State
 	int selectedBrush = BrushType.PENCIL.ordinal();
@@ -103,12 +117,12 @@ public class DoodleActivity extends AppCompatActivity
 
 	boolean suppressTabPopup;
 	PopupWindow tabPopup;
-	Handler tabPopupDismissDelayHandler = new Handler(Looper.getMainLooper());
+	Handler handler = new Handler(Looper.getMainLooper());
 
 	DrawPopupController drawPopupController;
 	CameraPopupController cameraPopupController;
 
-
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -141,9 +155,23 @@ public class DoodleActivity extends AppCompatActivity
 			}
 
 			documentModificationTime = document.getModificationDate().getTime();
+
+			String thumbnailId = getIntent().getStringExtra(EXTRA_DOODLE_THUMBNAIL_ID);
+			Log.i(TAG, "onCreate: getThumbnailId: " + thumbnailId);
+
+			Bitmap placeholder = DoodleThumbnailRenderer.getInstance().getThumbnailById(thumbnailId);
+			Log.i(TAG, "onCreate: placeholder bitmap: " + placeholder);
+
+			if (placeholder != null) {
+				doodlePlaceholderImageView.setImageBitmap(placeholder);
+			} else {
+				doodlePlaceholderImageView.setVisibility(View.GONE);
+			}
+
 		} else {
 			Icepick.restoreInstanceState(this, savedInstanceState);
 			document = PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, documentUuid);
+			doodlePlaceholderImageView.setVisibility(View.GONE);
 
 			if (document == null) {
 				throw new IllegalArgumentException("Document UUID didn't refer to an existing PhotoDoodleDocument");
@@ -180,6 +208,11 @@ public class DoodleActivity extends AppCompatActivity
 		// be tidy - in case a photo temp file survived a crash or whatever
 		//
 		deletePhotoTempFile();
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			getWindow().setEnterTransition(new Fade());
+			getWindow().setExitTransition(new Fade());
+		}
 	}
 
 	@Override
@@ -219,6 +252,26 @@ public class DoodleActivity extends AppCompatActivity
 				drawingTab.select();
 				break;
 		}
+
+		if (doodlePlaceholderImageView.getVisibility() != View.GONE) {
+			final int crossfadeDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					doodlePlaceholderImageView.animate()
+							.alpha(0)
+							.setDuration(crossfadeDuration)
+							.setListener(new AnimatorListenerAdapter() {
+								@Override
+								public void onAnimationEnd(Animator animation) {
+									doodlePlaceholderImageView.setVisibility(View.GONE);
+									super.onAnimationEnd(animation);
+								}
+							});
+				}
+			}, 500);
+
+		}
 	}
 
 	@Override
@@ -230,12 +283,37 @@ public class DoodleActivity extends AppCompatActivity
 	@Override
 	public void onBackPressed() {
 		if (!dismissTabItemPopup(false)) {
+			saveDoodleIfEdited();
 
-			boolean edited = saveDoodleIfEdited() || (document.getModificationDate().getTime() > documentModificationTime);
+			boolean edited = document.getModificationDate().getTime() > documentModificationTime;
 
 			Intent resultData = new Intent();
 			resultData.putExtra(RESULT_DID_EDIT_DOODLE, edited);
 			resultData.putExtra(RESULT_DOODLE_DOCUMENT_UUID, document.getUuid());
+
+			if (edited) {
+
+				int width = getIntent().getIntExtra(EXTRA_DOODLE_THUMBNAIL_WIDTH, 0);
+				int height = getIntent().getIntExtra(EXTRA_DOODLE_THUMBNAIL_HEIGHT, 0);
+				DoodleThumbnailRenderer thumbnailer = DoodleThumbnailRenderer.getInstance();
+				Bitmap placeholderBitmap;
+
+				if (width > 0 && height > 0) {
+					// render a thumbnail at the size of the grid item which fired off this activity
+					// the thumbnail should live in the cache, so it's immediately available to the grid item
+					placeholderBitmap = thumbnailer.renderThumbnail(this, document, width, height);
+					resultData.putExtra(RESULT_UPDATED_DOODLE_THUMBNAIL_ID, DoodleThumbnailRenderer.getThumbnailId(document, width, height));
+				} else {
+					placeholderBitmap = thumbnailer.renderThumbnail(this, document, 256, 256);
+				}
+
+				doodlePlaceholderImageView.setImageBitmap(placeholderBitmap);
+			}
+
+			// reveal the placeholder for the exit transition
+			doodlePlaceholderImageView.setVisibility(View.VISIBLE);
+			doodlePlaceholderImageView.setAlpha(1f);
+
 			setResult(RESULT_OK, resultData);
 
 			super.onBackPressed();
@@ -412,7 +490,6 @@ public class DoodleActivity extends AppCompatActivity
 
 			// mark that the document was modified
 			PhotoDoodleDocument.markModified(realm, document);
-
 			return true;
 		} else {
 			return false;
@@ -593,7 +670,7 @@ public class DoodleActivity extends AppCompatActivity
 	private boolean dismissTabItemPopup(boolean delay) {
 		if (tabPopup != null) {
 			if (delay) {
-				tabPopupDismissDelayHandler.postDelayed(new Runnable() {
+				handler.postDelayed(new Runnable() {
 					@Override
 					public void run() {
 						tabPopup.dismiss();

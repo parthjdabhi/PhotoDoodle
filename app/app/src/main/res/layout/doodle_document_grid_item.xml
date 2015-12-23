@@ -11,7 +11,7 @@
 		android:id="@+id/imageView"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:scaleType="centerCrop"
+		android:scaleType="fitXY"
 		tools:ignore="ContentDescription"/>
 
 	<ImageView
@@ -32,7 +32,7 @@
 		android:orientation="vertical">
 
 		<TextView
-			android:id="@+id/nameTextView"
+			android:id="@+id/infoTextView"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal|bottom"
@@ -40,29 +40,8 @@
 			android:ellipsize="end"
 			android:textAlignment="center"
 			android:textColor="@android:color/white"
+			android:textSize="10sp"
 			tools:text="Name"/>
-
-		<TextView
-			android:id="@+id/dateTextView"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center_horizontal|bottom"
-			android:layout_margin="4dp"
-			android:ellipsize="end"
-			android:textAlignment="center"
-			android:textColor="@android:color/white"
-			tools:text="Date"/>
-
-		<TextView
-			android:id="@+id/uuidTextView"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center_horizontal|bottom"
-			android:layout_margin="4dp"
-			android:ellipsize="end"
-			android:textAlignment="center"
-			android:textColor="@android:color/white"
-			tools:text="UUID"/>
 
 	</LinearLayout>
 

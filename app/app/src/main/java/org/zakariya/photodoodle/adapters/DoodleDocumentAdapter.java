@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +22,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -39,7 +39,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		 *
 		 * @param document the document represented by this item
 		 */
-		void onDoodleDocumentClick(PhotoDoodleDocument document);
+		void onDoodleDocumentClick(PhotoDoodleDocument document, View tappedItem, String thumbnailId);
 	}
 
 	public interface OnLongClickListener {
@@ -49,17 +49,16 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		 * @param document the document represented by this item
 		 * @return true if the long click is handled, false otherwise
 		 */
-		boolean onDoodleDocumentLongClick(PhotoDoodleDocument document);
+		boolean onDoodleDocumentLongClick(PhotoDoodleDocument document, View tappedItem, String thumbnailId);
 	}
 
 	public class ViewHolder extends RecyclerView.ViewHolder {
 		public PhotoDoodleDocument photoDoodleDocument;
+		public String thumbnailId;
 		public View rootView;
 		public ImageView imageView;
 		public ImageView loadingImageView;
-		public TextView nameTextView;
-		public TextView dateTextView;
-		public TextView uuidTextView;
+		public TextView infoTextView;
 
 		DoodleThumbnailRenderer.RenderTask thumbnailRenderTask;
 
@@ -68,9 +67,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 			rootView = v;
 			imageView = (ImageView) v.findViewById(R.id.imageView);
 			loadingImageView = (ImageView) v.findViewById(R.id.loadingImageView);
-			nameTextView = (TextView) v.findViewById(R.id.nameTextView);
-			dateTextView = (TextView) v.findViewById(R.id.dateTextView);
-			uuidTextView = (TextView) v.findViewById(R.id.uuidTextView);
+			infoTextView = (TextView) v.findViewById(R.id.infoTextView);
 		}
 	}
 
@@ -89,9 +86,9 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 	Comparator<PhotoDoodleDocument> sortComparator = new Comparator<PhotoDoodleDocument>() {
 		@Override
 		public int compare(PhotoDoodleDocument lhs, PhotoDoodleDocument rhs) {
-			long leftModDate = lhs.getModificationDate().getTime();
-			long rightModDate = rhs.getModificationDate().getTime();
-			long delta = rightModDate - leftModDate;
+			long leftCreationDate = lhs.getCreationDate().getTime();
+			long rightCreationDate = rhs.getCreationDate().getTime();
+			long delta = rightCreationDate - leftCreationDate;
 
 			// this dance is to avoid long->int precision loss
 			if (delta < 0) {
@@ -112,14 +109,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		dateFormatter = DateFormat.getDateTimeInstance();
 		crossfadeDuration = context.getResources().getInteger(android.R.integer.config_shortAnimTime);
 		photoDoodleDocuments = new ArrayList<>();
-
-		// we're using a manually-managed ArrayList. We lose automatic tracking, but
-		// gain nice add/remove/reorder animations if we are careful
-		for (PhotoDoodleDocument doc : items) {
-			photoDoodleDocuments.add(doc);
-		}
-
-		updateEmptyView();
+		setItems(items);
 	}
 
 	public void setOnClickListener(@Nullable OnClickListener listener) {
@@ -171,7 +161,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 				PhotoDoodleDocument doc = holder.photoDoodleDocument;
 				OnClickListener listener = getOnClickListener();
 				if (doc != null && listener != null) {
-					listener.onDoodleDocumentClick(doc);
+					listener.onDoodleDocumentClick(doc, holder.imageView, holder.thumbnailId);
 				}
 			}
 		});
@@ -182,7 +172,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 			public boolean onLongClick(View v) {
 				PhotoDoodleDocument doc = holder.photoDoodleDocument;
 				OnLongClickListener listener = getOnLongClickListener();
-				return doc != null && listener != null && listener.onDoodleDocumentLongClick(doc);
+				return doc != null && listener != null && listener.onDoodleDocumentLongClick(doc, holder.imageView, holder.thumbnailId);
 			}
 		});
 
@@ -208,20 +198,25 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		PhotoDoodleDocument doc = photoDoodleDocuments.get(position);
 		holder.photoDoodleDocument = doc;
 
-		holder.nameTextView.setText(doc.getName());
+		holder.infoTextView.setText(context.getString(R.string.doodle_document_grid_info_text,
+				doc.getName(),
+				dateFormatter.format(doc.getCreationDate()),
+				dateFormatter.format(doc.getModificationDate()),
+				doc.getUuid()));
 
-		Date date = doc.getModificationDate() != null ? doc.getModificationDate() : doc.getCreationDate();
-		holder.dateTextView.setText(dateFormatter.format(date));
-
-		holder.uuidTextView.setText(doc.getUuid());
+		// set a unique transition name
+		ViewCompat.setTransitionName(holder.imageView, String.valueOf(position) + "_imageView");
 
 		// note: Out icons are square, so knowing item width is sufficient
 		int thumbnailWidth = itemWidth;
 		//noinspection SuspiciousNameCombination
 		int thumbnailHeight = itemWidth;
 
+		// store the id used to represent this thumbnail for quick future lookup
+		holder.thumbnailId = DoodleThumbnailRenderer.getThumbnailId(doc, thumbnailWidth, thumbnailHeight);
+
 		DoodleThumbnailRenderer thumbnailer = DoodleThumbnailRenderer.getInstance();
-		Bitmap thumbnail = thumbnailer.getThumbnail(doc,thumbnailWidth,thumbnailHeight);
+		Bitmap thumbnail = thumbnailer.getThumbnailById(holder.thumbnailId);
 		if (thumbnail != null) {
 			//
 			//  The thumbnail is available, run with it
@@ -273,15 +268,17 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		}
 
 		sortDocuments();
+		updateEmptyView();
 		notifyDataSetChanged();
 	}
 
 	/**
 	 * Add a document to the list
+	 *
 	 * @param doc the document
 	 */
 	public void addItem(PhotoDoodleDocument doc) {
-		photoDoodleDocuments.add(0,doc);
+		photoDoodleDocuments.add(0, doc);
 		sortDocuments();
 		int index = getIndexOfItem(doc);
 		if (index >= 0) {
@@ -289,10 +286,13 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		} else {
 			notifyDataSetChanged();
 		}
+
+		updateEmptyView();
 	}
 
 	/**
 	 * Remove a document from the list.
+	 *
 	 * @param doc the document to remove
 	 */
 	public void removeItem(PhotoDoodleDocument doc) {
@@ -301,10 +301,13 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 			photoDoodleDocuments.remove(index);
 			notifyItemRemoved(index);
 		}
+
+		updateEmptyView();
 	}
 
 	/**
 	 * When a document is edited, it goes to the top of the list. Call this to re-sort storage and move the item.
+	 *
 	 * @param doc the edited document
 	 */
 	public void itemWasUpdated(PhotoDoodleDocument doc) {
@@ -313,10 +316,12 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 			sortDocuments();
 			int newIndex = getIndexOfItem(doc);
 			if (newIndex != previousIndex) {
-				notifyItemMoved(previousIndex,newIndex);
+				notifyItemMoved(previousIndex, newIndex);
 			}
 			notifyItemChanged(newIndex);
 		}
+
+		updateEmptyView();
 	}
 
 	private void sortDocuments() {

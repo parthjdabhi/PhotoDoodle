@@ -217,7 +217,9 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 
 		DoodleThumbnailRenderer thumbnailer = DoodleThumbnailRenderer.getInstance();
 		Bitmap thumbnail = thumbnailer.getThumbnailById(holder.thumbnailId);
+
 		if (thumbnail != null) {
+
 			//
 			//  The thumbnail is available, run with it
 			//

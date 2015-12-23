@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -16,9 +14,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.transition.Fade;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -63,8 +59,6 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	Realm realm;
 	RecyclerView.LayoutManager layoutManager;
 	DoodleDocumentAdapter adapter;
-	String editedDocumentUuid;
-	Handler delayedUpdateHandler;
 
 	public DoodleDocumentGridFragment() {
 		setHasOptionsMenu(true);
@@ -76,13 +70,6 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
 		realm = Realm.getInstance(getContext());
-		delayedUpdateHandler = new Handler(Looper.getMainLooper());
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			getActivity().getWindow().setEnterTransition(new Fade());
-			getActivity().getWindow().setExitTransition(new Fade());
-		}
-
 	}
 
 	@Override
@@ -134,7 +121,6 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		adapter.setOnLongClickListener(this);
 		recyclerView.setAdapter(adapter);
 
-
 		return v;
 	}
 
@@ -144,8 +130,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 			case REQUEST_EDIT_DOODLE:
 				if (resultCode == DoodleActivity.RESULT_OK) {
 					boolean didEdit = data.getBooleanExtra(DoodleActivity.RESULT_DID_EDIT_DOODLE, false);
-					final String uuid = data.getStringExtra(DoodleActivity.RESULT_DOODLE_DOCUMENT_UUID);
-					Log.i(TAG, "onActivityResult: uuid: " + uuid + " didEdit: " + didEdit);
+					String uuid = data.getStringExtra(DoodleActivity.RESULT_DOODLE_DOCUMENT_UUID);
 
 					if (didEdit && !TextUtils.isEmpty(uuid)) {
 						adapter.itemWasUpdated(PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, uuid));
@@ -155,21 +140,6 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
-	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-//		if (!TextUtils.isEmpty(editedDocumentUuid)) {
-//			delayedUpdateHandler.postDelayed(new Runnable() {
-//				@Override
-//				public void run() {
-//					adapter.itemWasUpdated(PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, editedDocumentUuid));
-//					recyclerView.smoothScrollToPosition(0);
-//					editedDocumentUuid = null;
-//				}
-//			}, 500);
-//		}
 	}
 
 	@OnClick(R.id.fab)

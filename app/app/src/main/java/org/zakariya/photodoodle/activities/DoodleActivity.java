@@ -25,7 +25,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.transition.Fade;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -208,11 +207,6 @@ public class DoodleActivity extends AppCompatActivity
 		// be tidy - in case a photo temp file survived a crash or whatever
 		//
 		deletePhotoTempFile();
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			getWindow().setEnterTransition(new Fade());
-			getWindow().setExitTransition(new Fade());
-		}
 	}
 
 	@Override

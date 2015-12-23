@@ -1,10 +1,12 @@
 package org.zakariya.photodoodle.fragments;
 
+import android.annotation.TargetApi;
+import android.app.ActivityOptions;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -13,7 +15,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,6 +26,8 @@ import org.zakariya.photodoodle.R;
 import org.zakariya.photodoodle.activities.DoodleActivity;
 import org.zakariya.photodoodle.adapters.DoodleDocumentAdapter;
 import org.zakariya.photodoodle.model.PhotoDoodleDocument;
+import org.zakariya.photodoodle.util.DoodleThumbnailRenderer;
+import org.zakariya.photodoodle.util.FragmentUtils;
 
 import java.lang.ref.WeakReference;
 
@@ -56,19 +59,17 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	Realm realm;
 	RecyclerView.LayoutManager layoutManager;
 	DoodleDocumentAdapter adapter;
-	String editedDocumentUuid;
-	Handler delayedUpdateHandler;
 
 	public DoodleDocumentGridFragment() {
 		setHasOptionsMenu(true);
 	}
 
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 	@Override
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
 		realm = Realm.getInstance(getContext());
-		delayedUpdateHandler = new Handler(Looper.getMainLooper());
 	}
 
 	@Override
@@ -109,7 +110,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
 		int displayWidth = metrics.widthPixels;
 		float maxItemSize = getResources().getDimension(R.dimen.max_doodle_grid_item_size);
-		int columns = (int)Math.ceil((float)displayWidth / (float)maxItemSize);
+		int columns = (int) Math.ceil((float) displayWidth / (float) maxItemSize);
 
 		layoutManager = new GridLayoutManager(getContext(), columns);
 		recyclerView.setLayoutManager(layoutManager);
@@ -120,7 +121,6 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		adapter.setOnLongClickListener(this);
 		recyclerView.setAdapter(adapter);
 
-
 		return v;
 	}
 
@@ -130,34 +130,16 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 			case REQUEST_EDIT_DOODLE:
 				if (resultCode == DoodleActivity.RESULT_OK) {
 					boolean didEdit = data.getBooleanExtra(DoodleActivity.RESULT_DID_EDIT_DOODLE, false);
-					final String uuid = data.getStringExtra(DoodleActivity.RESULT_DOODLE_DOCUMENT_UUID);
-					Log.i(TAG, "onActivityResult: uuid: " + uuid + " didEdit: " + didEdit);
+					String uuid = data.getStringExtra(DoodleActivity.RESULT_DOODLE_DOCUMENT_UUID);
 
 					if (didEdit && !TextUtils.isEmpty(uuid)) {
-						editedDocumentUuid = uuid;
-					} else {
-						editedDocumentUuid = null;
+						adapter.itemWasUpdated(PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, uuid));
 					}
 				}
 				break;
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
-	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		if (!TextUtils.isEmpty(editedDocumentUuid)) {
-			delayedUpdateHandler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					adapter.itemWasUpdated(PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, editedDocumentUuid));
-					recyclerView.smoothScrollToPosition(0);
-					editedDocumentUuid = null;
-				}
-			}, 500);
-		}
 	}
 
 	@OnClick(R.id.fab)
@@ -169,12 +151,12 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	}
 
 	@Override
-	public void onDoodleDocumentClick(PhotoDoodleDocument document) {
-		editPhotoDoodle(document);
+	public void onDoodleDocumentClick(PhotoDoodleDocument document, View tappedItem, String thumbnailId) {
+		editPhotoDoodle(document, tappedItem, thumbnailId);
 	}
 
 	@Override
-	public boolean onDoodleDocumentLongClick(PhotoDoodleDocument document) {
+	public boolean onDoodleDocumentLongClick(PhotoDoodleDocument document, View tappedItem, String thumbnailId) {
 		queryDeletePhotoDoodle(document);
 		return true;
 	}
@@ -206,9 +188,30 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	}
 
 	void editPhotoDoodle(PhotoDoodleDocument doc) {
+		editPhotoDoodle(doc, null, null);
+	}
+
+	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	void editPhotoDoodle(PhotoDoodleDocument doc, @Nullable View tappedItem, @Nullable String thumbnailId) {
 		Intent intent = new Intent(getContext(), DoodleActivity.class);
 		intent.putExtra(DoodleActivity.EXTRA_DOODLE_DOCUMENT_UUID, doc.getUuid());
-		startActivityForResult(intent, REQUEST_EDIT_DOODLE);
+
+		Bitmap thumbnail = DoodleThumbnailRenderer.getInstance().getThumbnailById(thumbnailId);
+
+		if (tappedItem != null && thumbnail != null && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)) {
+			intent.putExtra(DoodleActivity.EXTRA_DOODLE_THUMBNAIL_ID, thumbnailId);
+			intent.putExtra(DoodleActivity.EXTRA_DOODLE_THUMBNAIL_WIDTH, tappedItem.getWidth());
+			intent.putExtra(DoodleActivity.EXTRA_DOODLE_THUMBNAIL_HEIGHT, tappedItem.getHeight());
+
+			String transitionName = getString(R.string.transition_name_doodle_view);
+			ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(getActivity(), tappedItem, transitionName);
+
+			// this is a workaround for the issue where Fragment doesn't have the options variant for startActivityForResult
+			FragmentUtils.startActivityForResult(this, intent, REQUEST_EDIT_DOODLE, options.toBundle());
+
+		} else {
+			startActivityForResult(intent, REQUEST_EDIT_DOODLE);
+		}
 	}
 
 }

@@ -14,6 +14,7 @@ import org.zakariya.photodoodle.R;
 public abstract class SingleFragmentActivity extends AppCompatActivity {
 
 	private static final String TAG = "SingleFragmentActivity";
+	protected Fragment fragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +25,7 @@ public abstract class SingleFragmentActivity extends AppCompatActivity {
 		setSupportActionBar(toolbar);
 
 		FragmentManager fm = getSupportFragmentManager();
-		Fragment fragment = fm.findFragmentById(R.id.container);
+		fragment = fm.findFragmentById(R.id.container);
 		if (fragment == null) {
 			fragment = createFragment();
 			fm.beginTransaction().add(R.id.container, fragment).commit();
@@ -32,4 +33,8 @@ public abstract class SingleFragmentActivity extends AppCompatActivity {
 	}
 
 	protected abstract Fragment createFragment();
+
+	public Fragment getFragment() {
+		return fragment;
+	}
 }

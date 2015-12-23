@@ -52,10 +52,23 @@
 
 	</FrameLayout>
 
-	<org.zakariya.doodle.view.DoodleView
-		android:id="@+id/doodleView"
+	<FrameLayout
 		android:layout_width="match_parent"
 		android:layout_height="0dp"
-		android:layout_weight="1"/>
+		android:layout_weight="1">
+
+		<org.zakariya.doodle.view.DoodleView
+			android:id="@+id/doodleView"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"/>
+
+		<ImageView
+			android:id="@+id/doodlePlaceholderImageView"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:transitionName="@string/transition_name_doodle_view"
+			android:scaleType="centerCrop"/>
+
+	</FrameLayout>
 
 </LinearLayout>

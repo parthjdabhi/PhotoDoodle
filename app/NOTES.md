@@ -1,5 +1,7 @@
 #Currently
 
+Audit use of synchronized in DoodleThumbnailRenderer
+
 Superficial shared element transitions are working, but:
 - appbar region flashes white in between the two activities
 

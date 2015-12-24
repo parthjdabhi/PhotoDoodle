@@ -2,8 +2,13 @@ package org.zakariya.photodoodle.adapters;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.RippleDrawable;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
@@ -68,6 +73,19 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 			imageView = (ImageView) v.findViewById(R.id.imageView);
 			loadingImageView = (ImageView) v.findViewById(R.id.loadingImageView);
 			infoTextView = (TextView) v.findViewById(R.id.infoTextView);
+		}
+
+		@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+		public void setThumbnailImage(Bitmap thumbnail) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				Context context = rootView.getContext();
+				int rippleColor = context.getResources().getColor(R.color.primary);
+				BitmapDrawable drawable = new BitmapDrawable(context.getResources(), thumbnail);
+				RippleDrawable ripple = new RippleDrawable(ColorStateList.valueOf(rippleColor), drawable, null);
+				imageView.setImageDrawable(ripple);
+			} else {
+				imageView.setImageBitmap(thumbnail);
+			}
 		}
 	}
 
@@ -155,7 +173,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		View v = inflater.inflate(R.layout.doodle_document_grid_item, parent, false);
 
 		final ViewHolder holder = new ViewHolder(v);
-		holder.rootView.setOnClickListener(new View.OnClickListener() {
+		holder.imageView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				PhotoDoodleDocument doc = holder.photoDoodleDocument;
@@ -166,8 +184,8 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 			}
 		});
 
-		holder.rootView.setLongClickable(true);
-		holder.rootView.setOnLongClickListener(new View.OnLongClickListener() {
+		holder.imageView.setLongClickable(true);
+		holder.imageView.setOnLongClickListener(new View.OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
 				PhotoDoodleDocument doc = holder.photoDoodleDocument;
@@ -226,7 +244,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 
 			holder.thumbnailRenderTask = null;
 			holder.loadingImageView.setVisibility(View.GONE);
-			holder.imageView.setImageBitmap(thumbnail);
+			holder.setThumbnailImage(thumbnail);
 
 		} else {
 
@@ -241,7 +259,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 				@Override
 				public void onThumbnailReady(Bitmap thumbnail) {
 
-					holder.imageView.setImageBitmap(thumbnail);
+					holder.setThumbnailImage(thumbnail);
 					holder.loadingImageView.animate()
 							.alpha(0)
 							.setDuration(crossfadeDuration)

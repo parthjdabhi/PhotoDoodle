@@ -7,10 +7,13 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -38,7 +41,6 @@ import butterknife.OnClick;
 import icepick.Icepick;
 import io.realm.Realm;
 import io.realm.RealmResults;
-import io.realm.Sort;
 
 /**
  * Created by shamyl on 12/16/15.
@@ -61,6 +63,9 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	RecyclerView.LayoutManager layoutManager;
 	DoodleDocumentAdapter adapter;
 
+	PhotoDoodleDocument newlyCreatedDocumentPendingEdit;
+	Handler handler;
+
 	public DoodleDocumentGridFragment() {
 		setHasOptionsMenu(true);
 	}
@@ -71,6 +76,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
 		realm = Realm.getInstance(getContext());
+		handler = new Handler(Looper.getMainLooper());
 	}
 
 	@Override
@@ -116,13 +122,28 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		layoutManager = new GridLayoutManager(getContext(), columns);
 		recyclerView.setLayoutManager(layoutManager);
 
-		RealmResults<PhotoDoodleDocument> docs = realm.allObjectsSorted(PhotoDoodleDocument.class, "modificationDate", Sort.DESCENDING);
+		RealmResults<PhotoDoodleDocument> docs = realm.allObjects(PhotoDoodleDocument.class);
 		adapter = new DoodleDocumentAdapter(getContext(), recyclerView, columns, docs, emptyView);
 		adapter.setOnClickListener(this);
 		adapter.setOnLongClickListener(this);
 		recyclerView.setAdapter(adapter);
 
+		recyclerView.setItemAnimator(new DefaultItemAnimator(){
+			@Override
+			public void onAddFinished(RecyclerView.ViewHolder item) {
+				super.onAddFinished(item);
+				DoodleDocumentGridFragment.this.onAddItemAnimationFinished(item);
+			}
+		});
+
 		return v;
+	}
+
+	@Override
+	public void onDestroyView() {
+		// the item animator set in onCreateView holds a strong reference to this
+		recyclerView.setItemAnimator(null);
+		super.onDestroyView();
 	}
 
 	@Override
@@ -145,10 +166,10 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 
 	@OnClick(R.id.fab)
 	public void createNewPhotoDoodle() {
-		PhotoDoodleDocument doc = PhotoDoodleDocument.create(realm, getString(R.string.untitled_document));
-		adapter.addItem(doc);
+		// when the add animation completes, this document will be edited
+		newlyCreatedDocumentPendingEdit = PhotoDoodleDocument.create(realm, getString(R.string.untitled_document));
+		adapter.addItem(newlyCreatedDocumentPendingEdit);
 		recyclerView.smoothScrollToPosition(0);
-		editPhotoDoodle(doc);
 	}
 
 	@Override
@@ -221,6 +242,22 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 
 		} else {
 			startActivityForResult(intent, REQUEST_EDIT_DOODLE);
+		}
+	}
+
+	private void onAddItemAnimationFinished(RecyclerView.ViewHolder viewHolder) {
+		if (newlyCreatedDocumentPendingEdit != null) {
+
+			final DoodleDocumentAdapter.ViewHolder ddaViewHolder = (DoodleDocumentAdapter.ViewHolder) viewHolder;
+			final PhotoDoodleDocument document = newlyCreatedDocumentPendingEdit;
+			newlyCreatedDocumentPendingEdit = null;
+
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					editPhotoDoodle(document,ddaViewHolder.imageView);
+				}
+			}, 500);
 		}
 	}
 

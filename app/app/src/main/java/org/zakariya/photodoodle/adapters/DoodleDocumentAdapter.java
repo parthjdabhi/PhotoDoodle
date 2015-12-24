@@ -39,7 +39,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		 *
 		 * @param document the document represented by this item
 		 */
-		void onDoodleDocumentClick(PhotoDoodleDocument document, View tappedItem, String thumbnailId);
+		void onDoodleDocumentClick(PhotoDoodleDocument document, View tappedItem);
 	}
 
 	public interface OnLongClickListener {
@@ -49,7 +49,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		 * @param document the document represented by this item
 		 * @return true if the long click is handled, false otherwise
 		 */
-		boolean onDoodleDocumentLongClick(PhotoDoodleDocument document, View tappedItem, String thumbnailId);
+		boolean onDoodleDocumentLongClick(PhotoDoodleDocument document, View tappedItem);
 	}
 
 	public class ViewHolder extends RecyclerView.ViewHolder {
@@ -161,7 +161,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 				PhotoDoodleDocument doc = holder.photoDoodleDocument;
 				OnClickListener listener = getOnClickListener();
 				if (doc != null && listener != null) {
-					listener.onDoodleDocumentClick(doc, holder.imageView, holder.thumbnailId);
+					listener.onDoodleDocumentClick(doc, holder.imageView);
 				}
 			}
 		});
@@ -172,7 +172,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 			public boolean onLongClick(View v) {
 				PhotoDoodleDocument doc = holder.photoDoodleDocument;
 				OnLongClickListener listener = getOnLongClickListener();
-				return doc != null && listener != null && listener.onDoodleDocumentLongClick(doc, holder.imageView, holder.thumbnailId);
+				return doc != null && listener != null && listener.onDoodleDocumentLongClick(doc, holder.imageView);
 			}
 		});
 

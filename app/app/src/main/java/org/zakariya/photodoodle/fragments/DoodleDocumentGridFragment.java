@@ -15,6 +15,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -151,12 +152,12 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	}
 
 	@Override
-	public void onDoodleDocumentClick(PhotoDoodleDocument document, View tappedItem, String thumbnailId) {
-		editPhotoDoodle(document, tappedItem, thumbnailId);
+	public void onDoodleDocumentClick(PhotoDoodleDocument document, View tappedItem) {
+		editPhotoDoodle(document, tappedItem);
 	}
 
 	@Override
-	public boolean onDoodleDocumentLongClick(PhotoDoodleDocument document, View tappedItem, String thumbnailId) {
+	public boolean onDoodleDocumentLongClick(PhotoDoodleDocument document, View tappedItem) {
 		queryDeletePhotoDoodle(document);
 		return true;
 	}
@@ -188,18 +189,27 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	}
 
 	void editPhotoDoodle(PhotoDoodleDocument doc) {
-		editPhotoDoodle(doc, null, null);
+		editPhotoDoodle(doc, null);
 	}
 
 	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	void editPhotoDoodle(PhotoDoodleDocument doc, @Nullable View tappedItem, @Nullable String thumbnailId) {
+	void editPhotoDoodle(PhotoDoodleDocument doc, @Nullable View tappedItem) {
+
 		Intent intent = new Intent(getContext(), DoodleActivity.class);
 		intent.putExtra(DoodleActivity.EXTRA_DOODLE_DOCUMENT_UUID, doc.getUuid());
 
-		Bitmap thumbnail = DoodleThumbnailRenderer.getInstance().getThumbnailById(thumbnailId);
+		if (tappedItem != null && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)) {
 
-		if (tappedItem != null && thumbnail != null && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)) {
-			intent.putExtra(DoodleActivity.EXTRA_DOODLE_THUMBNAIL_ID, thumbnailId);
+			//
+			// render a thumbnail for the animation to scale. note, we're relying on the thumbnail
+			// being available later in DoodleThumbnailRenderer's cache since we can't pass a thumbnail via intent
+			//
+
+			int width = tappedItem.getWidth();
+			int height = tappedItem.getHeight();
+			Pair<Bitmap,String> result = DoodleThumbnailRenderer.getInstance().renderThumbnail(getActivity(), doc, width, height);
+
+			intent.putExtra(DoodleActivity.EXTRA_DOODLE_THUMBNAIL_ID, result.second);
 			intent.putExtra(DoodleActivity.EXTRA_DOODLE_THUMBNAIL_WIDTH, tappedItem.getWidth());
 			intent.putExtra(DoodleActivity.EXTRA_DOODLE_THUMBNAIL_HEIGHT, tappedItem.getHeight());
 

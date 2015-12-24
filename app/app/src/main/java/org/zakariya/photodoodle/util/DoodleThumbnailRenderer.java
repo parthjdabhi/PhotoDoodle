@@ -11,6 +11,7 @@ import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.LruCache;
+import android.util.Pair;
 
 import org.zakariya.doodle.model.PhotoDoodle;
 import org.zakariya.photodoodle.model.PhotoDoodleDocument;
@@ -106,9 +107,10 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 
 	/**
 	 * Get the cached thumbnail, if it exists, for the given document at the given width/height
+	 *
 	 * @param document the document
-	 * @param width the thumbnail width
-	 * @param height the thumbnail height
+	 * @param width    the thumbnail width
+	 * @param height   the thumbnail height
 	 * @return a bitmap
 	 */
 	@Nullable
@@ -118,9 +120,10 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 
 	/**
 	 * Get an id usable to identify a thumbnail for a given document
+	 *
 	 * @param document the document
-	 * @param width the width of the thumbnail
-	 * @param height the height of the thumbnail
+	 * @param width    the width of the thumbnail
+	 * @param height   the height of the thumbnail
 	 * @return a string passable to getThumbnailById
 	 */
 	public static String getThumbnailId(PhotoDoodleDocument document, int width, int height) {
@@ -131,6 +134,7 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 
 	/**
 	 * Get a rendered thumbnail - if it exists - by its ID
+	 *
 	 * @param id the id of a thumbnail. You can get the ID from getThumbnailId
 	 * @return a bitmap if it exists in the cache
 	 */
@@ -141,35 +145,45 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 
 	/**
 	 * Renders a thumbnail for a given PhotoDoodleDocument synchronously
-	 * @param context the context
+	 *
+	 * @param context  the context
 	 * @param document the document
-	 * @param width the width to render the thumbnail
-	 * @param height the height to render the thumbnail
+	 * @param width    the width to render the thumbnail
+	 * @param height   the height to render the thumbnail
 	 * @return a bitmap containing the document's rendering, at the provided width/height
 	 */
-	public Bitmap renderThumbnail(Context context, PhotoDoodleDocument document, int width, int height) {
-		final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-		bitmap.eraseColor(0xFFFFFFFF);
-		Canvas bitmapCanvas = new Canvas(bitmap);
+	public Pair<Bitmap,String> renderThumbnail(Context context, PhotoDoodleDocument document, int width, int height) {
 
-		Realm realm = Realm.getInstance(context);
-		PhotoDoodle doodle = PhotoDoodleDocument.loadPhotoDoodle(context, document);
-		doodle.draw(bitmapCanvas, width, height);
-		realm.close();
+		String thumbnailId = getThumbnailId(document, width, height);
+		Bitmap thumbnail = cache.get(thumbnailId);
 
-		cache.put(getThumbnailId(document,width,height),bitmap);
+		if (thumbnail != null) {
+			return new Pair<>(thumbnail,thumbnailId);
+		} else {
+			thumbnail = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+			thumbnail.eraseColor(0xFFFFFFFF);
+			Canvas bitmapCanvas = new Canvas(thumbnail);
 
-		return bitmap;
+			Realm realm = Realm.getInstance(context);
+			PhotoDoodle doodle = PhotoDoodleDocument.loadPhotoDoodle(context, document);
+			doodle.draw(bitmapCanvas, width, height);
+			realm.close();
+
+			cache.put(thumbnailId, thumbnail);
+
+			return new Pair<>(thumbnail,thumbnailId);
+		}
 	}
 
 	/**
 	 * Asynchronously render a thumbnail at a provided width/height for a document
-	 * @param document the document whos thumbnail you wish to render
-	 * @param width the target width
-	 * @param height the target height
+	 *
+	 * @param document  the document whos thumbnail you wish to render
+	 * @param width     the target width
+	 * @param height    the target height
 	 * @param callbacks invoked when the thumbnail is ready
 	 * @return a RenderTask which is cancelable
-	 *
+	 * <p/>
 	 * If a cached version of the thumbnail exists, it will be passed immediately to the callback.
 	 */
 	@Nullable

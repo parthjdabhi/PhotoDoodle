@@ -26,6 +26,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -287,21 +288,32 @@ public class DoodleActivity extends AppCompatActivity
 
 			if (edited) {
 
+				//
+				//  Render an updated placeholder image for exit transition. If we were NOT edited,
+				// the placeholder already contains a valid image.
+				//
+
 				int width = getIntent().getIntExtra(EXTRA_DOODLE_THUMBNAIL_WIDTH, 0);
 				int height = getIntent().getIntExtra(EXTRA_DOODLE_THUMBNAIL_HEIGHT, 0);
-				DoodleThumbnailRenderer thumbnailer = DoodleThumbnailRenderer.getInstance();
-				Bitmap placeholderBitmap;
 
-				if (width > 0 && height > 0) {
-					// render a thumbnail at the size of the grid item which fired off this activity
-					// the thumbnail should live in the cache, so it's immediately available to the grid item
-					placeholderBitmap = thumbnailer.renderThumbnail(this, document, width, height);
-					resultData.putExtra(RESULT_UPDATED_DOODLE_THUMBNAIL_ID, DoodleThumbnailRenderer.getThumbnailId(document, width, height));
-				} else {
-					placeholderBitmap = thumbnailer.renderThumbnail(this, document, 256, 256);
+				if (width == 0 || height == 0) {
+					width = doodleView.getWidth() / 2;
+					height = doodleView.getHeight() / 2;
+
+					// make it square
+					if (width > height) {
+						//noinspection SuspiciousNameCombination
+						width = height;
+					} else {
+						//noinspection SuspiciousNameCombination
+						height = width;
+					}
 				}
 
-				doodlePlaceholderImageView.setImageBitmap(placeholderBitmap);
+				Pair<Bitmap,String> rendering = DoodleThumbnailRenderer.getInstance().renderThumbnail(this, document, width, height);
+
+				doodlePlaceholderImageView.setImageBitmap(rendering.first);
+				resultData.putExtra(RESULT_UPDATED_DOODLE_THUMBNAIL_ID, rendering.second);
 			}
 
 			// reveal the placeholder for the exit transition

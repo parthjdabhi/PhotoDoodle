@@ -2,15 +2,6 @@
 
 Superficial shared element transitions are working, but:
 - appbar region flashes white in between the two activities
-- exit transition isn't happening (presumably because the placeholder image view is hidden)
-	- TRY making it visible, but alpha 0
-
-#BUGS
-- On return to GridFragment, modified docs aren't triggering a redraw of the thumbnail
-	onActivityResult isn't being called! This is presumably because I'm having to use getActivity().startActivityForResult for shared element transitions
-		- Use AppCompat.startActivityForResult (in case google fixes this)
-		- Catch activityResult in MainActivity (sigh) and forward it. Needs a reference to active fragment, of course, so track lifecycle changes
-
 
 #TODO
 use Camera2 API to integrate photo taking directly into the DoodleActivity (or more likely a PhotoView)

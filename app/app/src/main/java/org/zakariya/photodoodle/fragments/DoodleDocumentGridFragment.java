@@ -2,19 +2,19 @@ package org.zakariya.photodoodle.fragments;
 
 import android.annotation.TargetApi;
 import android.app.ActivityOptions;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.PointF;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -63,9 +63,6 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	RecyclerView.LayoutManager layoutManager;
 	DoodleDocumentAdapter adapter;
 
-	PhotoDoodleDocument newlyCreatedDocumentPendingEdit;
-	Handler handler;
-
 	public DoodleDocumentGridFragment() {
 		setHasOptionsMenu(true);
 	}
@@ -76,7 +73,6 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		super.onCreate(savedInstanceState);
 		Icepick.restoreInstanceState(this, savedInstanceState);
 		realm = Realm.getInstance(getContext());
-		handler = new Handler(Looper.getMainLooper());
 	}
 
 	@Override
@@ -119,7 +115,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		float maxItemSize = getResources().getDimension(R.dimen.max_doodle_grid_item_size);
 		int columns = (int) Math.ceil((float) displayWidth / (float) maxItemSize);
 
-		layoutManager = new GridLayoutManager(getContext(), columns);
+		layoutManager = new SmoothScrollGridLayoutManager(getContext(), columns);
 		recyclerView.setLayoutManager(layoutManager);
 
 		RealmResults<PhotoDoodleDocument> docs = realm.allObjects(PhotoDoodleDocument.class);
@@ -127,23 +123,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		adapter.setOnClickListener(this);
 		adapter.setOnLongClickListener(this);
 		recyclerView.setAdapter(adapter);
-
-		recyclerView.setItemAnimator(new DefaultItemAnimator(){
-			@Override
-			public void onAddFinished(RecyclerView.ViewHolder item) {
-				super.onAddFinished(item);
-				DoodleDocumentGridFragment.this.onAddItemAnimationFinished(item);
-			}
-		});
-
 		return v;
-	}
-
-	@Override
-	public void onDestroyView() {
-		// the item animator set in onCreateView holds a strong reference to this
-		recyclerView.setItemAnimator(null);
-		super.onDestroyView();
 	}
 
 	@Override
@@ -167,9 +147,11 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	@OnClick(R.id.fab)
 	public void createNewPhotoDoodle() {
 		// when the add animation completes, this document will be edited
-		newlyCreatedDocumentPendingEdit = PhotoDoodleDocument.create(realm, getString(R.string.untitled_document));
-		adapter.addItem(newlyCreatedDocumentPendingEdit);
+		PhotoDoodleDocument newDoc = PhotoDoodleDocument.create(realm, getString(R.string.untitled_document));
+		adapter.addItem(newDoc);
 		recyclerView.smoothScrollToPosition(0);
+
+		editPhotoDoodle(newDoc);
 	}
 
 	@Override
@@ -228,7 +210,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 
 			int width = tappedItem.getWidth();
 			int height = tappedItem.getHeight();
-			Pair<Bitmap,String> result = DoodleThumbnailRenderer.getInstance().renderThumbnail(getActivity(), doc, width, height);
+			Pair<Bitmap, String> result = DoodleThumbnailRenderer.getInstance().renderThumbnail(getActivity(), doc, width, height);
 
 			intent.putExtra(DoodleActivity.EXTRA_DOODLE_THUMBNAIL_ID, result.second);
 			intent.putExtra(DoodleActivity.EXTRA_DOODLE_THUMBNAIL_WIDTH, tappedItem.getWidth());
@@ -245,20 +227,35 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		}
 	}
 
-	private void onAddItemAnimationFinished(RecyclerView.ViewHolder viewHolder) {
-		if (newlyCreatedDocumentPendingEdit != null) {
+	private class SmoothScrollGridLayoutManager extends GridLayoutManager {
 
-			final DoodleDocumentAdapter.ViewHolder ddaViewHolder = (DoodleDocumentAdapter.ViewHolder) viewHolder;
-			final PhotoDoodleDocument document = newlyCreatedDocumentPendingEdit;
-			newlyCreatedDocumentPendingEdit = null;
-
-			handler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					editPhotoDoodle(document,ddaViewHolder.imageView);
-				}
-			}, 500);
+		public SmoothScrollGridLayoutManager(Context context, int spanCount) {
+			super(context, spanCount);
 		}
+
+		@Override
+		public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state, int position) {
+			RecyclerView.SmoothScroller smoothScroller = new TopSnappedSmoothScroller(recyclerView.getContext());
+			smoothScroller.setTargetPosition(position);
+			startSmoothScroll(smoothScroller);
+		}
+
+		private class TopSnappedSmoothScroller extends LinearSmoothScroller {
+			public TopSnappedSmoothScroller(Context context) {
+				super(context);
+			}
+
+			@Override
+			public PointF computeScrollVectorForPosition(int targetPosition) {
+				return SmoothScrollGridLayoutManager.this.computeScrollVectorForPosition(targetPosition);
+			}
+
+			@Override
+			protected int getVerticalSnapPreference() {
+				return SNAP_TO_START;
+			}
+		}
+
 	}
 
 }

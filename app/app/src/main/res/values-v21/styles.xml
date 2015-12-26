@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+	<style name="PhotoDoodle" parent="Theme.AppCompat.Light.NoActionBar">
 		<item name="actionBarStyle">@style/ActionBarStyle</item>
 		<item name="alertDialogTheme">@style/AlertDialogStyle</item>
 
@@ -24,4 +24,11 @@
 		<item name="android:windowSharedElementExitTransition">@transition/shared_element_transition</item>
 
 	</style>
+
+	<style name="PhotoDoodle.Home">
+		<!-- TODO Figure out how to make translucent navbar without breaking layout of statusbar/fab -->
+		<!--<item name="android:navigationBarColor">@color/translucent_status_bar</item>-->
+		<!--<item name="android:windowTranslucentNavigation">true</item>-->
+	</style>
+
 </resources>

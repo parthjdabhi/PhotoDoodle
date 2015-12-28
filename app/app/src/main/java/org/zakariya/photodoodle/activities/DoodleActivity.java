@@ -25,6 +25,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.Fade;
+import android.transition.Transition;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -129,6 +131,14 @@ public class DoodleActivity extends AppCompatActivity
 
 		setContentView(R.layout.activity_doodle);
 		ButterKnife.bind(this);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			Transition fade = new Fade();
+			fade.excludeTarget(android.R.id.navigationBarBackground, true);
+			getWindow().setExitTransition(fade);
+			getWindow().setEnterTransition(fade);
+		}
+
 
 		//
 		// setup the toolbar - note: we are providing our own titleTextView so hide the built-in title

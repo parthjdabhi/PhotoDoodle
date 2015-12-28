@@ -106,19 +106,6 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 	}
 
 	/**
-	 * Get the cached thumbnail, if it exists, for the given document at the given width/height
-	 *
-	 * @param document the document
-	 * @param width    the thumbnail width
-	 * @param height   the thumbnail height
-	 * @return a bitmap
-	 */
-	@Nullable
-	public Bitmap getThumbnail(PhotoDoodleDocument document, int width, int height) {
-		return cache.get(getThumbnailId(document, width, height));
-	}
-
-	/**
 	 * Get an id usable to identify a thumbnail for a given document
 	 *
 	 * @param document the document
@@ -144,7 +131,7 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 	}
 
 	/**
-	 * Renders a thumbnail for a given PhotoDoodleDocument synchronously
+	 * Renders a thumbnail for a given PhotoDoodleDocument synchronously, or returns existing cached one if available.
 	 *
 	 * @param context  the context
 	 * @param document the document
@@ -194,8 +181,7 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 		}
 
 		final String documentUuid = document.getUuid();
-		final long modificationTimestampSeconds = document.getModificationDate().getTime() / 1000;
-		String taskId = generateRenderTaskKey(documentUuid, modificationTimestampSeconds, width, height);
+		final String taskId = getThumbnailId(document,width,height);
 
 		Bitmap thumbnail = cache.get(taskId);
 		if (thumbnail != null) {
@@ -208,7 +194,7 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 			task.setFuture(executor.submit(new Runnable() {
 				@Override
 				public void run() {
-					performRenderThumbnail(documentUuid, modificationTimestampSeconds, width, height, handler, callbacks);
+					performRenderThumbnail(documentUuid, taskId, width, height, handler, callbacks);
 				}
 			}));
 			return task;
@@ -232,10 +218,9 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 		tasks.remove(taskId);
 	}
 
-	private void performRenderThumbnail(String documentUuid, long timestampSeconds, int width, int height, Handler handler, final Callbacks callbacks) {
+	private void performRenderThumbnail(String documentUuid, final String taskId, int width, int height, Handler handler, final Callbacks callbacks) {
 
 		try {
-			final String taskId = generateRenderTaskKey(documentUuid, timestampSeconds, width, height);
 			final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 			bitmap.eraseColor(0xFFFFFFFF);
 			Canvas bitmapCanvas = new Canvas(bitmap);
@@ -258,8 +243,6 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 						if (!task.isCanceled()) {
 							//Log.i(TAG, "performRenderThumbnail: run: sending bitmap to callback");
 							callbacks.onThumbnailReady(bitmap);
-						} else {
-							//Log.i(TAG, "performRenderThumbnail: run: task was canceled");
 						}
 						clearRenderTask(taskId);
 					}

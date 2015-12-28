@@ -1,9 +1,6 @@
 #Currently
 
-- make sure deleting a doodle deletes the doodle FILE
 - use coordinator layout to scroll out the appbar/navbar
-- 
-Audit use of synchronized in DoodleThumbnailRenderer
 
 Superficial shared element transitions are working, but:
 - appbar region flashes white in between the two activities

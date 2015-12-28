@@ -218,13 +218,18 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 
 	void deletePhotoDoodle(final PhotoDoodleDocument doc) {
 
+		View rootView = getView();
+		if (rootView == null) {
+			throw new IllegalStateException("Called on unattached fragment");
+		}
+
 		// hide document
 		realm.beginTransaction();
 		doc.setHidden(true);
 		realm.commitTransaction();
 		adapter.removeItem(doc);
 
-		Snackbar snackbar = Snackbar.make(recyclerView, R.string.snackbar_document_deleted, Snackbar.LENGTH_LONG);
+		Snackbar snackbar = Snackbar.make(rootView, R.string.snackbar_document_deleted, Snackbar.LENGTH_LONG);
 
 		// make text white
 		View view = snackbar.getView();

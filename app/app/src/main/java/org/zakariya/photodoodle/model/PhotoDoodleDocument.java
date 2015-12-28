@@ -11,11 +11,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
 import io.realm.Realm;
 import io.realm.RealmObject;
+import io.realm.RealmResults;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.Required;
 
@@ -37,6 +39,8 @@ public class PhotoDoodleDocument extends RealmObject {
 
 	private Date modificationDate;
 
+	private boolean hidden;
+
 	/**
 	 * Create a new PhotoDoodleDocument with UUID, name and creationDate set.
 	 *
@@ -57,10 +61,29 @@ public class PhotoDoodleDocument extends RealmObject {
 		return doc;
 	}
 
+	public static RealmResults<PhotoDoodleDocument> all(Realm realm) {
+		return realm.where(PhotoDoodleDocument.class).notEqualTo("hidden", true).findAll();
+	}
+
+	public static void deleteAllHiddenDocuments(Context context, Realm realm) {
+		RealmResults<PhotoDoodleDocument> hidden = realm.where(PhotoDoodleDocument.class).equalTo("hidden", true).findAll();
+
+		// must move it to an array list so we can delete them or else realm freaks out
+		ArrayList<PhotoDoodleDocument> hiddenList = new ArrayList<>();
+		for (PhotoDoodleDocument doc : hidden) {
+			hiddenList.add(doc);
+		}
+
+		for (PhotoDoodleDocument doc : hiddenList) {
+			delete(context, realm, doc);
+		}
+	}
+
 	/**
 	 * Delete the document from the Realm
-	 * @param context the context
-	 * @param realm the realm
+	 *
+	 * @param context  the context
+	 * @param realm    the realm
 	 * @param document the document to delete
 	 */
 	public static void delete(Context context, Realm realm, PhotoDoodleDocument document) {
@@ -82,7 +105,8 @@ public class PhotoDoodleDocument extends RealmObject {
 
 	/**
 	 * Get the file used by a PhotoDoodleDocument to save its doodle (the doodle is not saved in the realm because it can be big)
-	 * @param context the context
+	 *
+	 * @param context  the context
 	 * @param document the document
 	 * @return a File object referring to the document's doodle's save data. May not exist if nothing has been saved
 	 */
@@ -161,5 +185,13 @@ public class PhotoDoodleDocument extends RealmObject {
 
 	public void setModificationDate(Date modificationDate) {
 		this.modificationDate = modificationDate;
+	}
+
+	public boolean isHidden() {
+		return hidden;
+	}
+
+	public void setHidden(boolean hidden) {
+		this.hidden = hidden;
 	}
 }

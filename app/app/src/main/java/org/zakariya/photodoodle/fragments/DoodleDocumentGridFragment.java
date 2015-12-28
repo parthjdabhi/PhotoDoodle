@@ -6,11 +6,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PointF;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
@@ -18,6 +20,7 @@ import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,6 +28,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import org.zakariya.photodoodle.R;
 import org.zakariya.photodoodle.activities.DoodleActivity;
@@ -118,7 +122,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		layoutManager = new SmoothScrollGridLayoutManager(getContext(), columns);
 		recyclerView.setLayoutManager(layoutManager);
 
-		RealmResults<PhotoDoodleDocument> docs = realm.allObjects(PhotoDoodleDocument.class);
+		RealmResults<PhotoDoodleDocument> docs = PhotoDoodleDocument.all(realm);
 		adapter = new DoodleDocumentAdapter(getContext(), recyclerView, columns, docs, emptyView);
 		adapter.setOnClickListener(this);
 		adapter.setOnLongClickListener(this);
@@ -142,6 +146,35 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	public void showSnackbar(View fab) {
+		Snackbar snackbar = Snackbar.make(fab, "Hello Snackbar", Snackbar.LENGTH_LONG);
+
+		// make text white
+		View view = snackbar.getView();
+		TextView tv = (TextView) view.findViewById(android.support.design.R.id.snackbar_text);
+		tv.setTextColor(Color.WHITE);
+
+		snackbar.setCallback(new Snackbar.Callback() {
+			@Override
+			public void onDismissed(Snackbar snackbar, int event) {
+				Log.i(TAG, "snackbar.onDismissed: ");
+				super.onDismissed(snackbar, event);
+			}
+		});
+
+		snackbar.setAction("Undo", new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Log.i(TAG, "snackbar onClick: ");
+			}
+		});
+
+		//noinspection deprecation
+		snackbar.setActionTextColor(getResources().getColor(R.color.accent));
+
+		snackbar.show();
 	}
 
 	@OnClick(R.id.fab)
@@ -183,12 +216,45 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 				.show();
 	}
 
-	void deletePhotoDoodle(PhotoDoodleDocument doc) {
+	void deletePhotoDoodle(final PhotoDoodleDocument doc) {
+
+		// hide document
+		realm.beginTransaction();
+		doc.setHidden(true);
+		realm.commitTransaction();
 		adapter.removeItem(doc);
 
-		realm.beginTransaction();
-		doc.removeFromRealm();
-		realm.commitTransaction();
+		Snackbar snackbar = Snackbar.make(recyclerView, R.string.snackbar_document_deleted, Snackbar.LENGTH_LONG);
+
+		// make text white
+		View view = snackbar.getView();
+		TextView tv = (TextView) view.findViewById(android.support.design.R.id.snackbar_text);
+		tv.setTextColor(Color.WHITE);
+
+		snackbar.setCallback(new Snackbar.Callback() {
+			@Override
+			public void onDismissed(Snackbar snackbar, int event) {
+				super.onDismissed(snackbar, event);
+				if (doc.isHidden()) {
+					PhotoDoodleDocument.delete(getContext(), realm, doc);
+				}
+			}
+		});
+
+		snackbar.setAction(R.string.snackbar_document_deleted_undo, new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				realm.beginTransaction();
+				doc.setHidden(false);
+				realm.commitTransaction();
+				adapter.addItem(doc);
+			}
+		});
+
+		//noinspection deprecation
+		snackbar.setActionTextColor(getResources().getColor(R.color.accent));
+
+		snackbar.show();
 	}
 
 	void editPhotoDoodle(PhotoDoodleDocument doc) {

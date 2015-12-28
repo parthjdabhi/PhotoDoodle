@@ -29,6 +29,8 @@
 
 	<string name="dialog_delete_document_message">Discard doodle?</string>
 	<string name="dialog_delete_document_destructive_button_title">Discard</string>
+	<string name="snackbar_document_deleted">Discarded</string>
+	<string name="snackbar_document_deleted_undo">Undo</string>
 
 	<string name="doodle_document_grid_menu_new_doodle">New</string>
 

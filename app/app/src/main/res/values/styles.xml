@@ -23,6 +23,31 @@
 		<item name="titleTextStyle">@style/TitleTextStyle</item>
 	</style>
 
+	<style name="Display1" parent="TextAppearance.AppCompat.Display1">
+		<item name="android:textColor">@color/textColor</item>
+	</style>
+
+	<style name="Display2" parent="TextAppearance.AppCompat.Display2">
+		<item name="android:textColor">@color/textColor</item>
+	</style>
+
+	<style name="Display3" parent="TextAppearance.AppCompat.Display3">
+		<item name="android:textColor">@color/textColor</item>
+	</style>
+
+	<style name="Display4" parent="TextAppearance.AppCompat.Display4">
+		<item name="android:textColor">@color/textColor</item>
+	</style>
+
+	<style name="Body1" parent="TextAppearance.AppCompat.Body1">
+		<item name="android:textColor">@color/textColor</item>
+	</style>
+
+	<style name="Body2" parent="TextAppearance.AppCompat.Body2">
+		<item name="android:textColor">@color/textColor</item>
+	</style>
+
+
 	<!-- action bar title text -->
 	<style name="TitleTextStyle"
 	       parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">

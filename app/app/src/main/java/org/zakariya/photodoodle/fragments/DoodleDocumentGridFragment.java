@@ -31,6 +31,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.zakariya.photodoodle.R;
+import org.zakariya.photodoodle.activities.AboutActivity;
 import org.zakariya.photodoodle.activities.DoodleActivity;
 import org.zakariya.photodoodle.adapters.DoodleDocumentAdapter;
 import org.zakariya.photodoodle.model.PhotoDoodleDocument;
@@ -100,7 +101,11 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.menuItemSettings:
+			case R.id.menuItemSync:
+				return true;
+
+			case R.id.menuItemAbout:
+				showAbout();
 				return true;
 		}
 
@@ -290,6 +295,10 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		} else {
 			startActivityForResult(intent, REQUEST_EDIT_DOODLE);
 		}
+	}
+
+	void showAbout() {
+		startActivity(new Intent(getContext(), AboutActivity.class));
 	}
 
 	private class SmoothScrollGridLayoutManager extends GridLayoutManager {

@@ -223,10 +223,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 			throw new IllegalStateException("Called on unattached fragment");
 		}
 
-		// hide document
-		realm.beginTransaction();
-		doc.setHidden(true);
-		realm.commitTransaction();
+		// hide document from adapter
 		adapter.removeItem(doc);
 
 		Snackbar snackbar = Snackbar.make(rootView, R.string.snackbar_document_deleted, Snackbar.LENGTH_LONG);
@@ -240,7 +237,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 			@Override
 			public void onDismissed(Snackbar snackbar, int event) {
 				super.onDismissed(snackbar, event);
-				if (doc.isHidden()) {
+				if (!adapter.contains(doc)) {
 					PhotoDoodleDocument.delete(getContext(), realm, doc);
 				}
 			}
@@ -249,9 +246,6 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		snackbar.setAction(R.string.snackbar_document_deleted_undo, new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				realm.beginTransaction();
-				doc.setHidden(false);
-				realm.commitTransaction();
 				adapter.addItem(doc);
 			}
 		});

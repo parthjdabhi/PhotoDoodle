@@ -344,6 +344,10 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		updateEmptyView();
 	}
 
+	public boolean contains(PhotoDoodleDocument document) {
+		return getIndexOfItem(document.getUuid()) >= 0;
+	}
+
 	private void sortDocuments() {
 		Collections.sort(photoDoodleDocuments, sortComparator);
 	}

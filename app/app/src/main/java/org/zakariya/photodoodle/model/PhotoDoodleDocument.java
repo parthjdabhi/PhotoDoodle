@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
@@ -39,8 +38,6 @@ public class PhotoDoodleDocument extends RealmObject {
 
 	private Date modificationDate;
 
-	private boolean hidden;
-
 	/**
 	 * Create a new PhotoDoodleDocument with UUID, name and creationDate set.
 	 *
@@ -62,21 +59,7 @@ public class PhotoDoodleDocument extends RealmObject {
 	}
 
 	public static RealmResults<PhotoDoodleDocument> all(Realm realm) {
-		return realm.where(PhotoDoodleDocument.class).notEqualTo("hidden", true).findAll();
-	}
-
-	public static void deleteAllHiddenDocuments(Context context, Realm realm) {
-		RealmResults<PhotoDoodleDocument> hidden = realm.where(PhotoDoodleDocument.class).equalTo("hidden", true).findAll();
-
-		// must move it to an array list so we can delete them or else realm freaks out
-		ArrayList<PhotoDoodleDocument> hiddenList = new ArrayList<>();
-		for (PhotoDoodleDocument doc : hidden) {
-			hiddenList.add(doc);
-		}
-
-		for (PhotoDoodleDocument doc : hiddenList) {
-			delete(context, realm, doc);
-		}
+		return realm.allObjects(PhotoDoodleDocument.class);
 	}
 
 	/**
@@ -185,13 +168,5 @@ public class PhotoDoodleDocument extends RealmObject {
 
 	public void setModificationDate(Date modificationDate) {
 		this.modificationDate = modificationDate;
-	}
-
-	public boolean isHidden() {
-		return hidden;
-	}
-
-	public void setHidden(boolean hidden) {
-		this.hidden = hidden;
 	}
 }

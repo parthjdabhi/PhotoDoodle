@@ -9,6 +9,8 @@ import org.zakariya.photodoodle.util.DoodleThumbnailRenderer;
  */
 public class PhotoDoodleApplication extends android.app.Application {
 
+	private static final String TAG = "PhotoDoodleApplication";
+
 	private static PhotoDoodleApplication instance;
 
 	@Override

@@ -8,4 +8,5 @@ local.properties
 .gradle
 
 google-services.json
+strings_private.xml
 SECRETS.md

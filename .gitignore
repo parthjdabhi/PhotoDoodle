@@ -6,3 +6,6 @@ prebuilts
 .DS_Store
 local.properties
 .gradle
+
+google-services.json
+SECRETS.md

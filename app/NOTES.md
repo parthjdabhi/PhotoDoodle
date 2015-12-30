@@ -1,8 +1,5 @@
 #Currently
 
-- make an about screen showing icon, info, build #, etc
-- use coordinator layout to scroll out the appbar/navbar
-
 Superficial shared element transitions are working, but:
 - appbar region flashes white in between the two activities
 

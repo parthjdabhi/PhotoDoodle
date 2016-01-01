@@ -36,9 +36,7 @@
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="PhotoDoodle" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7fde0eb8-423e-4c88-926f-eb3a8950460c" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/src/main/res/values/strings_private.xml" afterPath="" />
-    </list>
+    <list default="true" id="7fde0eb8-423e-4c88-926f-eb3a8950460c" name="Default" comment="" />
     <ignored path="app.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />

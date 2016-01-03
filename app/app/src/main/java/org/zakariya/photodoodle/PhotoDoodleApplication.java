@@ -3,6 +3,7 @@ package org.zakariya.photodoodle;
 import android.content.res.Configuration;
 
 import org.zakariya.photodoodle.util.DoodleThumbnailRenderer;
+import org.zakariya.photodoodle.util.SignInManager;
 
 /**
  * Created by shamyl on 12/20/15.
@@ -44,5 +45,6 @@ public class PhotoDoodleApplication extends android.app.Application {
 
 	private void initSingletons() {
 		DoodleThumbnailRenderer.init(this);
+		SignInManager.init(this);
 	}
 }

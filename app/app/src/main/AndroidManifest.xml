@@ -36,6 +36,16 @@
 		</activity>
 
 		<activity
+			android:name=".activities.SyncActivity"
+			android:label="@string/activity_title_sync"
+			android:launchMode="singleTop">
+			<meta-data
+				android:name="android.support.PARENT_ACTIVITY"
+				android:value=".activities.MainActivity"/>
+		</activity>
+
+
+		<activity
 			android:name=".activities.ColorPickerTestActivity"
 			android:label="ColorPickerView"
 			android:launchMode="singleTop"
@@ -47,12 +57,13 @@
 		</activity>
 
 
+
 		<!-- use an alias in case we want to change the launch activity later without breaking
 			 homescreen shortcuts.  Note must be defined after the targetActivity -->
 		<activity-alias
 			android:name=".Launcher"
 			android:label="@string/app_name"
-			android:targetActivity=".activities.MainActivity">
+			android:targetActivity=".activities.SyncActivity">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />

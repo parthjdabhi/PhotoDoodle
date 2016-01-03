@@ -4,6 +4,11 @@ Superficial shared element transitions are working, but:
 - appbar region flashes white in between the two activities
 
 #TODO
+redo drawing UX.
+	- drop the cool popup menus :(
+	- make a toolbar across the bottom with pen/pencil/erasers colorwell and camera icon
+	- active tool is raised?
+	
 use Camera2 API to integrate photo taking directly into the DoodleActivity (or more likely a PhotoView)
 
 

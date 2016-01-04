@@ -3,7 +3,7 @@ package org.zakariya.photodoodle;
 import android.content.res.Configuration;
 
 import org.zakariya.photodoodle.util.DoodleThumbnailRenderer;
-import org.zakariya.photodoodle.util.SignInManager;
+import org.zakariya.photodoodle.util.GoogleSignInManager;
 
 /**
  * Created by shamyl on 12/20/15.
@@ -26,11 +26,11 @@ public class PhotoDoodleApplication extends android.app.Application {
 	}
 
 	public void onApplicationBackgrounded() {
-		SignInManager.getInstance().disconnect();
+		GoogleSignInManager.getInstance().disconnect();
 	}
 
 	public void onApplicationResumed() {
-		SignInManager.getInstance().connect();
+		GoogleSignInManager.getInstance().connect();
 	}
 
 	@Override
@@ -53,6 +53,6 @@ public class PhotoDoodleApplication extends android.app.Application {
 
 	private void initSingletons() {
 		DoodleThumbnailRenderer.init(this);
-		SignInManager.init(this);
+		GoogleSignInManager.init(this);
 	}
 }

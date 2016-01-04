@@ -85,7 +85,7 @@ public class BaseActivity extends AppCompatActivity {
 
 		public void onActivityStart() {
 			count++;
-			Log.i(TAG, "onActivityStart count: " + count);
+			//Log.i(TAG, "onActivityStart count: " + count);
 
 			delayHandler.removeCallbacks(action);
 
@@ -102,10 +102,10 @@ public class BaseActivity extends AppCompatActivity {
 			}
 
 			count--;
-			Log.i(TAG, "onActivityStop: count: " + count);
+			//Log.i(TAG, "onActivityStop: count: " + count);
 
 			if (count == 0) {
-				Log.i(TAG, "onActivityStop: - scheduling fire of ApplicationDidBackgroundEvent...");
+				//Log.i(TAG, "onActivityStop: - scheduling fire of ApplicationDidBackgroundEvent...");
 				didFireBackgroundingEvent = false;
 				delayHandler.postDelayed(action, BACKGROUND_DELAY_MILLIS);
 			}

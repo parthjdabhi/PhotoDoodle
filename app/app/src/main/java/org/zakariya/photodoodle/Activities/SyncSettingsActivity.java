@@ -24,7 +24,7 @@ import org.zakariya.photodoodle.R;
 import org.zakariya.photodoodle.events.GoogleSignInEvent;
 import org.zakariya.photodoodle.events.GoogleSignOutEvent;
 import org.zakariya.photodoodle.util.BusProvider;
-import org.zakariya.photodoodle.util.SignInManager;
+import org.zakariya.photodoodle.util.GoogleSignInManager;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -106,13 +106,13 @@ public class SyncSettingsActivity extends BaseActivity {
 
 		if (requestCode == RC_GET_SIGN_IN) {
 			GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-			SignInManager.getInstance().setGoogleSignInResult(result);
+			GoogleSignInManager.getInstance().setGoogleSignInResult(result);
 		}
 	}
 
 	@OnClick(R.id.signInButton)
 	void signIn() {
-		Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(SignInManager.getInstance().getGoogleApiClient());
+		Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(GoogleSignInManager.getInstance().getGoogleApiClient());
 		startActivityForResult(signInIntent, RC_GET_SIGN_IN);
 	}
 
@@ -127,7 +127,7 @@ public class SyncSettingsActivity extends BaseActivity {
 	}
 
 	void signOut() {
-		SignInManager.getInstance().signOut();
+		GoogleSignInManager.getInstance().signOut();
 	}
 
 	@Subscribe
@@ -141,7 +141,7 @@ public class SyncSettingsActivity extends BaseActivity {
 	}
 
 	private void syncToCurrentSignedInState() {
-		GoogleSignInAccount account = SignInManager.getInstance().getGoogleSignInAccount();
+		GoogleSignInAccount account = GoogleSignInManager.getInstance().getGoogleSignInAccount();
 		if (account != null) {
 			showSignedInState(account);
 		} else {

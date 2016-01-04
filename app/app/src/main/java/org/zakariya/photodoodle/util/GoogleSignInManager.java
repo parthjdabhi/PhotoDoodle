@@ -23,11 +23,11 @@ import org.zakariya.photodoodle.events.GoogleSignOutEvent;
 /**
  * Created by shamyl on 1/2/16.
  */
-public class SignInManager implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
+public class GoogleSignInManager implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
-	private static final String TAG = "SignInManager";
+	private static final String TAG = "GoogleSignInManager";
 
-	private static SignInManager instance;
+	private static GoogleSignInManager instance;
 
 	private Context context;
 	private GoogleApiClient googleApiClient;
@@ -35,14 +35,14 @@ public class SignInManager implements GoogleApiClient.OnConnectionFailedListener
 	private boolean connected;
 
 	public static void init(Context context) {
-		instance = new SignInManager(context);
+		instance = new GoogleSignInManager(context);
 	}
 
-	public static SignInManager getInstance() {
+	public static GoogleSignInManager getInstance() {
 		return instance;
 	}
 
-	private SignInManager(Context context) {
+	private GoogleSignInManager(Context context) {
 		this.context = context;
 
 		String serverClientId = context.getString(R.string.oauth_server_client_id);

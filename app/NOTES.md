@@ -1,9 +1,13 @@
 #Currently
 
+Need to make a common base activity which tracks application active state, and fires events accordingly
+	- sign in manager needs to listen to activate/deactivate state to connect/disconnect google api client
+
+#TODO
+
 Superficial shared element transitions are working, but:
 - appbar region flashes white in between the two activities
 
-#TODO
 redo drawing UX.
 	- drop the cool popup menus :(
 	- make a toolbar across the bottom with pen/pencil/erasers colorwell and camera icon

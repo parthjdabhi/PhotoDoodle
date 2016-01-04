@@ -23,7 +23,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.Fade;
 import android.transition.Transition;
@@ -59,7 +58,7 @@ import icepick.Icepick;
 import icepick.State;
 import io.realm.Realm;
 
-public class DoodleActivity extends AppCompatActivity
+public class DoodleActivity extends BaseActivity
 		implements TabLayout.OnTabSelectedListener, CameraPopupController.Callbacks, DrawPopupController.Callbacks {
 
 	public static final String EXTRA_DOODLE_THUMBNAIL_ID = "DoodleActivity.EXTRA_DOODLE_THUMBNAIL_ID";

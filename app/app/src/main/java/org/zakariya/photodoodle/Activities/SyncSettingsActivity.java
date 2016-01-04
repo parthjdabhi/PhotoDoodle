@@ -3,7 +3,6 @@ package org.zakariya.photodoodle.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -34,7 +33,7 @@ import butterknife.OnClick;
 /**
  * Created by shamyl on 1/2/16.
  */
-public class SyncSettingsActivity extends AppCompatActivity {
+public class SyncSettingsActivity extends BaseActivity {
 
 	private static final String TAG = "SyncSettingsActivity";
 	private static final int RC_GET_SIGN_IN = 1;
@@ -56,7 +55,7 @@ public class SyncSettingsActivity extends AppCompatActivity {
 
 	@Bind(R.id.avatarImageView)
 	ImageView avatarImageView;
-	
+
 	@Bind(R.id.syncHistoryRecyclerView)
 	RecyclerView syncHistoryRecyclerView;
 
@@ -116,12 +115,12 @@ public class SyncSettingsActivity extends AppCompatActivity {
 		Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(SignInManager.getInstance().getGoogleApiClient());
 		startActivityForResult(signInIntent, RC_GET_SIGN_IN);
 	}
-	
+
 	@OnClick(R.id.syncNowButton)
 	void syncNow() {
 		Log.i(TAG, "syncNow: ");
 	}
-	
+
 	@OnClick(R.id.resetAndSyncButton)
 	void resetAndSync() {
 		Log.i(TAG, "resetAndSync: ");

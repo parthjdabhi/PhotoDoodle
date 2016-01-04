@@ -25,6 +25,14 @@ public class PhotoDoodleApplication extends android.app.Application {
 		return instance;
 	}
 
+	public void onApplicationBackgrounded() {
+		SignInManager.getInstance().disconnect();
+	}
+
+	public void onApplicationResumed() {
+		SignInManager.getInstance().connect();
+	}
+
 	@Override
 	public void onTrimMemory(int level) {
 		super.onTrimMemory(level);

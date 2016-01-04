@@ -28,9 +28,11 @@ public class SignInManager implements GoogleApiClient.OnConnectionFailedListener
 	private static final String TAG = "SignInManager";
 
 	private static SignInManager instance;
+
 	private Context context;
 	private GoogleApiClient googleApiClient;
 	private GoogleSignInAccount googleSignInAccount;
+	private boolean connected;
 
 	public static void init(Context context) {
 		instance = new SignInManager(context);
@@ -56,7 +58,8 @@ public class SignInManager implements GoogleApiClient.OnConnectionFailedListener
 				.addApi(Auth.GOOGLE_SIGN_IN_API, gso)
 				.build();
 
-		googleApiClient.connect();
+		connected = false;
+		connect();
 	}
 
 	public Context getContext() {
@@ -65,6 +68,31 @@ public class SignInManager implements GoogleApiClient.OnConnectionFailedListener
 
 	public GoogleApiClient getGoogleApiClient() {
 		return googleApiClient;
+	}
+
+	public boolean isConnected() {
+		return connected;
+	}
+
+	/**
+	 * Connect the googleApiClient instance. This should be called when application is resuming
+	 */
+	public void connect() {
+		if (!connected) {
+			Log.i(TAG, "connect: ");
+			googleApiClient.connect();
+		}
+	}
+
+	/**
+	 * Disconnect the googleApiClient instance. This should be called when application is backgrounded.
+	 */
+	public void disconnect() {
+		if (connected) {
+			Log.i(TAG, "disconnect: ");
+			googleApiClient.disconnect();
+			connected = false;
+		}
 	}
 
 	@Nullable
@@ -132,11 +160,16 @@ public class SignInManager implements GoogleApiClient.OnConnectionFailedListener
 		Log.i(TAG, "onConnected: ");
 
 		// if possible, sign in immediately
+		connected = true;
 		attemptSilentSignIn();
 	}
 
 	@Override
 	public void onConnectionSuspended(int i) {
+		connected = false;
+
+		// TODO: Attempt reconnect, and broadcast that GoogleSignIn has been lost
+
 		switch (i) {
 			case CAUSE_NETWORK_LOST:
 				Log.w(TAG, "onConnectionSuspended: CAUSE_NETWORK_LOST ");

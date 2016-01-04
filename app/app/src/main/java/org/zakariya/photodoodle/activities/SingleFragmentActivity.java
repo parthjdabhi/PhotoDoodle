@@ -3,7 +3,6 @@ package org.zakariya.photodoodle.activities;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import org.zakariya.photodoodle.R;
@@ -11,7 +10,7 @@ import org.zakariya.photodoodle.R;
 /**
  * Created by shamyl on 8/9/15.
  */
-public abstract class SingleFragmentActivity extends AppCompatActivity {
+public abstract class SingleFragmentActivity extends BaseActivity {
 
 	private static final String TAG = "SingleFragmentActivity";
 	protected Fragment fragment;

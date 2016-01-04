@@ -33,7 +33,7 @@ import android.widget.TextView;
 import org.zakariya.photodoodle.R;
 import org.zakariya.photodoodle.activities.AboutActivity;
 import org.zakariya.photodoodle.activities.DoodleActivity;
-import org.zakariya.photodoodle.activities.SyncActivity;
+import org.zakariya.photodoodle.activities.SyncSettingsActivity;
 import org.zakariya.photodoodle.adapters.DoodleDocumentAdapter;
 import org.zakariya.photodoodle.model.PhotoDoodleDocument;
 import org.zakariya.photodoodle.util.DoodleThumbnailRenderer;
@@ -304,7 +304,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	}
 
 	void showSync() {
-		startActivity(new Intent(getContext(), SyncActivity.class));
+		startActivity(new Intent(getContext(), SyncSettingsActivity.class));
 	}
 
 	private class SmoothScrollGridLayoutManager extends GridLayoutManager {

@@ -49,6 +49,9 @@
 	<string name="about_version_build">build %1$d</string>
 
 	<string name="sign_in_message">Sign in to enable sync</string>
+	<string name="sync_history">Sync History</string>
+	<string name="sync_now_button">Sync</string>
+	<string name="sync_reset_button">Reset &amp; Sync</string>
 
 	<!-- transitions -->
 	<string name="transition_name_doodle_view">doodleView</string>

@@ -17,7 +17,14 @@
 		<activity
 			android:name=".activities.MainActivity"
 			android:label="@string/app_name"
-			android:theme="@style/PhotoDoodle.Home"/>
+			android:theme="@style/PhotoDoodle.Home">
+
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+
+		</activity>
 
 		<activity
 			android:name=".activities.DoodleActivity"
@@ -34,25 +41,10 @@
 			android:label="@string/activity_title_sync">
 		</activity>
 
-
 		<activity
 			android:name=".activities.ColorPickerTestActivity"
 			android:label="ColorPickerView">
 		</activity>
-
-
-		<!-- use an alias in case we want to change the launch activity later without breaking
-			 homescreen shortcuts.  Note must be defined after the targetActivity -->
-		<activity-alias
-			android:name=".Launcher"
-			android:label="@string/app_name"
-			android:targetActivity=".activities.MainActivity">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-		</activity-alias>
-
 
 	</application>
 

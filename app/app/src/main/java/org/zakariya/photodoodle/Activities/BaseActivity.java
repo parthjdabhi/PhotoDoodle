@@ -62,7 +62,7 @@ public class BaseActivity extends AppCompatActivity {
 
 	private static class BackgroundWatcher {
 
-		private static final int BACKGROUND_DELAY_MILLIS = 5 * 1000; // 5 seconds
+		private static final int BACKGROUND_DELAY_MILLIS = 1000; // 1 second
 		private static final String TAG = "BackgroundWatcher";
 
 		boolean didFireBackgroundingEvent;

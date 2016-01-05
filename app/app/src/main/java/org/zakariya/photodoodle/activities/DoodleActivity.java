@@ -431,37 +431,30 @@ public class DoodleActivity extends BaseActivity
 	@Override
 	public void onClearPhoto() {
 		photoDoodle.clearPhoto();
-		dismissTabItemPopup(true);
 	}
 
 	@Override
 	public void onSelectPencil() {
 		setSelectedBrush(BrushType.PENCIL);
-		dismissTabItemPopup(true);
 	}
 
 	@Override
 	public void onSelectBrush() {
 		setSelectedBrush(BrushType.BRUSH);
-		dismissTabItemPopup(true);
 	}
 
 	@Override
 	public void onSelectSmallEraser() {
 		setSelectedBrush(BrushType.SMALL_ERASER);
-		dismissTabItemPopup(true);
 	}
 
 	@Override
 	public void onSelectBigEraser() {
 		setSelectedBrush(BrushType.LARGE_ERASER);
-		dismissTabItemPopup(true);
 	}
 
 	@Override
 	public void onSelectColor(ColorSwatchView colorSwatchView) {
-		dismissTabItemPopup(true);
-
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		LayoutInflater inflater = LayoutInflater.from(builder.getContext());
 		View view = inflater.inflate(R.layout.dialog_color_picker, null);
@@ -485,7 +478,6 @@ public class DoodleActivity extends BaseActivity
 	@Override
 	public void onClearDrawing() {
 		photoDoodle.clearDrawing();
-		dismissTabItemPopup(true);
 	}
 
 	@OnClick(R.id.titleTextView)

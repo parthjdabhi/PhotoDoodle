@@ -1,7 +1,8 @@
 #Currently
 
-Need to make a common base activity which tracks application active state, and fires events accordingly
-	- sign in manager needs to listen to activate/deactivate state to connect/disconnect google api client
+Occasional hard-to-reproduce crash when returning to PhotoDoodle after it has been backgrounded long enough to be terminated. Launcher reports it cannot start PhotoDoodle.
+
+Consider dropping singleTop param for my activities. Try to understand exactly when it's needed, don't just use it everywhere.
 
 #TODO
 

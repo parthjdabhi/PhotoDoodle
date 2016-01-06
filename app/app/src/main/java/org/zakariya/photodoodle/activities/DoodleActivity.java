@@ -218,10 +218,19 @@ public class DoodleActivity extends BaseActivity
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (actionId == EditorInfo.IME_ACTION_DONE) {
 					v.clearFocus();
-					hideKeyboard(v);
 					return true;
 				} else {
 					return false;
+				}
+			}
+		});
+
+		titleEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				Log.i(TAG, "onFocusChange: hasFocus:" + hasFocus);
+				if (!hasFocus) {
+					hideKeyboard(v);
 				}
 			}
 		});

@@ -82,9 +82,6 @@ public class DoodleActivity extends BaseActivity
 
 	enum BrushType {PENCIL, BRUSH, LARGE_ERASER, SMALL_ERASER}
 
-//	@Bind(R.id.titleTextView)
-//	TextView titleTextView;
-
 	@Bind(R.id.titleEditText)
 	EditText titleEditText;
 
@@ -331,16 +328,24 @@ public class DoodleActivity extends BaseActivity
 
 	@Override
 	public void onBackPressed() {
-		if (!dismissTabItemPopup(false)) {
-			saveAndSetActivityResult();
 
-			// reveal the placeholder for the exit transition
-			doodlePlaceholderImageView.setVisibility(View.VISIBLE);
-			doodlePlaceholderImageView.setAlpha(1f);
-
-
-			super.onBackPressed();
+		if (titleEditText.hasFocus()){
+			titleEditText.clearFocus();
+			return;
 		}
+
+		if (dismissTabItemPopup(false)){
+			return;
+		}
+
+		saveAndSetActivityResult();
+
+		// reveal the placeholder for the exit transition
+		doodlePlaceholderImageView.setVisibility(View.VISIBLE);
+		doodlePlaceholderImageView.setAlpha(1f);
+
+
+		super.onBackPressed();
 	}
 
 	@Override

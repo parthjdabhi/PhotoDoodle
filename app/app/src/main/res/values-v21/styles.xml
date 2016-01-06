@@ -31,4 +31,12 @@
 		<!--<item name="android:windowTranslucentNavigation">true</item>-->
 	</style>
 
+	<style name="AppBarEditText" parent="Widget.AppCompat.EditText">
+		<item name="android:textColor">@color/actionBarText</item>
+		<item name="android:colorControlNormal">@color/actionbarEditText_colorControlNormal</item>
+		<item name="android:colorControlActivated">@color/actionbarEditText_colorControlActivated</item>
+		<item name="android:colorControlHighlight">@color/actionbarEditText_colorControlHighlight</item>
+	</style>
+
+
 </resources>

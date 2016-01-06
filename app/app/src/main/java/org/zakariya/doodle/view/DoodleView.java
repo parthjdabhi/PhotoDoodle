@@ -70,6 +70,7 @@ public class DoodleView extends View {
 
 	@Override
 	public boolean onTouchEvent(@NonNull MotionEvent event) {
+		super.onTouchEvent(event);
 		return doodle != null && doodle.onTouchEvent(event);
 	}
 

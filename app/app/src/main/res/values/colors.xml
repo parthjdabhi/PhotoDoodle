@@ -14,7 +14,10 @@
 	<color name="popup_item_tint">#62563F</color>
 	<color name="popup_item_text_color">#62563F</color>
 	<color name="selected_popup_item_background">#4462563F</color>
-
 	<color name="translucent_status_bar">#99000000</color>
+
+	<color name="actionbarEditText_colorControlNormal">#99FFFFFF</color>
+	<color name="actionbarEditText_colorControlActivated">#00E6FF</color>
+	<color name="actionbarEditText_colorControlHighlight">#9DF5FF</color>
 
 </resources>

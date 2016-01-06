@@ -25,16 +25,21 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.transition.Fade;
 import android.transition.Transition;
 import android.util.Log;
 import android.util.Pair;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -54,7 +59,6 @@ import java.util.Date;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import icepick.Icepick;
 import icepick.State;
 import io.realm.Realm;
@@ -78,8 +82,11 @@ public class DoodleActivity extends BaseActivity
 
 	enum BrushType {PENCIL, BRUSH, LARGE_ERASER, SMALL_ERASER}
 
-	@Bind(R.id.titleTextView)
-	TextView titleTextView;
+//	@Bind(R.id.titleTextView)
+//	TextView titleTextView;
+
+	@Bind(R.id.titleEditText)
+	EditText titleEditText;
 
 	@Bind(R.id.toolbar)
 	Toolbar toolbar;
@@ -190,7 +197,34 @@ public class DoodleActivity extends BaseActivity
 		}
 
 		// update title
-		titleTextView.setText(document.getName());
+		titleEditText.setText(document.getName());
+		titleEditText.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+				setDocumentName(s.toString());
+			}
+		});
+
+		titleEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if (actionId == EditorInfo.IME_ACTION_DONE) {
+					v.clearFocus();
+					hideKeyboard(v);
+					return true;
+				} else {
+					return false;
+				}
+			}
+		});
 
 		//
 		//  Create the PhotoDoodle. If this is result of a state restoration
@@ -450,11 +484,6 @@ public class DoodleActivity extends BaseActivity
 		photoDoodle.clearDrawing();
 	}
 
-	@OnClick(R.id.titleTextView)
-	public void onTitleTap() {
-		queryRenameDocument(titleTextView.getText().toString());
-	}
-
 	/**
 	 * If the doodle is dirty (edits were made) saves it to its file, and returns true.
 	 *
@@ -522,34 +551,10 @@ public class DoodleActivity extends BaseActivity
 			document.setModificationDate(new Date());
 			realm.commitTransaction();
 		}
-
-		titleTextView.setText(documentName);
 	}
 
 	public String getDocumentName() {
 		return document.getName();
-	}
-
-	public void queryRenameDocument(String oldName) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-		LayoutInflater inflater = LayoutInflater.from(builder.getContext());
-		View view = inflater.inflate(R.layout.dialog_document_rename, null);
-		final EditText editText = (EditText) view.findViewById(R.id.editText);
-		editText.setText(getDocumentName());
-		editText.selectAll();
-
-		builder
-				.setTitle(R.string.dialog_rename_document_title)
-				.setView(view)
-				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						setDocumentName(editText.getText().toString());
-					}
-				})
-				.setNegativeButton(android.R.string.cancel, null)
-				.show();
 	}
 
 	public void setSelectedBrush(BrushType selectedBrush) {
@@ -763,6 +768,13 @@ public class DoodleActivity extends BaseActivity
 			if (!photoTempFile.delete()) {
 				Log.e(TAG, "Unable to delete the photo temp save file at " + photoTempFile);
 			}
+		}
+	}
+
+	private void hideKeyboard(View view) {
+		InputMethodManager manager = (InputMethodManager) view.getContext().getSystemService(INPUT_METHOD_SERVICE);
+		if (manager != null) {
+			manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
 		}
 	}
 }

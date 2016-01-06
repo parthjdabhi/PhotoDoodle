@@ -54,6 +54,12 @@
 		<item name="android:textColor">@color/actionBarText</item>
 	</style>
 
+	<style name="TitleTextStyle.EditText">
+		<item name="colorControlNormal">@color/actionBarText</item>
+		<item name="colorControlActivated">#FF0000</item>
+		<item name="colorControlHighlight">#00FFFF</item>
+	</style>
+
 	<style name="PopupImageButtonStyle" parent="Widget.AppCompat.Button.Borderless">
 		<item name="android:layout_width">@dimen/doodle_drawing_tool_icon_size</item>
 		<item name="android:layout_height">@dimen/doodle_drawing_tool_icon_size</item>
@@ -74,5 +80,7 @@
 		<item name="colorAccent">@color/primary</item>
 		<item name="android:textColorPrimary">@color/textColor</item>
 	</style>
+
+
 
 </resources>

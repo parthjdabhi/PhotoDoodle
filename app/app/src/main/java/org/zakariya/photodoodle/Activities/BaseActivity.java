@@ -45,6 +45,7 @@ public class BaseActivity extends AppCompatActivity {
 
 	/**
 	 * Determine if the current activity is paused (meaning, it's not the topmost activity receiving user input)
+	 *
 	 * @return true if the activity is active and not paused
 	 */
 	public boolean isPaused() {

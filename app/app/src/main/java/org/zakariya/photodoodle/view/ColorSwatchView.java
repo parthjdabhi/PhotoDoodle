@@ -85,12 +85,12 @@ public class ColorSwatchView extends View {
 			final float width = getWidth();
 			final float height = getHeight();
 			alphaCheckerPaint.setColor(0xFFFFFFFF);
-			canvas.drawRect(0,0,width,height,alphaCheckerPaint);
+			canvas.drawRect(0, 0, width, height, alphaCheckerPaint);
 
 			alphaCheckerPaint.setColor(ALPHA_CHECKER_COLOR);
 			for (int y = 0, j = 0; y < height; y += alphaCheckerSize, j++) {
 				for (int x = 0, k = 0; x < width; x += alphaCheckerSize, k++) {
-					if ((j+k) % 2 == 0) {
+					if ((j + k) % 2 == 0) {
 						canvas.drawRect(x, y, x + alphaCheckerSize, y + alphaCheckerSize, alphaCheckerPaint);
 					}
 				}
@@ -117,21 +117,21 @@ public class ColorSwatchView extends View {
 	}
 
 	private float getSwatchCenterX() {
-		return getWidth()/2 + getPaddingLeft()/2 - getPaddingRight()/2;
+		return getWidth() / 2 + getPaddingLeft() / 2 - getPaddingRight() / 2;
 	}
 
 	private float getSwatchCenterY() {
-		return getHeight()/2 + getPaddingTop()/2 - getPaddingBottom()/2;
+		return getHeight() / 2 + getPaddingTop() / 2 - getPaddingBottom() / 2;
 	}
 
 	private float getSwatchRadius() {
-		final float width = getWidth() - (getPaddingLeft()+getPaddingRight());
+		final float width = getWidth() - (getPaddingLeft() + getPaddingRight());
 		final float height = getHeight() - (getPaddingTop() + getPaddingBottom());
-		return Math.min(width, height)/2 - selectionThickness;
+		return Math.min(width, height) / 2 - selectionThickness;
 	}
 
 	private float getSwatchHighlightRadius() {
-		return getSwatchRadius() + selectionThickness/2;
+		return getSwatchRadius() + selectionThickness / 2;
 	}
 
 	private void configurePaintsAndInvalidate() {

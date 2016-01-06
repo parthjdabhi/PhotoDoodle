@@ -22,8 +22,8 @@ import android.view.ViewGroup;
 import android.view.animation.AnticipateOvershootInterpolator;
 import android.view.animation.Interpolator;
 
-import org.zakariya.photodoodle.R;
 import org.zakariya.doodle.geom.PointFUtil;
+import org.zakariya.photodoodle.R;
 
 /**
  * TODO: document your custom view class.
@@ -200,7 +200,7 @@ public class ColorPickerView extends View {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		if (requestedHueRingDiameter > 0) {
-			final int estimatedIntrinsicSize = (int)(requestedHueRingDiameter + 3*MAX_TONE_SWATCH_RADIUS_DP);
+			final int estimatedIntrinsicSize = (int) (requestedHueRingDiameter + 3 * MAX_TONE_SWATCH_RADIUS_DP);
 
 			int widthMode = MeasureSpec.getMode(widthMeasureSpec);
 			int widthSize = MeasureSpec.getSize(widthMeasureSpec);
@@ -233,7 +233,7 @@ public class ColorPickerView extends View {
 			setMeasuredDimension(width, height);
 		} else {
 			// no requested hue ring diameter means we can't make a meaningful size measurement
-			super.onMeasure(widthMeasureSpec,heightMeasureSpec);
+			super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 		}
 	}
 
@@ -470,7 +470,7 @@ public class ColorPickerView extends View {
 
 	private void updateLayoutInfo() {
 
-		int knobPadding = (int)(MAX_TONE_SWATCH_RADIUS_DP + 4*SEPARATOR_WIDTH_DP);
+		int knobPadding = (int) (MAX_TONE_SWATCH_RADIUS_DP + 4 * SEPARATOR_WIDTH_DP);
 		int paddingLeft = getPaddingLeft() + knobPadding;
 		int paddingTop = getPaddingTop() + knobPadding;
 		int paddingRight = getPaddingRight() + knobPadding;
@@ -479,7 +479,7 @@ public class ColorPickerView extends View {
 		int contentWidth = getWidth() - paddingLeft - paddingRight;
 		int contentHeight = getHeight() - paddingTop - paddingBottom;
 		int contentSize = Math.min(contentWidth, contentHeight);
-		float maxHueRingRadius = contentSize/2f;
+		float maxHueRingRadius = contentSize / 2f;
 
 		layoutInfo.contentSize = contentSize;
 
@@ -532,7 +532,7 @@ public class ColorPickerView extends View {
 		layoutInfo.toneSquareLeft = layoutInfo.centerX - layoutInfo.toneSquareSize / 2;
 		layoutInfo.toneSquareTop = layoutInfo.centerY - layoutInfo.toneSquareSize / 2;
 
-		layoutInfo.hueRingThickness = (layoutInfo.toneSquareSwatchSize - 2*SEPARATOR_WIDTH_DP) * 0.75f / 2;
+		layoutInfo.hueRingThickness = (layoutInfo.toneSquareSwatchSize - 2 * SEPARATOR_WIDTH_DP) * 0.75f / 2;
 		layoutInfo.hueAngleIncrement = (float) (2 * Math.PI) / (float) precision;
 		layoutInfo.hueAngleIncrementDegrees = 360f / (float) precision;
 

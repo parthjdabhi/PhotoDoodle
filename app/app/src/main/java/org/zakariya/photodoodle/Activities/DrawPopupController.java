@@ -28,10 +28,15 @@ public class DrawPopupController {
 
 	public interface Callbacks {
 		void onSelectPencil();
+
 		void onSelectBrush();
+
 		void onSelectSmallEraser();
+
 		void onSelectBigEraser();
+
 		void onSelectColor(ColorSwatchView colorSwatchView);
+
 		void onClearDrawing();
 	}
 
@@ -60,7 +65,7 @@ public class DrawPopupController {
 	public DrawPopupController(View popupView, Callbacks callbacks) {
 		this.popupView = popupView;
 		callbacksWeakReference = new WeakReference<>(callbacks);
-		ButterKnife.bind(this,popupView);
+		ButterKnife.bind(this, popupView);
 		setActiveTool(ActiveTool.PENCIL);
 	}
 
@@ -76,7 +81,7 @@ public class DrawPopupController {
 		this.activeTool = activeTool;
 
 		ImageButton btn = null;
-		switch (activeTool){
+		switch (activeTool) {
 			case PENCIL:
 				btn = pencilToolButton;
 				break;
@@ -101,7 +106,7 @@ public class DrawPopupController {
 	}
 
 	@OnClick(R.id.pencilToolButton)
-	void onPencilToolButtonClick(){
+	void onPencilToolButtonClick() {
 		setActiveTool(ActiveTool.PENCIL);
 		Callbacks cb = callbacksWeakReference.get();
 		if (cb != null) {
@@ -110,7 +115,7 @@ public class DrawPopupController {
 	}
 
 	@OnClick(R.id.brushToolButton)
-	void onBrushToolButtonClick(){
+	void onBrushToolButtonClick() {
 		setActiveTool(ActiveTool.BRUSH);
 		Callbacks cb = callbacksWeakReference.get();
 		if (cb != null) {
@@ -119,7 +124,7 @@ public class DrawPopupController {
 	}
 
 	@OnClick(R.id.smallEraserToolButton)
-	void onSmallEraserToolButtonClick(){
+	void onSmallEraserToolButtonClick() {
 		setActiveTool(ActiveTool.SMALL_ERASER);
 		Callbacks cb = callbacksWeakReference.get();
 		if (cb != null) {
@@ -128,7 +133,7 @@ public class DrawPopupController {
 	}
 
 	@OnClick(R.id.bigEraserToolButton)
-	void onBigEraserToolButtonClick(){
+	void onBigEraserToolButtonClick() {
 		setActiveTool(ActiveTool.BIG_ERASER);
 		Callbacks cb = callbacksWeakReference.get();
 		if (cb != null) {
@@ -137,7 +142,7 @@ public class DrawPopupController {
 	}
 
 	@OnClick(R.id.colorSwatchTool)
-	void onColorSwatchViewClick(){
+	void onColorSwatchViewClick() {
 		Callbacks cb = callbacksWeakReference.get();
 		if (cb != null) {
 			cb.onSelectColor(colorSwatchView);
@@ -145,7 +150,7 @@ public class DrawPopupController {
 	}
 
 	@OnClick(R.id.clearDrawingButton)
-	void onClearPhotoButtonClick(){
+	void onClearPhotoButtonClick() {
 		Callbacks cb = callbacksWeakReference.get();
 		if (cb != null) {
 			cb.onClearDrawing();

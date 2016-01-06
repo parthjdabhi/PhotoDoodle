@@ -121,7 +121,7 @@ public class ColorPickerTestFragment extends Fragment {
 	}
 
 	private void setInColor(int color) {
-		inColor = Color.rgb(Color.red(color),Color.green(color),Color.blue(color));
+		inColor = Color.rgb(Color.red(color), Color.green(color), Color.blue(color));
 		inColorSwatch.setColor(inColor);
 		colorPickerView.setInitialColor(inColor);
 	}
@@ -141,8 +141,8 @@ public class ColorPickerTestFragment extends Fragment {
 		inTextInputLayout.setError(null);
 
 		try {
-			int c = Integer.parseInt(colorString,16);
-			c = Color.rgb(Color.red(c),Color.green(c),Color.blue(c));
+			int c = Integer.parseInt(colorString, 16);
+			c = Color.rgb(Color.red(c), Color.green(c), Color.blue(c));
 			setInColor(c);
 		} catch (NumberFormatException nfe) {
 			inColorSwatch.setColor(0x0);

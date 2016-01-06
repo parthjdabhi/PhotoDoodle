@@ -139,13 +139,13 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 	 * @param height   the height to render the thumbnail
 	 * @return a bitmap containing the document's rendering, at the provided width/height
 	 */
-	public Pair<Bitmap,String> renderThumbnail(Context context, PhotoDoodleDocument document, int width, int height) {
+	public Pair<Bitmap, String> renderThumbnail(Context context, PhotoDoodleDocument document, int width, int height) {
 
 		String thumbnailId = getThumbnailId(document, width, height);
 		Bitmap thumbnail = cache.get(thumbnailId);
 
 		if (thumbnail != null) {
-			return new Pair<>(thumbnail,thumbnailId);
+			return new Pair<>(thumbnail, thumbnailId);
 		} else {
 			thumbnail = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 			thumbnail.eraseColor(0xFFFFFFFF);
@@ -158,7 +158,7 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 
 			cache.put(thumbnailId, thumbnail);
 
-			return new Pair<>(thumbnail,thumbnailId);
+			return new Pair<>(thumbnail, thumbnailId);
 		}
 	}
 
@@ -181,7 +181,7 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 		}
 
 		final String documentUuid = document.getUuid();
-		final String taskId = getThumbnailId(document,width,height);
+		final String taskId = getThumbnailId(document, width, height);
 
 		Bitmap thumbnail = cache.get(taskId);
 		if (thumbnail != null) {

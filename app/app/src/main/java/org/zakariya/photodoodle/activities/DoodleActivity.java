@@ -20,6 +20,7 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.NavUtils;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -146,6 +147,7 @@ public class DoodleActivity extends BaseActivity
 		ActionBar actionBar = getSupportActionBar();
 		if (actionBar != null) {
 			actionBar.setDisplayShowTitleEnabled(false);
+			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
 
 		buildModeTabs();
@@ -287,49 +289,12 @@ public class DoodleActivity extends BaseActivity
 	@Override
 	public void onBackPressed() {
 		if (!dismissTabItemPopup(false)) {
-			saveDoodleIfEdited();
-
-			boolean edited = document.getModificationDate().getTime() > documentModificationTime;
-
-			Intent resultData = new Intent();
-			resultData.putExtra(RESULT_DID_EDIT_DOODLE, edited);
-			resultData.putExtra(RESULT_DOODLE_DOCUMENT_UUID, document.getUuid());
-
-			if (edited) {
-
-				//
-				//  Render an updated placeholder image for exit transition. If we were NOT edited,
-				// the placeholder already contains a valid image.
-				//
-
-				int width = getIntent().getIntExtra(EXTRA_DOODLE_THUMBNAIL_WIDTH, 0);
-				int height = getIntent().getIntExtra(EXTRA_DOODLE_THUMBNAIL_HEIGHT, 0);
-
-				if (width == 0 || height == 0) {
-					width = doodleView.getWidth() / 2;
-					height = doodleView.getHeight() / 2;
-
-					// make it square
-					if (width > height) {
-						//noinspection SuspiciousNameCombination
-						width = height;
-					} else {
-						//noinspection SuspiciousNameCombination
-						height = width;
-					}
-				}
-
-				Pair<Bitmap,String> rendering = DoodleThumbnailRenderer.getInstance().renderThumbnail(this, document, width, height);
-
-				doodlePlaceholderImageView.setImageBitmap(rendering.first);
-				resultData.putExtra(RESULT_UPDATED_DOODLE_THUMBNAIL_ID, rendering.second);
-			}
+			saveAndSetActivityResult();
 
 			// reveal the placeholder for the exit transition
 			doodlePlaceholderImageView.setVisibility(View.VISIBLE);
 			doodlePlaceholderImageView.setAlpha(1f);
 
-			setResult(RESULT_OK, resultData);
 
 			super.onBackPressed();
 		}
@@ -344,6 +309,11 @@ public class DoodleActivity extends BaseActivity
 
 			case R.id.menuItemClear:
 				photoDoodle.clear();
+				return true;
+
+			case android.R.id.home:
+				saveAndSetActivityResult();
+				NavUtils.navigateUpFromSameTask(this);
 				return true;
 
 			default:
@@ -501,6 +471,48 @@ public class DoodleActivity extends BaseActivity
 		} else {
 			return false;
 		}
+	}
+
+	private void saveAndSetActivityResult() {
+		saveDoodleIfEdited();
+
+		boolean edited = document.getModificationDate().getTime() > documentModificationTime;
+
+		Intent resultData = new Intent();
+		resultData.putExtra(RESULT_DID_EDIT_DOODLE, edited);
+		resultData.putExtra(RESULT_DOODLE_DOCUMENT_UUID, document.getUuid());
+
+		if (edited) {
+
+			//
+			//  Render an updated placeholder image for exit transition. If we were NOT edited,
+			// the placeholder already contains a valid image.
+			//
+
+			int width = getIntent().getIntExtra(EXTRA_DOODLE_THUMBNAIL_WIDTH, 0);
+			int height = getIntent().getIntExtra(EXTRA_DOODLE_THUMBNAIL_HEIGHT, 0);
+
+			if (width == 0 || height == 0) {
+				width = doodleView.getWidth() / 2;
+				height = doodleView.getHeight() / 2;
+
+				// make it square
+				if (width > height) {
+					//noinspection SuspiciousNameCombination
+					width = height;
+				} else {
+					//noinspection SuspiciousNameCombination
+					height = width;
+				}
+			}
+
+			Pair<Bitmap, String> rendering = DoodleThumbnailRenderer.getInstance().renderThumbnail(this, document, width, height);
+
+			doodlePlaceholderImageView.setImageBitmap(rendering.first);
+			resultData.putExtra(RESULT_UPDATED_DOODLE_THUMBNAIL_ID, rendering.second);
+		}
+
+		setResult(RESULT_OK, resultData);
 	}
 
 	public void setDocumentName(String documentName) {

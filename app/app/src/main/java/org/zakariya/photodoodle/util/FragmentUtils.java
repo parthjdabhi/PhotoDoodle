@@ -16,6 +16,7 @@ public class FragmentUtils {
 	/**
 	 * Adapted from:
 	 * http://stackoverflow.com/questions/27004721/start-activity-from-fragment-using-transition-api-21-support
+	 *
 	 * @param fragment
 	 * @param intent
 	 * @param requestCode

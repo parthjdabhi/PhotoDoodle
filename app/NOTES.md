@@ -1,6 +1,6 @@
 #Currently
 
-Occasional hard-to-reproduce crash when returning to PhotoDoodle after it has been backgrounded long enough to be terminated. Launcher reports it cannot start PhotoDoodle.
+Add back/up button to Toolbar. Do this for the About activity first, for testing. See if my old issue where lack of singleTop caused problems.
 
 Consider dropping singleTop param for my activities. Try to understand exactly when it's needed, don't just use it everywhere.
 

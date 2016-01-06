@@ -19,6 +19,7 @@ public class CameraPopupController {
 
 	public interface Callbacks {
 		void onTakePhoto();
+
 		void onClearPhoto();
 	}
 
@@ -34,7 +35,7 @@ public class CameraPopupController {
 	public CameraPopupController(View popupView, Callbacks callbacks) {
 		this.popupView = popupView;
 		callbacksWeakReference = new WeakReference<>(callbacks);
-		ButterKnife.bind(this,popupView);
+		ButterKnife.bind(this, popupView);
 	}
 
 	public View getPopupView() {
@@ -42,7 +43,7 @@ public class CameraPopupController {
 	}
 
 	@OnClick(R.id.takePhotoButton)
-	void onTakePhotoButtonClick(){
+	void onTakePhotoButtonClick() {
 		Callbacks cb = callbacksWeakReference.get();
 		if (cb != null) {
 			cb.onTakePhoto();
@@ -50,7 +51,7 @@ public class CameraPopupController {
 	}
 
 	@OnClick(R.id.clearPhotoButton)
-	void onClearPhotoButtonClick(){
+	void onClearPhotoButtonClick() {
 		Callbacks cb = callbacksWeakReference.get();
 		if (cb != null) {
 			cb.onClearPhoto();

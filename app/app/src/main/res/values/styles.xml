@@ -54,10 +54,11 @@
 		<item name="android:textColor">@color/actionBarText</item>
 	</style>
 
-	<style name="TitleTextStyle.EditText">
-		<item name="colorControlNormal">@color/actionBarText</item>
-		<item name="colorControlActivated">#FF0000</item>
-		<item name="colorControlHighlight">#00FFFF</item>
+	<style name="AppBarEditText" parent="Widget.AppCompat.EditText">
+		<item name="android:textColor">@color/actionBarText</item>
+		<item name="colorControlNormal">@color/actionbarEditText_colorControlNormal</item>
+		<item name="colorControlActivated">@color/actionbarEditText_colorControlActivated</item>
+		<item name="colorControlHighlight">@color/actionbarEditText_colorControlHighlight</item>
 	</style>
 
 	<style name="PopupImageButtonStyle" parent="Widget.AppCompat.Button.Borderless">

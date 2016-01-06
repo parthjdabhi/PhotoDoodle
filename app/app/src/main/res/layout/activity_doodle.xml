@@ -47,9 +47,10 @@
 				    android:lines="1"
 				    android:ellipsize="end"
 				    android:imeOptions="actionDone"
-				    android:inputType="textCapWords"
+				    android:inputType="textCapWords|textNoSuggestions"
 				    tools:text="Title Text"
-					style="@style/TitleTextStyle.EditText"
+				    android:theme="@style/AppBarEditText"
+				    style="@style/TitleTextStyle"
 					/>
 
 				<!--<TextView-->

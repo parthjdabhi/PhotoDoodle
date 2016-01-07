@@ -26,6 +26,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.transition.Fade;
 import android.transition.Transition;
@@ -149,11 +150,6 @@ public class DoodleActivity extends BaseActivity
 		//
 		setSupportActionBar(toolbar);
 		ActionBar actionBar = getSupportActionBar();
-		if (actionBar != null) {
-			actionBar.setDisplayShowTitleEnabled(false);
-			actionBar.setDisplayHomeAsUpEnabled(true);
-		}
-
 		buildModeTabs();
 
 		//
@@ -163,74 +159,93 @@ public class DoodleActivity extends BaseActivity
 		realm = Realm.getInstance(this);
 		if (savedInstanceState == null) {
 			documentUuid = getIntent().getStringExtra(EXTRA_DOODLE_DOCUMENT_UUID);
-			document = PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, documentUuid);
 
-			if (document == null) {
-				throw new IllegalArgumentException("Document UUID didn't refer to an existing PhotoDoodleDocument");
+			if (!TextUtils.isEmpty(documentUuid)) {
+
+				document = PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, documentUuid);
+				if (document == null) {
+					throw new IllegalArgumentException("Document UUID didn't refer to an existing PhotoDoodleDocument");
+				}
+
+				documentModificationTime = document.getModificationDate().getTime();
+
+				String thumbnailId = getIntent().getStringExtra(EXTRA_DOODLE_THUMBNAIL_ID);
+				Bitmap placeholder = DoodleThumbnailRenderer.getInstance().getThumbnailById(thumbnailId);
+
+				if (placeholder != null) {
+					doodlePlaceholderImageView.setImageBitmap(placeholder);
+				} else {
+					doodlePlaceholderImageView.setVisibility(View.GONE);
+				}
 			}
-
-			documentModificationTime = document.getModificationDate().getTime();
-
-			String thumbnailId = getIntent().getStringExtra(EXTRA_DOODLE_THUMBNAIL_ID);
-			Log.i(TAG, "onCreate: getThumbnailId: " + thumbnailId);
-
-			Bitmap placeholder = DoodleThumbnailRenderer.getInstance().getThumbnailById(thumbnailId);
-			Log.i(TAG, "onCreate: placeholder bitmap: " + placeholder);
-
-			if (placeholder != null) {
-				doodlePlaceholderImageView.setImageBitmap(placeholder);
-			} else {
-				doodlePlaceholderImageView.setVisibility(View.GONE);
-			}
-
 		} else {
 			Icepick.restoreInstanceState(this, savedInstanceState);
-			document = PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, documentUuid);
-			doodlePlaceholderImageView.setVisibility(View.GONE);
-
-			if (document == null) {
-				throw new IllegalArgumentException("Document UUID didn't refer to an existing PhotoDoodleDocument");
+			if (!TextUtils.isEmpty(documentUuid)) {
+				document = PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, documentUuid);
+				if (document == null) {
+					throw new IllegalArgumentException("Document UUID didn't refer to an existing PhotoDoodleDocument");
+				}
 			}
+
+			doodlePlaceholderImageView.setVisibility(View.GONE);
 		}
 
-		// update title
-		titleEditText.setText(document.getName());
-		titleEditText.addTextChangedListener(new TextWatcher() {
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+		if (document != null) {
+
+			// show the up button
+			if (actionBar != null) {
+				actionBar.setDisplayHomeAsUpEnabled(true);
 			}
 
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
+			// hide default title
+			if (actionBar != null) {
+				actionBar.setDisplayShowTitleEnabled(false);
 			}
 
-			@Override
-			public void afterTextChanged(Editable s) {
-				setDocumentName(s.toString());
-			}
-		});
-
-		titleEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-			@Override
-			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-				if (actionId == EditorInfo.IME_ACTION_DONE) {
-					v.clearFocus();
-					return true;
-				} else {
-					return false;
+			// update title
+			titleEditText.setText(document.getName());
+			titleEditText.addTextChangedListener(new TextWatcher() {
+				@Override
+				public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 				}
-			}
-		});
 
-		titleEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-			@Override
-			public void onFocusChange(View v, boolean hasFocus) {
-				Log.i(TAG, "onFocusChange: hasFocus:" + hasFocus);
-				if (!hasFocus) {
-					hideKeyboard(v);
+				@Override
+				public void onTextChanged(CharSequence s, int start, int before, int count) {
 				}
-			}
-		});
+
+				@Override
+				public void afterTextChanged(Editable s) {
+					setDocumentName(s.toString());
+				}
+			});
+
+			titleEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+				@Override
+				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+					if (actionId == EditorInfo.IME_ACTION_DONE) {
+						v.clearFocus();
+						return true;
+					} else {
+						return false;
+					}
+				}
+			});
+
+			titleEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+				@Override
+				public void onFocusChange(View v, boolean hasFocus) {
+					Log.i(TAG, "onFocusChange: hasFocus:" + hasFocus);
+					if (!hasFocus) {
+						hideKeyboard(v);
+					}
+				}
+			});
+		} else {
+
+			// we don't have a document, this means we're running in a test harness where
+			// DoodleActivity was launched directly.
+			titleEditText.setVisibility(View.GONE);
+		}
 
 		//
 		//  Create the PhotoDoodle. If this is result of a state restoration
@@ -245,7 +260,12 @@ public class DoodleActivity extends BaseActivity
 				photoDoodle.onCreate(doodleState);
 			}
 		} else {
-			photoDoodle = PhotoDoodleDocument.loadPhotoDoodle(this, document);
+			if (document != null) {
+				photoDoodle = PhotoDoodleDocument.loadPhotoDoodle(this, document);
+			} else {
+				// DoodleActivity was launched directly for testing, create a blank document
+				photoDoodle = new PhotoDoodle(this);
+			}
 		}
 
 		photoDoodle.setDrawDebugPositioningOverlay(false);
@@ -258,6 +278,7 @@ public class DoodleActivity extends BaseActivity
 		//
 		// be tidy - in case a photo temp file survived a crash or whatever
 		//
+
 		deletePhotoTempFile();
 	}
 
@@ -504,6 +525,10 @@ public class DoodleActivity extends BaseActivity
 	 * @return true if the doodle had edits and needed to be saved
 	 */
 	public boolean saveDoodleIfEdited() {
+		if (document == null) {
+			return false;
+		}
+
 		if (photoDoodle.isDirty()) {
 			PhotoDoodleDocument.savePhotoDoodle(this, document, photoDoodle);
 			photoDoodle.setDirty(false);
@@ -517,6 +542,10 @@ public class DoodleActivity extends BaseActivity
 	}
 
 	private void saveAndSetActivityResult() {
+		if (document == null) {
+			return;
+		}
+
 		saveDoodleIfEdited();
 
 		boolean edited = document.getModificationDate().getTime() > documentModificationTime;

@@ -1,5 +1,7 @@
 #Currently
 
+Make DoodleActivity launchable as main activity (it has to handle not receiving a doc UUID in intent) so I can launch directly while testing new UX
+
 Add back/up button to Toolbar. Do this for the About activity first, for testing. See if my old issue where lack of singleTop caused problems.
 
 Consider dropping singleTop param for my activities. Try to understand exactly when it's needed, don't just use it everywhere.

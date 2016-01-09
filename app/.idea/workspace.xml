@@ -37,14 +37,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7fde0eb8-423e-4c88-926f-eb3a8950460c" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/PhotoDoodle/src/main/res/transition/shared_element_transition.xml" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/activities/DoodleActivity.java" afterPath="$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/activities/DoodleActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/activities/MainActivity.java" afterPath="$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/activities/MainActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/fragments/DoodleDocumentGridFragment.java" afterPath="$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/fragments/DoodleDocumentGridFragment.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/PhotoDoodle/src/main/res/layout/activity_doodle.xml" afterPath="$PROJECT_DIR$/PhotoDoodle/src/main/res/layout/activity_doodle.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/PhotoDoodle/src/main/res/values-v21/styles.xml" afterPath="$PROJECT_DIR$/PhotoDoodle/src/main/res/values-v21/styles.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/PhotoDoodle/src/main/res/values/strings.xml" afterPath="$PROJECT_DIR$/PhotoDoodle/src/main/res/values/strings.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/NOTES.md" afterPath="$PROJECT_DIR$/NOTES.md" />
     </list>
     <ignored path="app.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -72,11 +65,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="NOTES.md" pinned="false" current-in-tab="false">
+      <file leaf-file-name="NOTES.md" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/NOTES.md">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-9.379311">
-              <caret line="17" column="4" selection-start-line="17" selection-start-column="4" selection-end-line="17" selection-end-column="4" />
+            <state vertical-scroll-proportion="0.018823529">
+              <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -85,105 +78,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DoodleActivity.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/activities/DoodleActivity.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="505" column="77" selection-start-line="505" selection-start-column="77" selection-end-line="505" selection-end-column="77" />
-              <folding>
-                <element signature="e#5390#5391#0" expanded="true" />
-                <element signature="e#5432#5433#0" expanded="true" />
-                <element signature="e#5485#5760#0" expanded="true" />
-                <element signature="e#5759#5760#0" expanded="true" />
-                <element signature="e#5806#6031#0" expanded="true" />
-                <element signature="e#6030#6031#0" expanded="true" />
-                <element signature="e#6989#7047#0" expanded="true" />
-                <element signature="e#7086#7150#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="DoodleDocumentGridFragment.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/fragments/DoodleDocumentGridFragment.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="270" column="0" selection-start-line="270" selection-start-column="0" selection-end-line="270" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="MainActivity.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/activities/MainActivity.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="18" column="0" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
-              <folding>
-                <element signature="e#453#454#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="styles.xml" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/res/values-v21/styles.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.38554215">
-              <caret line="12" column="62" selection-start-line="12" selection-start-column="62" selection-end-line="12" selection-end-column="62" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="dimens.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/res/values/dimens.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-12.8">
-              <caret line="20" column="57" selection-start-line="20" selection-start-column="57" selection-end-line="20" selection-end-column="57" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Doodle.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/doodle/model/Doodle.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="26" column="28" selection-start-line="26" selection-start-column="28" selection-end-line="26" selection-end-column="28" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="IncrementalInputStrokeDoodle.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/doodle/model/IncrementalInputStrokeDoodle.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="290" column="0" selection-start-line="290" selection-start-column="0" selection-end-line="290" selection-end-column="0" />
-              <folding>
-                <element signature="e#8164#8165#0" expanded="true" />
-                <element signature="e#8199#8200#0" expanded="true" />
-                <element signature="e#8362#8363#0" expanded="true" />
-                <element signature="e#8393#8394#0" expanded="true" />
-                <element signature="e#8556#8557#0" expanded="true" />
-                <element signature="e#8587#8588#0" expanded="true" />
-                <element signature="e#8753#8754#0" expanded="true" />
-                <element signature="e#8785#8786#0" expanded="true" />
-                <element signature="e#9134#9135#0" expanded="true" />
-                <element signature="e#9155#9156#0" expanded="true" />
-                <element signature="e#10862#10863#0" expanded="true" />
-                <element signature="e#10892#10893#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PhotoDoodle.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/doodle/model/PhotoDoodle.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="75" column="0" selection-start-line="75" selection-start-column="0" selection-end-line="75" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -2619,7 +2518,6 @@
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/photodoodle/activities/DoodleActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/zakariya/doodle/view/DoodleView.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_doodle.xml" />
-        <option value="$PROJECT_DIR$/NOTES.md" />
         <option value="$PROJECT_DIR$/PhotoDoodle/src/main/AndroidManifest.xml" />
         <option value="$PROJECT_DIR$/PhotoDoodle/src/main/res/layout/doodle_document_grid_item.xml" />
         <option value="$PROJECT_DIR$/PhotoDoodle/src/main/res/values/dimens.xml" />
@@ -2632,6 +2530,7 @@
         <option value="$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/fragments/DoodleDocumentGridFragment.java" />
         <option value="$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/activities/MainActivity.java" />
         <option value="$PROJECT_DIR$/PhotoDoodle/src/main/res/values-v21/styles.xml" />
+        <option value="$PROJECT_DIR$/NOTES.md" />
       </list>
     </option>
   </component>
@@ -3578,7 +3477,7 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4857363" sideWeight="0.502442" order="9" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32967034" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Android Monitor" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3627343" sideWeight="0.48779" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Android Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3627343" sideWeight="0.48779" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22893773" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3296582" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32855567" sideWeight="0.492674" order="5" side_tool="false" content_ui="tabs" />
@@ -3587,10 +3486,10 @@
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3299923" sideWeight="0.5" order="13" side_tool="true" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25763127" sideWeight="0.8183391" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25763127" sideWeight="0.8224917" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.40352812" sideWeight="0.491453" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25763127" sideWeight="0.1816609" order="3" side_tool="true" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25763127" sideWeight="0.17750826" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25824177" sideWeight="0.46637267" order="4" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.48033926" sideWeight="0.497558" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Android Model" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32967034" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
@@ -3936,29 +3835,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/NOTES.md">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-9.379311">
-          <caret line="17" column="4" selection-start-line="17" selection-start-column="4" selection-end-line="17" selection-end-column="4" />
-          <folding />
-        </state>
-      </provider>
-      <provider editor-type-id="MarkdownPreviewEditor">
-        <state />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/view/ColorPickerView.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="53" column="46" selection-start-line="53" selection-start-column="46" selection-end-line="53" selection-end-column="46" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/doodle/model/Doodle.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="26" column="28" selection-start-line="26" selection-start-column="28" selection-end-line="26" selection-end-column="28" />
           <folding />
         </state>
       </provider>
@@ -3968,35 +3848,6 @@
         <state vertical-scroll-proportion="-10.64">
           <caret line="24" column="37" selection-start-line="24" selection-start-column="37" selection-end-line="24" selection-end-column="37" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/doodle/model/PhotoDoodle.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="75" column="0" selection-start-line="75" selection-start-column="0" selection-end-line="75" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/doodle/model/IncrementalInputStrokeDoodle.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="290" column="0" selection-start-line="290" selection-start-column="0" selection-end-line="290" selection-end-column="0" />
-          <folding>
-            <element signature="e#8164#8165#0" expanded="true" />
-            <element signature="e#8199#8200#0" expanded="true" />
-            <element signature="e#8362#8363#0" expanded="true" />
-            <element signature="e#8393#8394#0" expanded="true" />
-            <element signature="e#8556#8557#0" expanded="true" />
-            <element signature="e#8587#8588#0" expanded="true" />
-            <element signature="e#8753#8754#0" expanded="true" />
-            <element signature="e#8785#8786#0" expanded="true" />
-            <element signature="e#9134#9135#0" expanded="true" />
-            <element signature="e#9155#9156#0" expanded="true" />
-            <element signature="e#10862#10863#0" expanded="true" />
-            <element signature="e#10892#10893#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -4019,17 +3870,72 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/res/values-v21/styles.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.23216444">
+          <caret line="12" column="62" selection-start-line="12" selection-start-column="62" selection-end-line="12" selection-end-column="62" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/res/values/dimens.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-12.8">
+        <state vertical-scroll-proportion="0.37470725">
           <caret line="20" column="57" selection-start-line="20" selection-start-column="57" selection-end-line="20" selection-end-column="57" />
           <folding />
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/doodle/model/PhotoDoodle.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.516496">
+          <caret line="75" column="0" selection-start-line="75" selection-start-column="0" selection-end-line="75" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/doodle/model/IncrementalInputStrokeDoodle.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.29920363">
+          <caret line="290" column="0" selection-start-line="290" selection-start-column="0" selection-end-line="290" selection-end-column="0" />
+          <folding>
+            <element signature="e#8164#8165#0" expanded="true" />
+            <element signature="e#8199#8200#0" expanded="true" />
+            <element signature="e#8362#8363#0" expanded="true" />
+            <element signature="e#8393#8394#0" expanded="true" />
+            <element signature="e#8556#8557#0" expanded="true" />
+            <element signature="e#8587#8588#0" expanded="true" />
+            <element signature="e#8753#8754#0" expanded="true" />
+            <element signature="e#8785#8786#0" expanded="true" />
+            <element signature="e#9134#9135#0" expanded="true" />
+            <element signature="e#9155#9156#0" expanded="true" />
+            <element signature="e#10862#10863#0" expanded="true" />
+            <element signature="e#10892#10893#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/doodle/model/Doodle.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.25483504">
+          <caret line="26" column="28" selection-start-line="26" selection-start-column="28" selection-end-line="26" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/activities/MainActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.23663254">
+          <caret line="18" column="0" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+          <folding>
+            <element signature="e#453#454#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/activities/DoodleActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
+        <state vertical-scroll-proportion="0.10921501">
           <caret line="505" column="77" selection-start-line="505" selection-start-column="77" selection-end-line="505" selection-end-column="77" />
           <folding>
             <element signature="e#5390#5391#0" expanded="true" />
@@ -4052,22 +3958,15 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/activities/MainActivity.java">
+    <entry file="file://$PROJECT_DIR$/NOTES.md">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="18" column="0" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
-          <folding>
-            <element signature="e#453#454#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/PhotoDoodle/src/main/res/values-v21/styles.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.38554215">
-          <caret line="12" column="62" selection-start-line="12" selection-start-column="62" selection-end-line="12" selection-end-column="62" />
+        <state vertical-scroll-proportion="0.018823529">
+          <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
           <folding />
         </state>
+      </provider>
+      <provider editor-type-id="MarkdownPreviewEditor">
+        <state />
       </provider>
     </entry>
   </component>

@@ -1,11 +1,9 @@
 package org.zakariya.photodoodle.fragments;
 
 import android.annotation.TargetApi;
-import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.os.Build;
@@ -21,7 +19,6 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,8 +33,6 @@ import org.zakariya.photodoodle.activities.DoodleActivity;
 import org.zakariya.photodoodle.activities.SyncSettingsActivity;
 import org.zakariya.photodoodle.adapters.DoodleDocumentAdapter;
 import org.zakariya.photodoodle.model.PhotoDoodleDocument;
-import org.zakariya.photodoodle.util.DoodleThumbnailRenderer;
-import org.zakariya.photodoodle.util.FragmentUtils;
 
 import java.lang.ref.WeakReference;
 
@@ -272,31 +267,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 
 		Intent intent = new Intent(getContext(), DoodleActivity.class);
 		intent.putExtra(DoodleActivity.EXTRA_DOODLE_DOCUMENT_UUID, doc.getUuid());
-
-		if (tappedItem != null && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)) {
-
-			//
-			// render a thumbnail for the animation to scale. note, we're relying on the thumbnail
-			// being available later in DoodleThumbnailRenderer's cache since we can't pass a thumbnail via intent
-			//
-
-			int width = tappedItem.getWidth();
-			int height = tappedItem.getHeight();
-			Pair<Bitmap, String> result = DoodleThumbnailRenderer.getInstance().renderThumbnail(getActivity(), doc, width, height);
-
-			intent.putExtra(DoodleActivity.EXTRA_DOODLE_THUMBNAIL_ID, result.second);
-			intent.putExtra(DoodleActivity.EXTRA_DOODLE_THUMBNAIL_WIDTH, tappedItem.getWidth());
-			intent.putExtra(DoodleActivity.EXTRA_DOODLE_THUMBNAIL_HEIGHT, tappedItem.getHeight());
-
-			String transitionName = getString(R.string.transition_name_doodle_view);
-			ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(getActivity(), tappedItem, transitionName);
-
-			// this is a workaround for the issue where Fragment doesn't have the options variant for startActivityForResult
-			FragmentUtils.startActivityForResult(this, intent, REQUEST_EDIT_DOODLE, options.toBundle());
-
-		} else {
-			startActivityForResult(intent, REQUEST_EDIT_DOODLE);
-		}
+		startActivityForResult(intent, REQUEST_EDIT_DOODLE);
 	}
 
 	void showAbout() {

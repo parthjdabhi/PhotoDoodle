@@ -53,8 +53,4 @@
 	<string name="sync_now_button">Sync</string>
 	<string name="sync_reset_button">Reset &amp; Sync</string>
 
-	<!-- transitions -->
-	<string name="transition_name_doodle_view">doodleView</string>
-
-
 </resources>

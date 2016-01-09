@@ -4,8 +4,6 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.transition.Fade;
-import android.transition.Transition;
 
 import org.zakariya.photodoodle.fragments.DoodleDocumentGridFragment;
 
@@ -18,13 +16,6 @@ public class MainActivity extends SingleFragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			Transition fade = new Fade();
-			fade.excludeTarget(android.R.id.navigationBarBackground, true);
-			getWindow().setExitTransition(fade);
-			getWindow().setEnterTransition(fade);
-		}
 	}
 
 	@Override

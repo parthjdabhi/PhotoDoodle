@@ -1,7 +1,5 @@
 package org.zakariya.photodoodle.activities;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -29,10 +27,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.transition.Fade;
-import android.transition.Transition;
 import android.util.Log;
-import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -43,7 +38,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
@@ -52,7 +46,6 @@ import org.zakariya.doodle.model.PhotoDoodle;
 import org.zakariya.doodle.view.DoodleView;
 import org.zakariya.photodoodle.R;
 import org.zakariya.photodoodle.model.PhotoDoodleDocument;
-import org.zakariya.photodoodle.util.DoodleThumbnailRenderer;
 import org.zakariya.photodoodle.view.ColorPickerView;
 import org.zakariya.photodoodle.view.ColorSwatchView;
 
@@ -68,14 +61,10 @@ import io.realm.Realm;
 public class DoodleActivity extends BaseActivity
 		implements TabLayout.OnTabSelectedListener, CameraPopupController.Callbacks, DrawPopupController.Callbacks {
 
-	public static final String EXTRA_DOODLE_THUMBNAIL_ID = "DoodleActivity.EXTRA_DOODLE_THUMBNAIL_ID";
-	public static final String EXTRA_DOODLE_THUMBNAIL_WIDTH = "DoodleActivity.EXTRA_DOODLE_THUMBNAIL_WIDTH";
-	public static final String EXTRA_DOODLE_THUMBNAIL_HEIGHT = "DoodleActivity.EXTRA_DOODLE_THUMBNAIL_HEIGHT";
 	public static final String EXTRA_DOODLE_DOCUMENT_UUID = "DoodleActivity.EXTRA_DOODLE_DOCUMENT_UUID";
 
 	public static final String RESULT_DID_EDIT_DOODLE = "DoodleActivity.RESULT_DID_EDIT_DOODLE";
 	public static final String RESULT_DOODLE_DOCUMENT_UUID = "DoodleActivity.RESULT_DOODLE_DOCUMENT_UUID";
-	public static final String RESULT_UPDATED_DOODLE_THUMBNAIL_ID = "DoodleActivity.RESULT_UPDATED_DOODLE_THUMBNAIL_ID";
 
 	private static final String STATE_DOODLE = "DoodleActivity.STATE_DOODLE";
 
@@ -95,9 +84,6 @@ public class DoodleActivity extends BaseActivity
 
 	@Bind(R.id.doodleView)
 	DoodleView doodleView;
-
-	@Bind(R.id.doodlePlaceholderImageView)
-	ImageView doodlePlaceholderImageView;
 
 	@State
 	int color = 0xFF000000;
@@ -138,14 +124,6 @@ public class DoodleActivity extends BaseActivity
 		setContentView(R.layout.activity_doodle);
 		ButterKnife.bind(this);
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			Transition fade = new Fade();
-			fade.excludeTarget(android.R.id.navigationBarBackground, true);
-			getWindow().setExitTransition(fade);
-			getWindow().setEnterTransition(fade);
-		}
-
-
 		//
 		// setup the toolbar - note: we are providing our own titleTextView so we'll hide the built-in title later
 		//
@@ -171,15 +149,6 @@ public class DoodleActivity extends BaseActivity
 				}
 
 				documentModificationTime = document.getModificationDate().getTime();
-
-				String thumbnailId = getIntent().getStringExtra(EXTRA_DOODLE_THUMBNAIL_ID);
-				Bitmap placeholder = DoodleThumbnailRenderer.getInstance().getThumbnailById(thumbnailId);
-
-				if (placeholder != null) {
-					doodlePlaceholderImageView.setImageBitmap(placeholder);
-				} else {
-					doodlePlaceholderImageView.setVisibility(View.GONE);
-				}
 			}
 		} else {
 			Icepick.restoreInstanceState(this, savedInstanceState);
@@ -189,8 +158,6 @@ public class DoodleActivity extends BaseActivity
 					throw new IllegalArgumentException("Document UUID didn't refer to an existing PhotoDoodleDocument");
 				}
 			}
-
-			doodlePlaceholderImageView.setVisibility(View.GONE);
 		}
 
 		if (document != null) {
@@ -329,26 +296,6 @@ public class DoodleActivity extends BaseActivity
 				drawingTab.select();
 				break;
 		}
-
-		if (doodlePlaceholderImageView.getVisibility() != View.GONE) {
-			final int crossfadeDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
-			handler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					doodlePlaceholderImageView.animate()
-							.alpha(0)
-							.setDuration(crossfadeDuration)
-							.setListener(new AnimatorListenerAdapter() {
-								@Override
-								public void onAnimationEnd(Animator animation) {
-									doodlePlaceholderImageView.setVisibility(View.GONE);
-									super.onAnimationEnd(animation);
-								}
-							});
-				}
-			}, 500);
-
-		}
 	}
 
 	@Override
@@ -370,12 +317,6 @@ public class DoodleActivity extends BaseActivity
 		}
 
 		saveAndSetActivityResult();
-
-		// reveal the placeholder for the exit transition
-		doodlePlaceholderImageView.setVisibility(View.VISIBLE);
-		doodlePlaceholderImageView.setAlpha(1f);
-
-
 		super.onBackPressed();
 	}
 
@@ -563,37 +504,6 @@ public class DoodleActivity extends BaseActivity
 		Intent resultData = new Intent();
 		resultData.putExtra(RESULT_DID_EDIT_DOODLE, edited);
 		resultData.putExtra(RESULT_DOODLE_DOCUMENT_UUID, document.getUuid());
-
-		if (edited) {
-
-			//
-			//  Render an updated placeholder image for exit transition. If we were NOT edited,
-			// the placeholder already contains a valid image.
-			//
-
-			int width = getIntent().getIntExtra(EXTRA_DOODLE_THUMBNAIL_WIDTH, 0);
-			int height = getIntent().getIntExtra(EXTRA_DOODLE_THUMBNAIL_HEIGHT, 0);
-
-			if (width == 0 || height == 0) {
-				width = doodleView.getWidth() / 2;
-				height = doodleView.getHeight() / 2;
-
-				// make it square
-				if (width > height) {
-					//noinspection SuspiciousNameCombination
-					width = height;
-				} else {
-					//noinspection SuspiciousNameCombination
-					height = width;
-				}
-			}
-
-			Pair<Bitmap, String> rendering = DoodleThumbnailRenderer.getInstance().renderThumbnail(this, document, width, height);
-
-			doodlePlaceholderImageView.setImageBitmap(rendering.first);
-			resultData.putExtra(RESULT_UPDATED_DOODLE_THUMBNAIL_ID, rendering.second);
-		}
-
 		setResult(RESULT_OK, resultData);
 	}
 

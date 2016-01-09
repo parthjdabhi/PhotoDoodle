@@ -21,6 +21,7 @@ import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -146,10 +147,12 @@ public class DoodleActivity extends BaseActivity
 
 
 		//
-		// setup the toolbar - note: we are providing our own titleTextView so hide the built-in title
+		// setup the toolbar - note: we are providing our own titleTextView so we'll hide the built-in title later
 		//
+
 		setSupportActionBar(toolbar);
 		ActionBar actionBar = getSupportActionBar();
+
 		buildModeTabs();
 
 		//
@@ -269,6 +272,13 @@ public class DoodleActivity extends BaseActivity
 		}
 
 		photoDoodle.setDrawDebugPositioningOverlay(false);
+		photoDoodle.setScaleMode(PhotoDoodle.ScaleMode.FIT);
+		photoDoodle.setPadding(getResources().getDimension(R.dimen.doodle_canvas_padding));
+		photoDoodle.setCanvasShadowOffset(getResources().getDimension(R.dimen.doodle_canvas_shadow_offset));
+		photoDoodle.setCanvasBorderColor(ContextCompat.getColor(this,R.color.canvasBorderColor));
+		photoDoodle.setCanvasShadowColor(ContextCompat.getColor(this,R.color.canvasShadowColor));
+		photoDoodle.setBackgroundColor(ContextCompat.getColor(this,R.color.windowBackgroundColor));
+
 		doodleView.setDoodle(photoDoodle);
 
 		setColor(color);

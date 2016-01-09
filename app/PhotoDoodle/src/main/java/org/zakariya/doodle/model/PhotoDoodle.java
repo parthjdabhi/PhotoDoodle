@@ -71,8 +71,13 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		Icepick.restoreInstanceState(this, savedInstanceState);
 
 		// setting jpeg data marks this as dirty, so we don't want a rotation to flag us as dirty
+		// also, assigning photoJpegData resets user translation, so store it and reassign
+
 		boolean wasDirty = isDirty();
+		PointF userTranslation = new PointF(userTranslationOnCanvas.x, userTranslationOnCanvas.y);
 		setPhotoJpegData(photoJpegData);
+		userTranslationOnCanvas.x = userTranslation.x;
+		userTranslationOnCanvas.y = userTranslation.y;
 		setDirty(wasDirty);
 	}
 
@@ -96,11 +101,10 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		super.clear();
 	}
 
-	@Override
-	public void draw(Canvas canvas) {
-
+	protected void drawPhoto(Canvas canvas) {
 		if (photo != null) {
 			canvas.save();
+			canvas.clipRect(getCanvasScreenRect());
 			canvas.concat(canvasToScreenMatrix);
 			canvas.concat(photoMatrix);
 			canvas.drawBitmap(photo, 0, 0, photoPaint);
@@ -117,8 +121,16 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 
 			canvas.restore();
 		}
+	}
 
-		super.draw(canvas);
+	@Override
+	public void draw(Canvas canvas) {
+		drawBackground(canvas);
+		drawCanvasDecoration(canvas);
+		drawPhoto(canvas);
+		drawStrokes(canvas);
+		drawDebugPositioningOverlay(canvas);
+		drawInvalidationRect(canvas);
 	}
 
 	@Override
@@ -209,15 +221,15 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 
 		markDirty();
 		this.photoJpegData = photoData;
+		userTranslationOnCanvas.x = 0;
+		userTranslationOnCanvas.y = 0;
 
 		if (this.photoJpegData != null && this.photoJpegData.length > 0) {
 			photo = BitmapFactory.decodeByteArray(this.photoJpegData, 0, this.photoJpegData.length);
-			setBackgroundColor(0x0);
 			updatePhotoMatrix();
 		} else {
 			photo = null;
 			photoJpegData = null;
-			setBackgroundColor(0xFFFFFFFF);
 		}
 
 		invalidate();
@@ -233,7 +245,7 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 
 	public void setPhoto(Bitmap photo) {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		photo.compress(Bitmap.CompressFormat.JPEG,100,byteArrayOutputStream);
+		photo.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
 		setPhotoJpegData(byteArrayOutputStream.toByteArray());
 	}
 
@@ -255,17 +267,9 @@ public class PhotoDoodle extends IncrementalInputStrokeDoodle {
 		}
 
 		if (photo != null) {
+			// use FILL photo scaling
 			float minPhotoSize = Math.min(photo.getWidth(), photo.getHeight());
-			float maxPhotoSize = Math.max(photo.getWidth(), photo.getHeight());
-			float photoScale = 1;
-			switch (getScaleMode()) {
-				case FIT:
-					photoScale = CANVAS_SIZE * 2 / maxPhotoSize;
-					break;
-				case FILL:
-					photoScale = CANVAS_SIZE * 2 / minPhotoSize;
-					break;
-			}
+			float photoScale = CANVAS_SIZE * 2 / minPhotoSize;
 
 			photoMatrix.preTranslate(userTranslationOnCanvas.x, userTranslationOnCanvas.y);
 			photoMatrix.preScale(photoScale, photoScale);

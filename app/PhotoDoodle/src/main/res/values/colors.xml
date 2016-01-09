@@ -21,4 +21,7 @@
 	<color name="actionbarEditText_colorControlActivated">#00E6FF</color>
 	<color name="actionbarEditText_colorControlHighlight">#9DF5FF</color>
 
+	<color name="canvasBorderColor">#33000000</color>
+	<color name="canvasShadowColor">#11000000</color>
+
 </resources>

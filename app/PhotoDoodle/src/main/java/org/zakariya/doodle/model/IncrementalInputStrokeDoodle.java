@@ -37,6 +37,7 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	private static final String TAG = "IncInptStrokeDoodle";
 
 	public static final float CANVAS_SIZE = 1024f;
+	private static final RectF CANVAS_RECT = new RectF(-CANVAS_SIZE, -CANVAS_SIZE, CANVAS_SIZE, CANVAS_SIZE);
 
 	public enum ScaleMode {
 		FIT,
@@ -48,15 +49,30 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	protected float screenToCanvasScale;
 	protected float canvasToScreenScale;
 
-	private Paint invalidationRectPaint, debugPositioningPaint, bitmapPaint;
-	private RectF invalidationRect;
+	private Paint invalidationRectPaint, debugPositioningPaint, bitmapPaint, canvasDecorationPaint;
+	private RectF invalidationRect, canvasScreenRect;
 	private IncrementalInputStrokeTessellator incrementalInputStrokeTessellator;
 	private Context context;
 	private Canvas bitmapCanvas;
 	private Bitmap bitmap;
 
 	@State
-	int scaleMode = ScaleMode.FILL.ordinal();
+	int canvasBackgroundColor = 0xFFFFFFFF;
+
+	@State
+	int canvasBorderColor = 0x44000000;
+
+	@State
+	int canvasShadowColor = 0x11000000;
+
+	@State
+	float canvasShadowOffset = 4;
+
+	@State
+	float padding = 0;
+
+	@State
+	int scaleMode = ScaleMode.FIT.ordinal();
 
 	@State
 	boolean drawInvalidationRect = false;
@@ -78,6 +94,10 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 		bitmapPaint = new Paint();
 		bitmapPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+
+		canvasDecorationPaint = new Paint();
+		canvasDecorationPaint.setAntiAlias(true);
+		canvasDecorationPaint.setStyle(Paint.Style.FILL);
 
 		setBrush(new Brush(0xFF000000, 1, 1, 100, false));
 	}
@@ -108,14 +128,34 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		clearDrawing();
 	}
 
-	@Override
-	public void draw(Canvas canvas) {
-
+	protected void drawBackground(Canvas canvas) {
 		if (Color.alpha(getBackgroundColor()) > 0) {
 			canvas.drawColor(getBackgroundColor());
 		}
+	}
 
+	protected void drawCanvasDecoration(Canvas canvas) {
+		// render border
+		if (Color.alpha(getCanvasBorderColor()) > 0) {
+			RectF csr = getCanvasScreenRect();
+			canvasDecorationPaint.setColor(canvasBorderColor);
+			canvas.drawRect(csr.left - 1, csr.top - 1, csr.right + 2, csr.bottom + 2, canvasDecorationPaint);
+		}
+
+		if (Color.alpha(getCanvasShadowColor()) > 0 && canvasShadowOffset > 0) {
+			RectF csr = getCanvasScreenRect();
+			canvasDecorationPaint.setColor(canvasShadowColor);
+			canvas.drawRect(csr.left, csr.top + canvasShadowOffset, csr.right, csr.bottom + canvasShadowOffset, canvasDecorationPaint);
+		}
+
+		canvasDecorationPaint.setColor(getCanvasBackgroundColor());
+		canvas.drawRect(getCanvasScreenRect(),canvasDecorationPaint);
+	}
+
+	protected void drawStrokes(Canvas canvas) {
 		// render backing store
+		canvas.save();
+		canvas.clipRect(getCanvasScreenRect());
 		canvas.drawBitmap(bitmap, 0, 0, bitmapPaint);
 
 		if (incrementalInputStrokeTessellator != null && !getBrush().isEraser()) {
@@ -128,6 +168,10 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 			}
 		}
 
+		canvas.restore();
+	}
+
+	protected void drawDebugPositioningOverlay(Canvas canvas) {
 		// draw the canvas bounds
 		if (isDrawDebugPositioningOverlay()) {
 			canvas.save();
@@ -142,7 +186,9 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 
 			canvas.restore();
 		}
+	}
 
+	protected void drawInvalidationRect(Canvas canvas) {
 		// draw the invalidation rect
 		if (isDrawInvalidationRect()) {
 			RectF r = invalidationRect != null ? invalidationRect : new RectF(0, 0, getWidth(), getHeight());
@@ -150,6 +196,15 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		}
 
 		invalidationRect = null;
+	}
+
+	@Override
+	public void draw(Canvas canvas) {
+		drawBackground(canvas);
+		drawCanvasDecoration(canvas);
+		drawStrokes(canvas);
+		drawDebugPositioningOverlay(canvas);
+		drawInvalidationRect(canvas);
 	}
 
 	@Override
@@ -161,7 +216,6 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		}
 
 		bitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
-		bitmap.eraseColor(0x0);
 		bitmapCanvas = new Canvas(bitmap);
 
 		// apply canvas to screen matrix
@@ -249,6 +303,41 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		return context;
 	}
 
+	public int getCanvasBackgroundColor() {
+		return canvasBackgroundColor;
+	}
+
+	public void setCanvasBackgroundColor(int canvasBackgroundColor) {
+		this.canvasBackgroundColor = canvasBackgroundColor;
+	}
+
+	public int getCanvasBorderColor() {
+		return canvasBorderColor;
+	}
+
+	public void setCanvasBorderColor(int canvasBorderColor) {
+		this.canvasBorderColor = canvasBorderColor;
+		invalidate();
+	}
+
+	public int getCanvasShadowColor() {
+		return canvasShadowColor;
+	}
+
+	public void setCanvasShadowColor(int canvasShadowColor) {
+		this.canvasShadowColor = canvasShadowColor;
+		invalidate();
+	}
+
+	public float getCanvasShadowOffset() {
+		return canvasShadowOffset;
+	}
+
+	public void setCanvasShadowOffset(float canvasShadowOffset) {
+		this.canvasShadowOffset = canvasShadowOffset;
+		invalidate();
+	}
+
 	public ScaleMode getScaleMode() {
 		return ScaleMode.values()[scaleMode];
 	}
@@ -258,6 +347,14 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		invalidate();
 	}
 
+	public float getPadding() {
+		return padding;
+	}
+
+	public void setPadding(float padding) {
+		this.padding = padding;
+		invalidate();
+	}
 
 	public boolean isDrawDebugPositioningOverlay() {
 		return drawDebugPositioningOverlay;
@@ -305,11 +402,17 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		return debugPositioningPaint;
 	}
 
+	protected RectF getCanvasScreenRect() {
+		return canvasScreenRect;
+	}
+
 	protected Matrix computeScreenToCanvasMatrix() {
-		final float midX = getWidth() * 0.5f;
-		final float midY = getHeight() * 0.5f;
-		final float maxHalfDim = Math.max(getWidth(), getHeight()) * 0.5f;
-		final float minHalfDim = Math.min(getWidth(), getHeight()) * 0.5f;
+		float width = getWidth() - 2*padding;
+		float height = getHeight() - 2*padding;
+		final float midX = padding + (width) * 0.5f;
+		final float midY = padding + (height) * 0.5f;
+		final float maxHalfDim = Math.max(width, height) * 0.5f;
+		final float minHalfDim = Math.min(width, height) * 0.5f;
 
 		switch(getScaleMode()){
 			case FIT:
@@ -327,10 +430,12 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 	}
 
 	protected Matrix computeCanvasToScreenMatrix() {
-		final float midX = getWidth() * 0.5f;
-		final float midY = getHeight() * 0.5f;
-		final float maxHalfDim = Math.max(getWidth(), getHeight()) * 0.5f;
-		final float minHalfDim = Math.min(getWidth(), getHeight()) * 0.5f;
+		float width = getWidth() - 2*padding;
+		float height = getHeight() - 2*padding;
+		final float midX = padding + width * 0.5f;
+		final float midY = padding + height * 0.5f;
+		final float maxHalfDim = Math.max(width, height) * 0.5f;
+		final float minHalfDim = Math.min(width, height) * 0.5f;
 
 		switch(getScaleMode()){
 			case FIT:
@@ -343,6 +448,9 @@ public class IncrementalInputStrokeDoodle extends Doodle implements IncrementalI
 		Matrix matrix = new Matrix();
 		matrix.preTranslate(midX, midY);
 		matrix.preScale(canvasToScreenScale,canvasToScreenScale);
+
+		canvasScreenRect = new RectF();
+		matrix.mapRect(canvasScreenRect,CANVAS_RECT);
 
 		return matrix;
 	}

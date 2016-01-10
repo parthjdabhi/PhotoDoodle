@@ -10,7 +10,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.support.annotation.Nullable;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -222,8 +221,6 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 				dateFormatter.format(doc.getModificationDate()),
 				doc.getUuid()));
 
-		// set a unique transition name
-		ViewCompat.setTransitionName(holder.imageView, String.valueOf(position) + "_imageView");
 
 		// note: Out icons are square, so knowing item width is sufficient
 		int thumbnailWidth = itemWidth;

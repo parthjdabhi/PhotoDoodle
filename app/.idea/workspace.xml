@@ -37,15 +37,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7fde0eb8-423e-4c88-926f-eb3a8950460c" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/NOTES.md" afterPath="$PROJECT_DIR$/NOTES.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/adapters/DoodleDocumentAdapter.java" afterPath="$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/adapters/DoodleDocumentAdapter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/fragments/DoodleDocumentGridFragment.java" afterPath="$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/fragments/DoodleDocumentGridFragment.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/view/CircularImageView.java" afterPath="$PROJECT_DIR$/PhotoDoodle/src/main/java/org/zakariya/photodoodle/view/CircularImageView.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/PhotoDoodle/src/main/res/layout/activity_doodle.xml" afterPath="$PROJECT_DIR$/PhotoDoodle/src/main/res/layout/activity_doodle.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/PhotoDoodle/src/main/res/layout/doodle_document_grid_item.xml" afterPath="$PROJECT_DIR$/PhotoDoodle/src/main/res/layout/doodle_document_grid_item.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/PhotoDoodle/src/main/res/values/colors.xml" afterPath="$PROJECT_DIR$/PhotoDoodle/src/main/res/values/colors.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/PhotoDoodle/src/main/res/values/dimens.xml" afterPath="$PROJECT_DIR$/PhotoDoodle/src/main/res/values/dimens.xml" />
     </list>
     <ignored path="app.iws" />
     <ignored path=".idea/workspace.xml" />

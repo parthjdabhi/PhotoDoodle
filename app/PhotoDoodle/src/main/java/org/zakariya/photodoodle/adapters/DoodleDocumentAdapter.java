@@ -215,7 +215,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		}
 
 		PhotoDoodleDocument doc = photoDoodleDocuments.get(position);
-		
+
 		holder.photoDoodleDocument = doc;
 		holder.infoTextView.setText(context.getString(R.string.doodle_document_grid_info_text,
 				doc.getName(),

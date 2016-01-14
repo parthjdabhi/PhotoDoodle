@@ -131,7 +131,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		recyclerView.setLayoutManager(layoutManager);
 		recyclerView.addItemDecoration(new DividerItemDecoration(
 				getResources().getDimension(R.dimen.doodle_grid_item_border_width),
-				ContextCompat.getColor(getContext(),R.color.doodleGridThumbnailBorderColor)
+				ContextCompat.getColor(getContext(), R.color.doodleGridThumbnailBorderColor)
 		));
 
 		recyclerView.setAdapter(adapter);
@@ -195,7 +195,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 				.show();
 	}
 
-	void deletePhotoDoodle(final PhotoDoodleDocument doc) {
+	void deletePhotoDoodle(PhotoDoodleDocument doc) {
 
 		View rootView = getView();
 		if (rootView == null) {
@@ -213,20 +213,27 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		TextView tv = (TextView) view.findViewById(android.support.design.R.id.snackbar_text);
 		tv.setTextColor(Color.WHITE);
 
+		final String docUuid = doc.getUuid();
+
 		snackbar.setCallback(new Snackbar.Callback() {
 			@Override
 			public void onDismissed(Snackbar snackbar, int event) {
 				super.onDismissed(snackbar, event);
-				if (!adapter.contains(doc)) {
+				PhotoDoodleDocument doc = PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, docUuid);
+				if (doc != null && !adapter.contains(doc)) {
 					PhotoDoodleDocument.delete(getContext(), realm, doc);
 				}
+
 			}
 		});
 
 		snackbar.setAction(R.string.snackbar_document_deleted_undo, new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				adapter.addItem(doc);
+				PhotoDoodleDocument doc = PhotoDoodleDocument.getPhotoDoodleDocumentByUuid(realm, docUuid);
+				if (doc != null && !adapter.contains(doc)) {
+					adapter.addItem(doc);
+				}
 			}
 		});
 

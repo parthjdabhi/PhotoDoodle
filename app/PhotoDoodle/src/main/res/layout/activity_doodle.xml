@@ -56,6 +56,7 @@
 					android:inputType="textCapWords|textNoSuggestions"
 					android:lines="1"
 					android:maxLines="1"
+					android:selectAllOnFocus="true"
 					android:theme="@style/AppBarEditText"
 					tools:text="Title Text"
 					/>

@@ -1,20 +1,20 @@
 package org.zakariya.photodoodle.fragments;
 
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.PointF;
+import android.graphics.Paint;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -119,15 +119,21 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		DisplayMetrics metrics = getResources().getDisplayMetrics();
 		int displayWidth = metrics.widthPixels;
 		float maxItemSize = getResources().getDimension(R.dimen.max_doodle_grid_item_size);
-		int columns = (int) Math.ceil((float) displayWidth / (float) maxItemSize);
-
-		layoutManager = new SmoothScrollGridLayoutManager(getContext(), columns);
-		recyclerView.setLayoutManager(layoutManager);
+		int columns = (int) Math.ceil((float) displayWidth / maxItemSize);
 
 		RealmResults<PhotoDoodleDocument> docs = PhotoDoodleDocument.all(realm);
 		adapter = new DoodleDocumentAdapter(getContext(), recyclerView, columns, docs, emptyView);
 		adapter.setOnClickListener(this);
 		adapter.setOnLongClickListener(this);
+
+
+		layoutManager = new GridLayoutManager(getContext(), columns);
+		recyclerView.setLayoutManager(layoutManager);
+		recyclerView.addItemDecoration(new DividerItemDecoration(
+				getResources().getDimension(R.dimen.doodle_grid_item_border_width),
+				ContextCompat.getColor(getContext(),R.color.doodleGridThumbnailBorderColor)
+		));
+
 		recyclerView.setAdapter(adapter);
 		return v;
 	}
@@ -148,35 +154,6 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
-	}
-
-	public void showSnackbar(View fab) {
-		Snackbar snackbar = Snackbar.make(fab, "Hello Snackbar", Snackbar.LENGTH_LONG);
-
-		// make text white
-		View view = snackbar.getView();
-		TextView tv = (TextView) view.findViewById(android.support.design.R.id.snackbar_text);
-		tv.setTextColor(Color.WHITE);
-
-		snackbar.setCallback(new Snackbar.Callback() {
-			@Override
-			public void onDismissed(Snackbar snackbar, int event) {
-				Log.i(TAG, "snackbar.onDismissed: ");
-				super.onDismissed(snackbar, event);
-			}
-		});
-
-		snackbar.setAction("Undo", new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Log.i(TAG, "snackbar onClick: ");
-			}
-		});
-
-		//noinspection deprecation
-		snackbar.setActionTextColor(getResources().getColor(R.color.accent));
-
-		snackbar.show();
 	}
 
 	@OnClick(R.id.fab)
@@ -203,7 +180,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	void queryDeletePhotoDoodle(final PhotoDoodleDocument document) {
 		final WeakReference<DoodleDocumentGridFragment> weakThis = new WeakReference<>(this);
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		builder.setMessage(R.string.dialog_delete_document_message)
 				.setNegativeButton(android.R.string.cancel, null)
 				.setPositiveButton(R.string.dialog_delete_document_destructive_button_title, new DialogInterface.OnClickListener() {
@@ -226,6 +203,7 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		}
 
 		// hide document from adapter
+		Log.i(TAG, "deletePhotoDoodle: deleting document");
 		adapter.removeItem(doc);
 
 		Snackbar snackbar = Snackbar.make(rootView, R.string.snackbar_document_deleted, Snackbar.LENGTH_LONG);
@@ -278,35 +256,69 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 		startActivity(new Intent(getContext(), SyncSettingsActivity.class));
 	}
 
-	private class SmoothScrollGridLayoutManager extends GridLayoutManager {
+	private class DividerItemDecoration extends RecyclerView.ItemDecoration {
 
-		public SmoothScrollGridLayoutManager(Context context, int spanCount) {
-			super(context, spanCount);
+		float thickness;
+		private Paint paint;
+
+		public DividerItemDecoration(float thickness, int color) {
+			this.thickness = thickness;
+
+			paint = new Paint();
+			paint.setAntiAlias(true);
+			paint.setColor(color);
+			paint.setStyle(Paint.Style.FILL);
 		}
 
 		@Override
-		public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state, int position) {
-			RecyclerView.SmoothScroller smoothScroller = new TopSnappedSmoothScroller(recyclerView.getContext());
-			smoothScroller.setTargetPosition(position);
-			startSmoothScroll(smoothScroller);
+		public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
+			super.onDrawOver(c, parent, state);
+
+			GridLayoutManager glm = (GridLayoutManager) parent.getLayoutManager();
+			DoodleDocumentAdapter adapter = (DoodleDocumentAdapter) parent.getAdapter();
+
+			int columns = glm.getSpanCount();
+			int rows = (int) Math.ceil((double) adapter.getItemCount() / (double) columns);
+
+			int childCount = parent.getChildCount();
+			for (int i = 0; i < childCount; i++) {
+				View child = parent.getChildAt(i);
+				int adapterPos = parent.getChildAdapterPosition(child);
+				int row = (int) Math.floor((double) adapterPos / (double) columns);
+				int col = adapterPos % columns;
+
+				float leftBorderWidth = thickness;
+				float topBorderWidth = thickness;
+				float rightBorderWidth = thickness;
+				float bottomBorderWidth = thickness;
+
+				if (row > 0) {
+					topBorderWidth *= 0.5;
+				}
+
+				if (row < rows - 1) {
+					bottomBorderWidth *= 0.5;
+				}
+
+				if (col > 0) {
+					leftBorderWidth *= 0.5;
+				}
+
+				if (col < columns - 1) {
+					rightBorderWidth *= 0.5;
+				}
+
+				float left = child.getLeft();
+				float top = child.getTop();
+				float right = child.getRight();
+				float bottom = child.getBottom();
+
+				c.drawRect(left, top, right, top + topBorderWidth, paint);
+				c.drawRect(left, bottom - bottomBorderWidth, right, bottom, paint);
+				c.drawRect(left, top + topBorderWidth, left + leftBorderWidth, bottom - bottomBorderWidth, paint);
+				c.drawRect(right - rightBorderWidth, top + topBorderWidth, right, bottom - bottomBorderWidth, paint);
+			}
 		}
-
-		private class TopSnappedSmoothScroller extends LinearSmoothScroller {
-			public TopSnappedSmoothScroller(Context context) {
-				super(context);
-			}
-
-			@Override
-			public PointF computeScrollVectorForPosition(int targetPosition) {
-				return SmoothScrollGridLayoutManager.this.computeScrollVectorForPosition(targetPosition);
-			}
-
-			@Override
-			protected int getVerticalSnapPreference() {
-				return SNAP_TO_START;
-			}
-		}
-
 	}
 
 }

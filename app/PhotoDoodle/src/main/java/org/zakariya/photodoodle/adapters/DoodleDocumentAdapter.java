@@ -10,6 +10,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -78,7 +79,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		public void setThumbnailImage(Bitmap thumbnail) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				Context context = rootView.getContext();
-				int rippleColor = context.getResources().getColor(R.color.primary);
+				int rippleColor = ContextCompat.getColor(context,R.color.primary);
 				BitmapDrawable drawable = new BitmapDrawable(context.getResources(), thumbnail);
 				RippleDrawable ripple = new RippleDrawable(ColorStateList.valueOf(rippleColor), drawable, null);
 				imageView.setImageDrawable(ripple);
@@ -126,6 +127,7 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		dateFormatter = DateFormat.getDateTimeInstance();
 		crossfadeDuration = context.getResources().getInteger(android.R.integer.config_shortAnimTime);
 		photoDoodleDocuments = new ArrayList<>();
+
 		setItems(items);
 	}
 
@@ -213,14 +215,13 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 		}
 
 		PhotoDoodleDocument doc = photoDoodleDocuments.get(position);
+		
 		holder.photoDoodleDocument = doc;
-
 		holder.infoTextView.setText(context.getString(R.string.doodle_document_grid_info_text,
 				doc.getName(),
 				dateFormatter.format(doc.getCreationDate()),
 				dateFormatter.format(doc.getModificationDate()),
 				doc.getUuid()));
-
 
 		// note: Out icons are square, so knowing item width is sufficient
 		int thumbnailWidth = itemWidth;
@@ -270,7 +271,6 @@ public class DoodleDocumentAdapter extends RecyclerView.Adapter<DoodleDocumentAd
 				}
 			});
 		}
-
 	}
 
 	@Override

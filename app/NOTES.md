@@ -1,5 +1,27 @@
 #Currently
 
+DoodleDocumentAdapter's updateAllImageBorders ALMOST works. It seems like one or two items doesn't get updated.
+
+I'm looking into using an ItemDecorator, but this may be complex.
+	might my best option be to walk the array of children and draw a border for each child explicitly???
+	- need to take into account scroll position
+	- only draw borders for existing items, so if there's an empty spot at end of list, don't draw decorator there
+	- what about animations??? 
+	
+
+#BUGS
+When deleting a bunch of items quickly - looks like the previously removed doc gets deleted. I assume snackbar is a singleton and is flushing its ondismissed queue or something to that effect.
+
+We need to do something like detect if a delete is requested while another delete is still showing the undo button, and in that case, force that delete to run??? Or is the problem that that's happening automatically, and correctly???
+ 
+	java.lang.IllegalStateException: Object is no longer managed by Realm. Has it been deleted?
+	  at io.realm.internal.InvalidRow.getStubException(InvalidRow.java:192)
+	  at io.realm.internal.InvalidRow.getString(InvalidRow.java:88)
+	  at io.realm.PhotoDoodleDocumentRealmProxy.getUuid(PhotoDoodleDocumentRealmProxy.java:74)
+	  at org.zakariya.photodoodle.adapters.DoodleDocumentAdapter.contains(DoodleDocumentAdapter.java:356)
+	  at org.zakariya.photodoodle.fragments.DoodleDocumentGridFragment$5.onDismissed(DoodleDocumentGridFragment.java:264)
+	  at android.support.design.widget.Snackbar.onViewHidden(Snackbar.java:603)
+
 #TODO
 
 Superficial shared element transitions are working, but:

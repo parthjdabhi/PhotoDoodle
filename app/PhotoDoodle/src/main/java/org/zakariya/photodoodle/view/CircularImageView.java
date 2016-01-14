@@ -26,7 +26,6 @@ public class CircularImageView extends ImageView {
 	private Drawable drawable;
 	private Paint paint;
 
-	//region Constructor & Init Method
 	public CircularImageView(final Context context) {
 		super(context, null);
 		init(context, null, 0);

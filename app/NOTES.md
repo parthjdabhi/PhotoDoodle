@@ -1,5 +1,9 @@
 #Currently
 
+Screwing with theming.
+BROKEN:
+	- Main activity toolbar popup is no longer Light style.
+
 DoodleDocumentAdapter's updateAllImageBorders ALMOST works. It seems like one or two items doesn't get updated.
 
 I'm looking into using an ItemDecorator, but this may be complex.

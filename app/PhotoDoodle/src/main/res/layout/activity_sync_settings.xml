@@ -11,9 +11,8 @@
 		android:id="@+id/toolbar"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:background="@color/primary_dark"
 		android:minHeight="?attr/actionBarSize"
-		android:theme="@style/ActionBarStyle"
+		android:theme="@style/DefaultActionBarStyle"
 		app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
 	<FrameLayout android:id="@+id/container"
@@ -110,7 +109,7 @@
 					android:text="@string/sync_history"
 					android:textAllCaps="true"
 					style="@style/Body2"
-					android:textColor="@color/primary_light"
+					android:textColor="@color/primaryLight"
 					android:layout_gravity="center_vertical"
 					android:layout_weight="1"/>
 

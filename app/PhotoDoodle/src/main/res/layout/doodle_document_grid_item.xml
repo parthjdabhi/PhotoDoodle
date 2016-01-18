@@ -23,7 +23,7 @@
 		android:tint="@color/placeholderIconTint"
 		android:scaleType="center"
 		tools:ignore="ContentDescription"
-		android:background="@color/windowBackgroundColor"
+		android:background="@color/windowBackground"
 		/>
 
 	<LinearLayout

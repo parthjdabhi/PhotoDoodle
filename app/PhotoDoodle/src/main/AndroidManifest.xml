@@ -32,6 +32,7 @@
 			android:label="@string/app_name"
 			android:launchMode="singleTop"
 			android:exported="true"
+			android:theme="@style/PhotoDoodle.DoodleActivity"
 			android:parentActivityName=".activities.MainActivity">
 		</activity>
 

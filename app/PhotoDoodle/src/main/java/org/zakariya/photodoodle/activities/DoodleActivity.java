@@ -194,6 +194,7 @@ public class DoodleActivity extends BaseActivity
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 					if (actionId == EditorInfo.IME_ACTION_DONE) {
 						v.clearFocus();
+						goFullscreen();
 						return true;
 					} else {
 						return false;
@@ -207,6 +208,7 @@ public class DoodleActivity extends BaseActivity
 					Log.i(TAG, "onFocusChange: hasFocus:" + hasFocus);
 					if (!hasFocus) {
 						hideKeyboard(v);
+						goFullscreen();
 					}
 				}
 			});
@@ -242,9 +244,9 @@ public class DoodleActivity extends BaseActivity
 		photoDoodle.setScaleMode(PhotoDoodle.ScaleMode.FIT);
 		photoDoodle.setPadding(getResources().getDimension(R.dimen.doodle_canvas_padding));
 		photoDoodle.setCanvasShadowOffset(getResources().getDimension(R.dimen.doodle_canvas_shadow_offset));
-		photoDoodle.setCanvasBorderColor(ContextCompat.getColor(this,R.color.canvasBorderColor));
-		photoDoodle.setCanvasShadowColor(ContextCompat.getColor(this,R.color.canvasShadowColor));
-		photoDoodle.setBackgroundColor(ContextCompat.getColor(this,R.color.windowBackgroundColor));
+		photoDoodle.setCanvasBorderColor(ContextCompat.getColor(this,R.color.canvasBorder));
+		photoDoodle.setCanvasShadowColor(ContextCompat.getColor(this,R.color.canvasShadow));
+		photoDoodle.setBackgroundColor(ContextCompat.getColor(this,R.color.windowBackground));
 
 		doodleView.setDoodle(photoDoodle);
 
@@ -364,6 +366,13 @@ public class DoodleActivity extends BaseActivity
 		}
 	}
 
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+		if (hasFocus) {
+			goFullscreen();
+		}
+	}
 
 	@Override
 	public void onTabSelected(TabLayout.Tab tab) {
@@ -572,12 +581,12 @@ public class DoodleActivity extends BaseActivity
 
 		cameraTabIcon = getResources().getDrawable(R.drawable.icon_tab_camera);
 		cameraTabIcon = DrawableCompat.wrap(cameraTabIcon);
-		DrawableCompat.setTint(cameraTabIcon, getResources().getColor(R.color.actionBarIconColor));
+		DrawableCompat.setTint(cameraTabIcon, getResources().getColor(R.color.immersiveActionBarIcon));
 		cameraTab.setIcon(cameraTabIcon);
 
 		drawingTabIcon = getResources().getDrawable(R.drawable.icon_tab_draw);
 		drawingTabIcon = DrawableCompat.wrap(drawingTabIcon);
-		DrawableCompat.setTint(drawingTabIcon, getResources().getColor(R.color.actionBarIconColor));
+		DrawableCompat.setTint(drawingTabIcon, getResources().getColor(R.color.immersiveActionBarIcon));
 		drawingTab.setIcon(drawingTabIcon);
 
 		modeTabs.addTab(cameraTab);
@@ -739,5 +748,15 @@ public class DoodleActivity extends BaseActivity
 		if (manager != null) {
 			manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
 		}
+	}
+
+	private void goFullscreen() {
+
+		int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+				| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+				| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+				| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+
+		getWindow().getDecorView().setSystemUiVisibility(flags);
 	}
 }

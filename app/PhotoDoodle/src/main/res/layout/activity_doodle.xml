@@ -6,6 +6,7 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:orientation="vertical"
+    android:paddingTop="24dp"
 	>
 
 	<!-- spoof to take focus -->
@@ -17,17 +18,15 @@
 
 	<FrameLayout
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:background="@color/primary">
+		android:layout_height="wrap_content">
 
 		<android.support.v7.widget.Toolbar
 			android:id="@+id/toolbar"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:background="@color/primary_dark"
 			android:minHeight="?attr/actionBarSize"
-			android:theme="@style/ActionBarStyle"
-			app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+			android:theme="@style/ImmersiveActionBarStyle"
+			app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"/>
 
 		<LinearLayout
 			android:layout_width="match_parent"
@@ -48,7 +47,8 @@
 
 				<EditText
 					android:id="@+id/titleEditText"
-					style="@style/TitleTextStyle"
+					style="@style/ImmersiveTitleTextStyle"
+					android:theme="@style/ImmersiveAppBarEditText"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:ellipsize="end"
@@ -57,7 +57,6 @@
 					android:lines="1"
 					android:maxLines="1"
 					android:selectAllOnFocus="true"
-					android:theme="@style/AppBarEditText"
 					tools:text="Title Text"
 					/>
 
@@ -68,7 +67,8 @@
 				android:layout_width="wrap_content"
 				android:layout_height="?attr/actionBarSize"
 				app:layout_scrollFlags="scroll"
-				app:tabIndicatorColor="@android:color/white"
+				app:tabIndicatorHeight="0dp"
+				app:tabIndicatorColor="@android:color/transparent"
 				/>
 
 		</LinearLayout>

@@ -2,26 +2,38 @@
 
 	<!-- Base application theme. -->
 	<style name="PhotoDoodle" parent="Theme.AppCompat.Light.NoActionBar">
-		<item name="actionBarStyle">@style/ActionBarStyle</item>
+		<item name="actionBarStyle">@style/DefaultActionBarStyle</item>
 		<item name="alertDialogTheme">@style/AlertDialogStyle</item>
 
 
 		<!-- Set AppCompat’s color theme attrs -->
 		<item name="colorPrimary">@color/primary</item>
-		<item name="colorPrimaryDark">@color/primary_dark</item>
+		<item name="colorPrimaryDark">@color/primaryDark</item>
 		<item name="colorAccent">@color/accent</item>
 
-		<item name="android:windowBackground">@color/windowBackgroundColor</item>
+		<item name="android:windowBackground">@color/windowBackground</item>
 		<item name="android:textColor">@color/textColor</item>
 	</style>
 
-
-	<style name="ActionBarStyle" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-		<item name="android:titleTextStyle">@style/TitleTextStyle</item>
-
-		<!-- Support library compatibility -->
-		<item name="titleTextStyle">@style/TitleTextStyle</item>
+	<style name="PhotoDoodle.Home">
 	</style>
+
+	<style name="PhotoDoodle.DoodleActivity">
+		<item name="actionBarStyle">@style/ImmersiveActionBarStyle</item>
+		<item name="colorPrimary">@color/windowBackground</item>
+		<item name="colorPrimaryDark">@color/primaryLight</item>
+	</style>
+
+	<style name="DefaultActionBarStyle" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+		<item name="android:background">@color/primary</item>
+	</style>
+
+
+	<style name="ImmersiveActionBarStyle" parent="@style/ThemeOverlay.AppCompat.Light">
+		<item name="android:background">@color/windowBackground</item>
+		<item name="colorControlNormal">@color/primary</item>
+	</style>
+
 
 	<style name="Display1" parent="TextAppearance.AppCompat.Display1">
 		<item name="android:textColor">@color/textColor</item>
@@ -47,28 +59,26 @@
 		<item name="android:textColor">@color/textColor</item>
 	</style>
 
-
-	<!-- action bar title text -->
-	<style name="TitleTextStyle"
-	       parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
-		<item name="android:textColor">@color/actionBarText</item>
-	</style>
-
-	<style name="AppBarEditText" parent="Widget.AppCompat.EditText">
-		<item name="android:textColor">@color/actionBarText</item>
+	<style name="ImmersiveAppBarEditText" parent="Widget.AppCompat.EditText">
+		<item name="android:textColor">@color/primary</item>
 		<item name="colorControlNormal">@color/actionbarEditText_colorControlNormal</item>
 		<item name="colorControlActivated">@color/actionbarEditText_colorControlActivated</item>
 		<item name="colorControlHighlight">@color/actionbarEditText_colorControlHighlight</item>
 	</style>
 
+	<style name="ImmersiveTitleTextStyle"
+	       parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
+		<item name="android:textColor">@color/primary</item>
+	</style>
+
 	<style name="PopupImageButtonStyle" parent="Widget.AppCompat.Button.Borderless">
 		<item name="android:layout_width">@dimen/doodle_drawing_tool_icon_size</item>
 		<item name="android:layout_height">@dimen/doodle_drawing_tool_icon_size</item>
-		<item name="android:tint">@color/popup_item_tint</item>
+		<item name="android:tint">@color/popupItemTint</item>
 	</style>
 
 	<style name="PopupTextButtonStyle" parent="Widget.AppCompat.Button.Borderless">
-		<item name="android:textColor">@color/popup_item_text_color</item>
+		<item name="android:textColor">@color/popupItemTextTint</item>
 	</style>
 
 	<style name="EmptyDoodleGridText" parent="Base.TextAppearance.AppCompat.Large">

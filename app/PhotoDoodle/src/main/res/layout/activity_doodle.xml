@@ -43,6 +43,7 @@
 				android:layout_gravity="start|center_vertical"
 				android:layout_weight="1"
 				app:errorEnabled="false"
+				android:translationY="-4dp"
 				>
 
 				<EditText

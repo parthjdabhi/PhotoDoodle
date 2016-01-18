@@ -1,6 +1,7 @@
 package org.zakariya.photodoodle.fragments;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -180,7 +181,12 @@ public class DoodleDocumentGridFragment extends Fragment implements DoodleDocume
 	void queryDeletePhotoDoodle(final PhotoDoodleDocument document) {
 		final WeakReference<DoodleDocumentGridFragment> weakThis = new WeakReference<>(this);
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		// TODO: Figure out why I get "The Activity's LayoutInflater already has a Factory installed so we can not install AppCompat's" warning here.
+		// Using getThemedContext() doesn't fix the problem.
+		// Context context = ((AppCompatActivity)getActivity()).getSupportActionBar().getThemedContext();
+		Context context = getActivity();
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setMessage(R.string.dialog_delete_document_message)
 				.setNegativeButton(android.R.string.cancel, null)
 				.setPositiveButton(R.string.dialog_delete_document_destructive_button_title, new DialogInterface.OnClickListener() {

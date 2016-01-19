@@ -9,11 +9,8 @@
 
 	<android.support.v7.widget.Toolbar
 		android:id="@+id/toolbar"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:minHeight="?attr/actionBarSize"
-		android:theme="@style/DefaultActionBarStyle"
-		app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+		style="@style/DefaultToolbarStyle"
+		/>
 
 	<FrameLayout android:id="@+id/container"
 	             xmlns:android="http://schemas.android.com/apk/res/android"

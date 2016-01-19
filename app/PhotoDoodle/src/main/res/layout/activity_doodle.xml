@@ -22,11 +22,8 @@
 
 		<android.support.v7.widget.Toolbar
 			android:id="@+id/toolbar"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:minHeight="?attr/actionBarSize"
-			android:theme="@style/ImmersiveActionBarStyle"
-			app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"/>
+			style="@style/ImmersiveToolbarStyle"
+			/>
 
 		<LinearLayout
 			android:layout_width="match_parent"

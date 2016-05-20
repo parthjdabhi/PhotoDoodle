@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<style name="PhotoDoodle" parent="Theme.AppCompat.Light.NoActionBar">
+	<style name="MrDoodle" parent="Theme.AppCompat.Light.NoActionBar">
 		<item name="actionBarStyle">@style/DefaultToolbarStyle</item>
 		<item name="alertDialogTheme">@style/AlertDialogStyle</item>
 
@@ -13,13 +13,13 @@
 		<item name="android:textColor">@color/textColor</item>
 	</style>
 
-	<style name="PhotoDoodle.Home">
+	<style name="MrDoodle.Home">
 		<!-- TODO Figure out how to make translucent nav bar without breaking layout of status bar/fab -->
 		<!--<item name="android:navigationBarColor">@color/translucent_status_bar</item>-->
 		<!--<item name="android:windowTranslucentNavigation">true</item>-->
 	</style>
 
-	<style name="PhotoDoodle.DoodleActivity">
+	<style name="MrDoodle.DoodleActivity">
 		<item name="actionBarStyle">@style/ImmersiveToolbarStyle</item>
 		<item name="android:colorPrimary">@color/windowBackground</item>
 		<item name="android:colorPrimaryDark">@color/primaryDark</item>

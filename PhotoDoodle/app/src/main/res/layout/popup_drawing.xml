@@ -64,7 +64,7 @@
 		android:layout_height="wrap_content"
 		android:orientation="horizontal">
 
-		<org.zakariya.photodoodle.view.ColorSwatchView
+		<org.zakariya.mrdoodle.view.ColorSwatchView
 			android:id="@+id/colorSwatchTool"
 			android:layout_width="80dp"
 			android:layout_height="48dp"

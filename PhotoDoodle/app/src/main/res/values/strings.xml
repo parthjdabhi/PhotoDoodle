@@ -1,5 +1,5 @@
 <resources>
-	<string name="app_name">PhotoDoodle</string>
+	<string name="app_name">MrDoodle</string>
 
 	<string name="menu_item_sync">Sync Settings</string>
 	<string name="menu_item_about">About</string>
@@ -32,7 +32,7 @@
 	<string name="no_camera_dialog_positive_button_title">Shucks</string>
 
 	<string name="dialog_rename_document_title">Rename</string>
-	<string name="untitled_document">Untitled PhotoDoodle</string>
+	<string name="untitled_document">Untitled Doodle</string>
 
 	<string name="dialog_delete_document_message">Discard doodle?</string>
 	<string name="dialog_delete_document_destructive_button_title">Discard</string>

@@ -26,8 +26,9 @@ import org.zakariya.doodle.geom.PointFUtil;
 import org.zakariya.mrdoodle.R;
 
 /**
- * TODO: document your custom view class.
+ * ColorPickerView
  */
+@SuppressWarnings("unused")
 public class ColorPickerView extends View {
 
 	public interface OnColorChangeListener {

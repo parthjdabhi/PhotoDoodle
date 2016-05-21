@@ -59,6 +59,12 @@
 			android:launchMode="singleTop">
 		</activity>
 
+		<activity android:name=".activities.FlyoutMenuTestActivity"
+		          android:label="@string/activity_title_flyout_menu_test"
+		          android:exported="true"
+		          android:launchMode="singleTop"/>
+
+
 	</application>
 
 </manifest>

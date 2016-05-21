@@ -165,7 +165,7 @@ public class DoodleThumbnailRenderer implements ComponentCallbacks2 {
 	/**
 	 * Asynchronously render a thumbnail at a provided width/height for a document
 	 *
-	 * @param document  the document whos thumbnail you wish to render
+	 * @param document  the document who's thumbnail you wish to render
 	 * @param width     the target width
 	 * @param height    the target height
 	 * @param callbacks invoked when the thumbnail is ready

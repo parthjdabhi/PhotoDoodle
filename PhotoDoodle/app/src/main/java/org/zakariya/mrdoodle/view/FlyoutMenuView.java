@@ -15,7 +15,7 @@ import android.graphics.Shader;
 import android.support.annotation.ColorInt;
 import android.support.v4.graphics.ColorUtils;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.util.Size;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,10 +24,72 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 
 import org.zakariya.mrdoodle.R;
 
+import java.util.List;
+
 public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdateListener {
 
-	private static final String TAG = FlyoutMenuView.class.getSimpleName();
+	/**
+	 * Base interface for items to be added to the FlyoutMenuView
+	 */
+	public interface MenuItem {
 
+		/**
+		 * Draw the contents of the MenuItem
+		 * @param canvas the canvas to draw with
+		 * @param alpha the opacity to draw the contents at - ranging from [0,1].
+		 */
+		void onDraw(Canvas canvas, float alpha);
+
+		/**
+		 * @return the width this MenuItem wants to be in pixels
+		 */
+		float getWidth();
+
+		/**
+		 * @return the height this MenuItem wants to be in pixels
+		 */
+		float getHeight();
+	}
+
+	/**
+	 * Base class for layout managers which position MenuItem instances in the FlyoutMenu.
+	 * LayoutManager is responsible for determining the minimum size menu that can show all items, and
+	 * is responsible for positioning items individually.
+	 */
+	public interface LayoutManager {
+		/**
+		 * @param items list of the items which the FlyoutMenu will be displaying
+		 * @return the minimum size the FlyoutMenu must be to display all items. How they're packed is up to the LayoutManager
+		 */
+		Size getMinimumSizeForItems(List<MenuItem> items);
+
+		/**
+		 * @param item an individual MenuItem
+		 * @param positionInList the individual MenuItem's index in the adapter
+		 * @return the Rect describing the position of this item, in pixels, where the origin (0,0) is the top left of the flyout menu
+		 */
+		Rect getLayoutRectForItem(MenuItem item, int positionInList);
+	}
+
+
+	/**
+	 * Base class for a FlyoutMenu's data source - the thing providing the MenuItems
+	 */
+	public interface Adapter {
+		/**
+		 * @return the number of MenuItems in this Adapter
+		 */
+		int getCount();
+
+		/**
+		 * @param position the index of the item to vend
+		 * @return the MenuItem at position
+		 */
+		MenuItem getItem(int position);
+	}
+
+
+	private static final String TAG = FlyoutMenuView.class.getSimpleName();
 
 	private static final int MENU_CORNER_RADIUS_DP = 4;
 	private static final int MENU_SHADOW_RADIUS_DP = 24;
@@ -339,14 +401,12 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		Bitmap shadowBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
 		shadowBitmap.eraseColor(0x0); // clear
 
-		Canvas canvas = new Canvas(shadowBitmap);
 		Paint paint = new Paint();
 		paint.setAntiAlias(true);
 		paint.setShader(new RadialGradient(shadowRadiusPx + 1, shadowRadiusPx + 1, shadowRadiusPx, color, ColorUtils.setAlphaComponent(color, 0), Shader.TileMode.CLAMP));
 
+		Canvas canvas = new Canvas(shadowBitmap);
 		canvas.drawRect(0, 0, size, size, paint);
-
-		Log.i(TAG, "createMenuShadowBitmap: rendered bitmap, width: " + shadowBitmap.getWidth() + " height: " + shadowBitmap.getHeight());
 
 		return shadowBitmap;
 	}
@@ -357,17 +417,14 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		Bitmap shadowBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
 		shadowBitmap.eraseColor(0x0);
 
-		Canvas canvas = new Canvas(shadowBitmap);
-		Paint paint = new Paint();
-		paint.setAntiAlias(true);
-
 		int colors[] = {color, ColorUtils.setAlphaComponent(color, 0)};
 		float stops[] = {(float) (buttonRadius - (shadowRadius / 2)) / (float) radius, 1f};
+		Paint paint = new Paint();
+		paint.setAntiAlias(true);
 		paint.setShader(new RadialGradient(radius, radius, radius, colors, stops, Shader.TileMode.CLAMP));
 
+		Canvas canvas = new Canvas(shadowBitmap);
 		canvas.drawRect(0, 0, size, size, paint);
-
-		Log.i(TAG, "createButtonShadowBitmap: rendered bitmap, width: " + shadowBitmap.getWidth() + " height: " + shadowBitmap.getHeight());
 
 		return shadowBitmap;
 	}

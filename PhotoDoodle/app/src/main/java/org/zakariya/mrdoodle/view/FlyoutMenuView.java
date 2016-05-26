@@ -15,7 +15,6 @@ import android.graphics.Shader;
 import android.support.annotation.ColorInt;
 import android.support.v4.graphics.ColorUtils;
 import android.util.AttributeSet;
-import android.util.Size;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,9 +23,65 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 
 import org.zakariya.mrdoodle.R;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+//@SuppressWarnings("unused")
 public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdateListener {
+
+
+	@SuppressWarnings("unused")
+	public static class Size {
+		int width;
+		int height;
+
+		public Size() {
+		}
+
+		public Size(int width, int height) {
+			this.width = width;
+			this.height = height;
+		}
+
+		public int getWidth() {
+			return width;
+		}
+
+		public void setWidth(int width) {
+			this.width = width;
+		}
+
+		public int getHeight() {
+			return height;
+		}
+
+		public void setHeight(int height) {
+			this.height = height;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (o == this) {
+				return true;
+			}
+
+			if (o instanceof Size) {
+				Size other = (Size) o;
+				return other.width == width && other.height == height;
+			}
+
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			int result = 17;
+			result = 31 * result + width;
+			result = 31 * result + height;
+			return result;
+		}
+	}
 
 	/**
 	 * Base interface for items to be added to the FlyoutMenuView
@@ -35,42 +90,94 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 		/**
 		 * Draw the contents of the MenuItem
+		 *
 		 * @param canvas the canvas to draw with
-		 * @param alpha the opacity to draw the contents at - ranging from [0,1].
+		 * @param alpha  the opacity to draw the contents at - ranging from [0,1].
 		 */
-		void onDraw(Canvas canvas, float alpha);
-
-		/**
-		 * @return the width this MenuItem wants to be in pixels
-		 */
-		float getWidth();
-
-		/**
-		 * @return the height this MenuItem wants to be in pixels
-		 */
-		float getHeight();
+		void onDraw(Canvas canvas, Rect bounds, float alpha);
 	}
 
 	/**
 	 * Base class for layout managers which position MenuItem instances in the FlyoutMenu.
-	 * LayoutManager is responsible for determining the minimum size menu that can show all items, and
+	 * Layout is responsible for determining the minimum size menu that can show all items, and
 	 * is responsible for positioning items individually.
 	 */
-	public interface LayoutManager {
+	public interface Layout {
 		/**
-		 * @param items list of the items which the FlyoutMenu will be displaying
-		 * @return the minimum size the FlyoutMenu must be to display all items. How they're packed is up to the LayoutManager
+		 * @param itemCount the number of items in the menu
+		 * @return the minimum size the FlyoutMenu must be to display all items. How they're packed is up to the Layout
 		 */
-		Size getMinimumSizeForItems(List<MenuItem> items);
+		Size getMinimumSizeForItems(int itemCount, int itemWidthPx, int itemHeightPx, int itemMarginPx);
 
 		/**
-		 * @param item an individual MenuItem
 		 * @param positionInList the individual MenuItem's index in the adapter
+		 * @param itemWidthPx    width of item to layout
+		 * @param itemHeightPx   height of the item to layout
+		 * @param itemMarginPx   the margin around the item
 		 * @return the Rect describing the position of this item, in pixels, where the origin (0,0) is the top left of the flyout menu
 		 */
-		Rect getLayoutRectForItem(MenuItem item, int positionInList);
+		Rect getLayoutRectForItem(int positionInList, int itemWidthPx, int itemHeightPx, int itemMarginPx);
 	}
 
+	@SuppressWarnings("unused")
+	public static class GridLayout implements Layout {
+
+		public static final int UNSPECIFIED = 0;
+
+		int cols, rows;
+
+		public GridLayout(int cols, int rows) {
+			this.cols = cols;
+			this.rows = rows;
+
+			if (this.cols > 0 && this.rows > 0) {
+				throw new IllegalArgumentException("one of cols or rows attribute must be 0, both cannot be set");
+			}
+		}
+
+		@Override
+		public Size getMinimumSizeForItems(int itemCount, int itemWidthPx, int itemHeightPx, int itemMarginPx) {
+			Size size = new Size();
+			if (cols > 0) {
+				// fixed number of columns
+				int requiredRows = (int) Math.ceil((float) itemCount / (float) cols);
+				size.width = cols * itemWidthPx + ((cols + 1) * itemMarginPx);
+				size.height = requiredRows * itemHeightPx + ((requiredRows + 1) * itemMarginPx);
+			} else if (rows > 0) {
+				int requiredCols = (int) Math.ceil((float) itemCount / (float) rows);
+				size.width = requiredCols * itemWidthPx + ((requiredCols + 1) * itemMarginPx);
+				size.height = rows * itemHeightPx + ((rows + 1) * itemMarginPx);
+			} else {
+				throw new IllegalArgumentException("one of cols or rows attribute must be 0, both cannot be set");
+			}
+
+			return size;
+		}
+
+		@Override
+		public Rect getLayoutRectForItem(int positionInList, int itemWidthPx, int itemHeightPx, int itemMarginPx) {
+			int row;
+			int col;
+
+			if (cols > 0) {
+				row = (int)Math.floor((float)positionInList / cols);
+				col = positionInList - row * cols;
+			} else if (rows > 0) {
+				col = (int)Math.floor((float)positionInList / rows);
+				row = positionInList - col * rows;
+			} else {
+				throw new IllegalArgumentException("one of cols or rows attribute must be 0, both cannot be set");
+			}
+
+			Rect rect = new Rect();
+			rect.left = col * itemWidthPx + (col + 1) * itemMarginPx;
+			rect.top = row * itemHeightPx + (row+1) * itemMarginPx;
+			rect.right = rect.left + itemWidthPx;
+			rect.bottom = rect.top + itemHeightPx;
+
+			return rect;
+		}
+	}
 
 	/**
 	 * Base class for a FlyoutMenu's data source - the thing providing the MenuItems
@@ -88,6 +195,36 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		MenuItem getItem(int position);
 	}
 
+	public static class ArrayAdapter<T> implements Adapter {
+
+		private List<T> items;
+
+		public ArrayAdapter(List<T> items) {
+			this.items = items;
+		}
+
+		public ArrayAdapter(T[] items) {
+			this.items = Arrays.asList(items);
+		}
+
+		@Override
+		public int getCount() {
+			return items.size();
+		}
+
+		@Override
+		public MenuItem getItem(int position) {
+			return (MenuItem) items.get(position);
+		}
+	}
+
+	private static class MenuItemLayout {
+		MenuItem item;
+		int itemAdapterPosition;
+		Rect frame;
+		Rect bounds;
+	}
+
 
 	private static final String TAG = FlyoutMenuView.class.getSimpleName();
 
@@ -98,6 +235,9 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 	private static final int BUTTON_SHADOW_RADIUS_DP = 12;
 	private static final int BUTTON_SHADOW_OFFSET_DP = 5;
+
+	private static final int DEFAULT_ITEM_SIZE_DP = 48;
+	private static final int DEFAULT_ITEM_MARGIN_DP = 8;
 
 	private static final int SHADOW_COLOR = 0x44000000;
 
@@ -123,8 +263,14 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	Rect menuShadowDstRect = new Rect();
 
 	Bitmap buttonShadowBitmap;
-	int buttonShadowInset;
 	int buttonShadowOffset;
+
+	int itemWidth;
+	int itemHeight;
+	int itemMargin;
+	Adapter adapter;
+	Layout layout;
+	ArrayList<MenuItemLayout> itemLayouts = new ArrayList<>();
 
 	public FlyoutMenuView(Context context) {
 		super(context);
@@ -150,6 +296,11 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 				attrs, R.styleable.FlyoutMenuView, defStyle, 0);
 
 		setMenuBackgroundColor(a.getColor(R.styleable.FlyoutMenuView_menuColor, menuBackgroundColor));
+
+		itemWidth = a.getDimensionPixelSize(R.styleable.FlyoutMenuView_itemWidth, (int)dp2px(DEFAULT_ITEM_SIZE_DP));
+		itemHeight = a.getDimensionPixelSize(R.styleable.FlyoutMenuView_itemHeight, (int)dp2px(DEFAULT_ITEM_SIZE_DP));
+		itemMargin = a.getDimensionPixelSize(R.styleable.FlyoutMenuView_itemMargin, (int)dp2px(DEFAULT_ITEM_MARGIN_DP));
+
 		a.recycle();
 
 		menuBackgroundCornerRadius = dp2px(MENU_CORNER_RADIUS_DP);
@@ -160,6 +311,25 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 		buttonShadowRadius = (int) dp2px(BUTTON_SHADOW_RADIUS_DP);
 		buttonShadowOffset = (int) dp2px(BUTTON_SHADOW_OFFSET_DP);
+	}
+
+
+	public Adapter getAdapter() {
+		return adapter;
+	}
+
+	public void setAdapter(Adapter adapter) {
+		this.adapter = adapter;
+		this.invalidateMenuItemLayout();
+	}
+
+	public Layout getLayout() {
+		return layout;
+	}
+
+	public void setLayout(Layout layout) {
+		this.layout = layout;
+		this.invalidateMenuItemLayout();
 	}
 
 	@Override
@@ -188,8 +358,8 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		if (menuExtentOpen < transitionShadowEdgeWeight) {
 			float buttonShadowAlpha = (transitionShadowEdgeWeight - menuExtentOpen) / transitionShadowEdgeWeight;
 
-			menuPaint.setAlpha((int)(buttonShadowAlpha * 255));
-			canvas.drawBitmap(buttonShadowBitmap, menuBackgroundFillOrigin.x - buttonShadowBitmap.getWidth()/2, menuBackgroundFillOrigin.y - buttonShadowBitmap.getHeight()/2 + buttonShadowOffset, menuPaint);
+			menuPaint.setAlpha((int) (buttonShadowAlpha * 255));
+			canvas.drawBitmap(buttonShadowBitmap, menuBackgroundFillOrigin.x - buttonShadowBitmap.getWidth() / 2, menuBackgroundFillOrigin.y - buttonShadowBitmap.getHeight() / 2 + buttonShadowOffset, menuPaint);
 		}
 
 		if (menuExtentOpen > openMenuShadowEdge) {
@@ -357,6 +527,33 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		invalidate();
 	}
 
+	public int getItemWidth() {
+		return itemWidth;
+	}
+
+	public void setItemWidth(int itemWidth) {
+		this.itemWidth = itemWidth;
+		invalidateMenuItemLayout();
+	}
+
+	public int getItemHeight() {
+		return itemHeight;
+	}
+
+	public void setItemHeight(int itemHeight) {
+		this.itemHeight = itemHeight;
+		invalidateMenuItemLayout();
+	}
+
+	public int getItemMargin() {
+		return itemMargin;
+	}
+
+	public void setItemMargin(int itemMargin) {
+		this.itemMargin = itemMargin;
+		invalidateMenuItemLayout();
+	}
+
 	public int getMenuBackgroundColor() {
 		return menuBackgroundColor;
 	}
@@ -377,6 +574,9 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 				menuBackgroundFillOrigin.y - menuClosedRadius,
 				menuBackgroundFillOrigin.x + menuClosedRadius,
 				menuBackgroundFillOrigin.y + menuClosedRadius);
+
+
+		// TODO: Unify this with layoutMenuItems since menu open shape size is dependant on adapter/layout/etc 
 
 		float openRectWidth = innerWidth * 3;
 		float openRectHeight = innerHeight * 3;
@@ -433,4 +633,23 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
 	}
 
+	void invalidateMenuItemLayout() {
+		itemLayouts.clear();
+	}
+
+	boolean needsLayoutMenuItems() {
+		return itemLayouts.isEmpty();
+	}
+
+	void layoutMenuItems() {
+		if (adapter != null && layout != null && needsLayoutMenuItems()) {
+			for (int i = 0, n = adapter.getCount(); i < n; i++) {
+				MenuItemLayout itemLayout = new MenuItemLayout();
+				itemLayout.item = adapter.getItem(i);
+				itemLayout.itemAdapterPosition = i;
+				itemLayout.frame = layout.getLayoutRectForItem(i, itemWidth, itemHeight, itemMargin);
+				itemLayout.bounds = new Rect(0,0,itemWidth, itemHeight);
+			}
+		}
+	}
 }

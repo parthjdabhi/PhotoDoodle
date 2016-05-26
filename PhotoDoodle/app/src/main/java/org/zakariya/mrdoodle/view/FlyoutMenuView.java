@@ -367,6 +367,9 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 			drawMenuShadow(canvas, menuPaint, menuOpenRect, menuShadowBitmap, menuShadowRadius, menuShadowInset, 0, menuShadowOffset, openMenuAlpha);
 		}
 
+		// this is cheap to call every frame - only does real work if layout or other matters have been invalidated
+		computeMenuFill();
+
 		// set clip to the menu shape
 		canvas.save();
 		canvas.clipPath(menuOpenShapePath);
@@ -523,7 +526,6 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	@Override
 	public void onAnimationUpdate(ValueAnimator animation) {
 		menuExtentOpen = (float) animation.getAnimatedValue();
-		updateLayoutInfo();
 		invalidate();
 	}
 
@@ -576,20 +578,7 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 				menuBackgroundFillOrigin.y + menuClosedRadius);
 
 
-		// TODO: Unify this with layoutMenuItems since menu open shape size is dependant on adapter/layout/etc 
-
-		float openRectWidth = innerWidth * 3;
-		float openRectHeight = innerHeight * 3;
-		menuOpenRect = new RectF(menuBackgroundFillOrigin.x - openRectWidth / 2, menuBackgroundFillOrigin.y - openRectHeight / 2, menuBackgroundFillOrigin.x + openRectWidth / 2, menuBackgroundFillOrigin.y + openRectHeight / 2);
-		menuOpenShapePath = new Path();
-		menuOpenShapePath.addRoundRect(menuOpenRect, menuBackgroundCornerRadius, menuBackgroundCornerRadius, Path.Direction.CW);
-
-		// compute the circular radius to fill the menuOpenRect
-		float a = distToOrigin(menuOpenRect.left, menuOpenRect.top);
-		float b = distToOrigin(menuOpenRect.right, menuOpenRect.top);
-		float c = distToOrigin(menuOpenRect.right, menuOpenRect.bottom);
-		float d = distToOrigin(menuOpenRect.left, menuOpenRect.bottom);
-		menuOpenRadius = Math.max(a, Math.max(b, Math.max(c, d)));
+		invalidateMenuFill();
 	}
 
 	float distToOrigin(float x, float y) {
@@ -643,6 +632,7 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 	void layoutMenuItems() {
 		if (adapter != null && layout != null && needsLayoutMenuItems()) {
+
 			for (int i = 0, n = adapter.getCount(); i < n; i++) {
 				MenuItemLayout itemLayout = new MenuItemLayout();
 				itemLayout.item = adapter.getItem(i);
@@ -650,6 +640,35 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 				itemLayout.frame = layout.getLayoutRectForItem(i, itemWidth, itemHeight, itemMargin);
 				itemLayout.bounds = new Rect(0,0,itemWidth, itemHeight);
 			}
+
+			invalidateMenuFill();
+		}
+	}
+
+	void invalidateMenuFill() {
+		menuOpenRect = null;
+		menuOpenShapePath = null;
+		menuOpenRadius = 0;
+	}
+
+	boolean needsComputeMenuFill() {
+		return menuOpenRadius <= 0;
+	}
+
+	void computeMenuFill() {
+		if (adapter != null && layout != null && needsComputeMenuFill()) {
+			Size menuSize = layout.getMinimumSizeForItems(adapter.getCount(), itemWidth, itemHeight, itemMargin);
+
+			menuOpenRect = new RectF(menuBackgroundFillOrigin.x - menuSize.width / 2, menuBackgroundFillOrigin.y - menuSize.height / 2, menuBackgroundFillOrigin.x + menuSize.width / 2, menuBackgroundFillOrigin.y + menuSize.height / 2);
+			menuOpenShapePath = new Path();
+			menuOpenShapePath.addRoundRect(menuOpenRect, menuBackgroundCornerRadius, menuBackgroundCornerRadius, Path.Direction.CW);
+
+			// compute the circular radius to fill the menuOpenRect
+			float a = distToOrigin(menuOpenRect.left, menuOpenRect.top);
+			float b = distToOrigin(menuOpenRect.right, menuOpenRect.top);
+			float c = distToOrigin(menuOpenRect.right, menuOpenRect.bottom);
+			float d = distToOrigin(menuOpenRect.left, menuOpenRect.bottom);
+			menuOpenRadius = Math.max(a, Math.max(b, Math.max(c, d)));
 		}
 	}
 }

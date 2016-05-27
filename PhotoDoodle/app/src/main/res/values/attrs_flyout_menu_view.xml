@@ -4,5 +4,10 @@
 		<attr name="itemWidth" format="dimension"/>
 		<attr name="itemHeight" format="dimension"/>
 		<attr name="itemMargin" format="dimension"/>
+		<attr name="horizontalMenuAnchor" format="float"/>
+		<attr name="horizontalMenuAnchorOutside" format="boolean"/>
+		<attr name="verticalMenuAnchor" format="float"/>
+		<attr name="verticalMenuAnchorOutside" format="boolean"/>
+		<attr name="menuAnchorOutsideMargin" format="dimension"/>
 	</declare-styleable>
 </resources>

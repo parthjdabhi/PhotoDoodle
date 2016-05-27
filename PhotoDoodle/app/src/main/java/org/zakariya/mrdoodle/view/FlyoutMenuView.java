@@ -160,10 +160,10 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 			int col;
 
 			if (cols > 0) {
-				row = (int)Math.floor((float)positionInList / cols);
+				row = (int) Math.floor((float) positionInList / cols);
 				col = positionInList - row * cols;
 			} else if (rows > 0) {
-				col = (int)Math.floor((float)positionInList / rows);
+				col = (int) Math.floor((float) positionInList / rows);
 				row = positionInList - col * rows;
 			} else {
 				throw new IllegalArgumentException("one of cols or rows attribute must be 0, both cannot be set");
@@ -171,7 +171,7 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 			Rect rect = new Rect();
 			rect.left = col * itemWidthPx + (col + 1) * itemMarginPx;
-			rect.top = row * itemHeightPx + (row+1) * itemMarginPx;
+			rect.top = row * itemHeightPx + (row + 1) * itemMarginPx;
 			rect.right = rect.left + itemWidthPx;
 			rect.bottom = rect.top + itemHeightPx;
 
@@ -239,20 +239,26 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	private static final int DEFAULT_ITEM_SIZE_DP = 48;
 	private static final int DEFAULT_ITEM_MARGIN_DP = 8;
 
+	private static final float DEFAULT_HORIZONTAL_MENU_ANCHOR = 1f;
+	private static final boolean DEFAULT_HORIZONTAL_MENU_ANCHOR_OUTSIDE = false;
+	private static final float DEFAULT_VERTICAL_MENU_ANCHOR = 0.5f;
+	private static final boolean DEFAULT_VERTICAL_MENU_ANCHOR_OUTSIDE = false;
+	private static final int DEFAULT_MENU_ANCHOR_OUTSIDE_MARGIN = 8;
+
 	private static final int SHADOW_COLOR = 0x44000000;
 
 
-	Paint menuPaint;
+	Paint paint;
 	Path menuOpenShapePath;
 	float menuBackgroundCornerRadius;
 	int menuBackgroundColor = 0xFFFFFFFF;
-	float menuExtentOpen; // 0 is closed, 1 is menuOpen
-	PointF menuBackgroundFillOrigin;
-	RectF menuClosedRect;
+	float menuOpenTransition; // 0 is closed, 1 is menuOpen
 	RectF menuOpenRect;
-	RectF menuBackgroundFillOval = new RectF();
-	float menuClosedRadius;
+	RectF menuFillOval = new RectF();
 	float menuOpenRadius;
+	PointF buttonCenter;
+	RectF buttonFillOval = new RectF();
+	float buttonRadius;
 
 	int menuShadowRadius;
 	int menuShadowInset;
@@ -264,6 +270,12 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 	Bitmap buttonShadowBitmap;
 	int buttonShadowOffset;
+
+	float horizontalMenuAnchor = 0.5f;
+	float verticalMenuAnchor = 0.5f;
+	boolean horizontalMenuAnchorOutside = false;
+	boolean verticalMenuAnchorOutside = false;
+	int menuAnchorOutsideMargin = 0;
 
 	int itemWidth;
 	int itemHeight;
@@ -288,18 +300,23 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	}
 
 	private void init(AttributeSet attrs, int defStyle) {
-		menuPaint = new Paint();
-		menuPaint.setAntiAlias(true);
+		paint = new Paint();
+		paint.setAntiAlias(true);
 
 		// Load attributes
 		final TypedArray a = getContext().obtainStyledAttributes(
 				attrs, R.styleable.FlyoutMenuView, defStyle, 0);
 
 		setMenuBackgroundColor(a.getColor(R.styleable.FlyoutMenuView_menuColor, menuBackgroundColor));
+		setItemWidth(a.getDimensionPixelSize(R.styleable.FlyoutMenuView_itemWidth, (int) dp2px(DEFAULT_ITEM_SIZE_DP)));
+		setItemHeight(a.getDimensionPixelSize(R.styleable.FlyoutMenuView_itemHeight, (int) dp2px(DEFAULT_ITEM_SIZE_DP)));
+		setItemMargin(a.getDimensionPixelSize(R.styleable.FlyoutMenuView_itemMargin, (int) dp2px(DEFAULT_ITEM_MARGIN_DP)));
 
-		itemWidth = a.getDimensionPixelSize(R.styleable.FlyoutMenuView_itemWidth, (int)dp2px(DEFAULT_ITEM_SIZE_DP));
-		itemHeight = a.getDimensionPixelSize(R.styleable.FlyoutMenuView_itemHeight, (int)dp2px(DEFAULT_ITEM_SIZE_DP));
-		itemMargin = a.getDimensionPixelSize(R.styleable.FlyoutMenuView_itemMargin, (int)dp2px(DEFAULT_ITEM_MARGIN_DP));
+		setHorizontalMenuAnchor(a.getFloat(R.styleable.FlyoutMenuView_horizontalMenuAnchor, DEFAULT_HORIZONTAL_MENU_ANCHOR));
+		setHorizontalMenuAnchorOutside(a.getBoolean(R.styleable.FlyoutMenuView_horizontalMenuAnchorOutside, DEFAULT_HORIZONTAL_MENU_ANCHOR_OUTSIDE));
+		setVerticalMenuAnchor(a.getFloat(R.styleable.FlyoutMenuView_verticalMenuAnchor, DEFAULT_VERTICAL_MENU_ANCHOR));
+		setVerticalMenuAnchorOutside(a.getBoolean(R.styleable.FlyoutMenuView_verticalMenuAnchorOutside, DEFAULT_VERTICAL_MENU_ANCHOR_OUTSIDE));
+		setMenuAnchorOutsideMargin(a.getDimensionPixelSize(R.styleable.FlyoutMenuView_menuAnchorOutsideMargin, (int) dp2px(DEFAULT_MENU_ANCHOR_OUTSIDE_MARGIN)));
 
 		a.recycle();
 
@@ -345,46 +362,54 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
 		updateLayoutInfo();
-		buttonShadowBitmap = createButtonShadowBitmap(SHADOW_COLOR, (int) menuClosedRadius, buttonShadowRadius);
+		buttonShadowBitmap = createButtonShadowBitmap(SHADOW_COLOR, (int) buttonRadius, buttonShadowRadius);
 		invalidate();
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
 
-		final float transitionShadowEdgeWeight = 0.1f;
-		final float openMenuShadowEdge = 1 - transitionShadowEdgeWeight;
-
-		if (menuExtentOpen < transitionShadowEdgeWeight) {
-			float buttonShadowAlpha = (transitionShadowEdgeWeight - menuExtentOpen) / transitionShadowEdgeWeight;
-
-			menuPaint.setAlpha((int) (buttonShadowAlpha * 255));
-			canvas.drawBitmap(buttonShadowBitmap, menuBackgroundFillOrigin.x - buttonShadowBitmap.getWidth() / 2, menuBackgroundFillOrigin.y - buttonShadowBitmap.getHeight() / 2 + buttonShadowOffset, menuPaint);
-		}
-
-		if (menuExtentOpen > openMenuShadowEdge) {
-			float openMenuAlpha = (menuExtentOpen - openMenuShadowEdge) / transitionShadowEdgeWeight;
-			drawMenuShadow(canvas, menuPaint, menuOpenRect, menuShadowBitmap, menuShadowRadius, menuShadowInset, 0, menuShadowOffset, openMenuAlpha);
-		}
+		// TODO: Add a margin to the placement of the menu for OUTSIDE placements
 
 		// this is cheap to call every frame - only does real work if layout or other matters have been invalidated
 		computeMenuFill();
+
+		final float pinion = 0.25f;
+		if (menuOpenTransition < pinion) {
+			drawButton(canvas, 1 - menuOpenTransition / pinion);
+		} else {
+			drawMenu(canvas, (menuOpenTransition - pinion) / (1 - pinion));
+		}
+	}
+
+	void drawButton(Canvas canvas, float alpha) {
+		paint.setAlpha((int) ((alpha * alpha) * 255));
+		canvas.drawBitmap(buttonShadowBitmap, buttonCenter.x - buttonShadowBitmap.getWidth() / 2, buttonCenter.y - buttonShadowBitmap.getHeight() / 2 + buttonShadowOffset, paint);
+
+		paint.setAlpha((int) (alpha * 255));
+		canvas.drawOval(buttonFillOval, paint);
+	}
+
+	void drawMenu(Canvas canvas, float alpha) {
+
+		drawMenuShadow(canvas, paint, menuOpenRect, menuShadowBitmap, menuShadowRadius, menuShadowInset, 0, menuShadowOffset, alpha * alpha);
 
 		// set clip to the menu shape
 		canvas.save();
 		canvas.clipPath(menuOpenShapePath);
 
 		// fill an oval centered at origin
-		float radius = menuClosedRadius + (menuExtentOpen * (menuOpenRadius - menuClosedRadius));
-		menuBackgroundFillOval.left = menuBackgroundFillOrigin.x - radius;
-		menuBackgroundFillOval.top = menuBackgroundFillOrigin.y - radius;
-		menuBackgroundFillOval.right = menuBackgroundFillOrigin.x + radius;
-		menuBackgroundFillOval.bottom = menuBackgroundFillOrigin.y + radius;
+		float radius = buttonRadius + (alpha * (menuOpenRadius - buttonRadius));
+		menuFillOval.left = buttonCenter.x - radius;
+		menuFillOval.top = buttonCenter.y - radius;
+		menuFillOval.right = buttonCenter.x + radius;
+		menuFillOval.bottom = buttonCenter.y + radius;
 
-		menuPaint.setAlpha(255);
-		canvas.drawOval(menuBackgroundFillOval, menuPaint);
+		paint.setAlpha(255);
+		canvas.drawOval(menuFillOval, paint);
 		canvas.restore();
 	}
+
 
 	void drawMenuShadow(Canvas canvas, Paint paint, RectF rect, Bitmap shadowBitmap, int shadowRadius, int inset, int xOffset, int yOffset, float alpha) {
 		canvas.save();
@@ -516,7 +541,7 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	}
 
 	void animateMenuOpenChange(boolean open) {
-		ValueAnimator a = ValueAnimator.ofFloat(menuExtentOpen, open ? 1 : 0);
+		ValueAnimator a = ValueAnimator.ofFloat(menuOpenTransition, open ? 1 : 0);
 		a.setDuration(225);
 		a.setInterpolator(new AccelerateDecelerateInterpolator());
 		a.addUpdateListener(this);
@@ -525,7 +550,7 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 	@Override
 	public void onAnimationUpdate(ValueAnimator animation) {
-		menuExtentOpen = (float) animation.getAnimatedValue();
+		menuOpenTransition = (float) animation.getAnimatedValue();
 		invalidate();
 	}
 
@@ -562,27 +587,72 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 	public void setMenuBackgroundColor(int menuBackgroundColor) {
 		this.menuBackgroundColor = menuBackgroundColor;
-		menuPaint.setColor(this.menuBackgroundColor);
+		paint.setColor(this.menuBackgroundColor);
 		invalidate();
+	}
+
+	public float getHorizontalMenuAnchor() {
+		return horizontalMenuAnchor;
+	}
+
+	public void setHorizontalMenuAnchor(float horizontalMenuAnchor) {
+		this.horizontalMenuAnchor = Math.min(Math.max(horizontalMenuAnchor, 0), 1);
+		invalidateMenuFill();
+	}
+
+	public float getVerticalMenuAnchor() {
+		return verticalMenuAnchor;
+	}
+
+	public void setVerticalMenuAnchor(float verticalMenuAnchor) {
+		this.verticalMenuAnchor = Math.min(Math.max(verticalMenuAnchor, 0), 1);
+		invalidateMenuFill();
+	}
+
+	public boolean isHorizontalMenuAnchorOutside() {
+		return horizontalMenuAnchorOutside;
+	}
+
+	public void setHorizontalMenuAnchorOutside(boolean horizontalMenuAnchorOutside) {
+		this.horizontalMenuAnchorOutside = horizontalMenuAnchorOutside;
+		invalidateMenuFill();
+	}
+
+	public boolean isVerticalMenuAnchorOutside() {
+		return verticalMenuAnchorOutside;
+	}
+
+	public void setVerticalMenuAnchorOutside(boolean verticalMenuAnchorOutside) {
+		this.verticalMenuAnchorOutside = verticalMenuAnchorOutside;
+		invalidateMenuFill();
+	}
+
+	public int getMenuAnchorOutsideMargin() {
+		return menuAnchorOutsideMargin;
+	}
+
+	public void setMenuAnchorOutsideMargin(int menuAnchorOutsideMargin) {
+		this.menuAnchorOutsideMargin = menuAnchorOutsideMargin;
+		invalidateMenuFill();
 	}
 
 	void updateLayoutInfo() {
 		float innerWidth = getWidth() - getPaddingLeft() + getPaddingRight();
 		float innerHeight = getHeight() - getPaddingTop() + getPaddingBottom();
-		menuBackgroundFillOrigin = new PointF(getPaddingLeft() + innerWidth / 2, getPaddingTop() + innerHeight / 2);
-		menuClosedRadius = Math.min(innerWidth / 2, innerHeight / 2);
-		menuClosedRect = new RectF(
-				menuBackgroundFillOrigin.x - menuClosedRadius,
-				menuBackgroundFillOrigin.y - menuClosedRadius,
-				menuBackgroundFillOrigin.x + menuClosedRadius,
-				menuBackgroundFillOrigin.y + menuClosedRadius);
+		buttonCenter = new PointF(getPaddingLeft() + innerWidth / 2, getPaddingTop() + innerHeight / 2);
+		buttonRadius = Math.min(innerWidth / 2, innerHeight / 2);
+		buttonFillOval = new RectF(
+				buttonCenter.x - buttonRadius,
+				buttonCenter.y - buttonRadius,
+				buttonCenter.x + buttonRadius,
+				buttonCenter.y + buttonRadius);
 
 
 		invalidateMenuFill();
 	}
 
 	float distToOrigin(float x, float y) {
-		return (float) Math.sqrt((x - menuBackgroundFillOrigin.x) * (x - menuBackgroundFillOrigin.x) + (y - menuBackgroundFillOrigin.y) * (y - menuBackgroundFillOrigin.y));
+		return (float) Math.sqrt((x - buttonCenter.x) * (x - buttonCenter.x) + (y - buttonCenter.y) * (y - buttonCenter.y));
 	}
 
 	Bitmap createMenuShadowBitmap(@ColorInt int color, int shadowRadiusPx) {
@@ -624,6 +694,7 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 	void invalidateMenuItemLayout() {
 		itemLayouts.clear();
+		invalidateMenuFill(); // a new layout affects positioning of the menu as well
 	}
 
 	boolean needsLayoutMenuItems() {
@@ -638,7 +709,7 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 				itemLayout.item = adapter.getItem(i);
 				itemLayout.itemAdapterPosition = i;
 				itemLayout.frame = layout.getLayoutRectForItem(i, itemWidth, itemHeight, itemMargin);
-				itemLayout.bounds = new Rect(0,0,itemWidth, itemHeight);
+				itemLayout.bounds = new Rect(0, 0, itemWidth, itemHeight);
 			}
 
 			invalidateMenuFill();
@@ -659,7 +730,27 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		if (adapter != null && layout != null && needsComputeMenuFill()) {
 			Size menuSize = layout.getMinimumSizeForItems(adapter.getCount(), itemWidth, itemHeight, itemMargin);
 
-			menuOpenRect = new RectF(menuBackgroundFillOrigin.x - menuSize.width / 2, menuBackgroundFillOrigin.y - menuSize.height / 2, menuBackgroundFillOrigin.x + menuSize.width / 2, menuBackgroundFillOrigin.y + menuSize.height / 2);
+			float buttonSize = 2 * buttonRadius;
+			float leftMin = buttonCenter.x + buttonRadius - menuSize.width;
+			float leftMax = buttonCenter.x - buttonRadius;
+			float topMin = buttonCenter.y + buttonRadius - menuSize.height;
+			float topMax = buttonCenter.y - buttonRadius;
+
+			if (horizontalMenuAnchorOutside) {
+				leftMin -= buttonSize + menuAnchorOutsideMargin;
+				leftMax += buttonSize + menuAnchorOutsideMargin;
+			}
+
+			if (verticalMenuAnchorOutside) {
+				topMin -= buttonSize + menuAnchorOutsideMargin;
+				topMax += buttonSize + menuAnchorOutsideMargin;
+			}
+
+			int menuLeft = (int) (leftMin + horizontalMenuAnchor * (leftMax - leftMin));
+			int menuTop = (int) (topMin + verticalMenuAnchor * (topMax - topMin));
+
+			menuOpenRect = new RectF(menuLeft, menuTop, menuLeft + menuSize.width, menuTop + menuSize.height);
+
 			menuOpenShapePath = new Path();
 			menuOpenShapePath.addRoundRect(menuOpenRect, menuBackgroundCornerRadius, menuBackgroundCornerRadius, Path.Direction.CW);
 

@@ -19,6 +19,10 @@
 		android:layout_centerVertical="true"
 		android:layout_centerHorizontal="true"
 		app:menuColor="#00FFFF"
+	    app:horizontalMenuAnchor="1"
+	    app:horizontalMenuAnchorOutside="false"
+	    app:verticalMenuAnchor="0"
+	    app:verticalMenuAnchorOutside="true"
 		/>
 
 </RelativeLayout>

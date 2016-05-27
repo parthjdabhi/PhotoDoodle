@@ -16,6 +16,7 @@ import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
+import android.support.annotation.Nullable;
 import android.support.v4.graphics.ColorUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -33,6 +34,10 @@ import java.util.List;
 //@SuppressWarnings("unused")
 public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdateListener {
 
+	public interface SelectionListener {
+		void onItemSelected(FlyoutMenuView flyoutMenuView, MenuItem item);
+		void onDismissWithoutSelection(FlyoutMenuView flyoutMenuView);
+	}
 
 	@SuppressWarnings("unused")
 	public static class Size {
@@ -89,7 +94,17 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	/**
 	 * Base interface for items to be added to the FlyoutMenuView
 	 */
-	public interface MenuItem {
+	public static class MenuItem {
+
+		int id;
+
+		public MenuItem(int id) {
+			this.id = id;
+		}
+
+		public int getId() {
+			return id;
+		}
 
 		/**
 		 * Draw the contents of the MenuItem
@@ -97,7 +112,8 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		 * @param canvas the canvas to draw with
 		 * @param bounds the bounds of this item in its coordinate space, where the origin (top,left) is 0,0
 		 */
-		void onDraw(Canvas canvas, Rect bounds);
+		void onDraw(Canvas canvas, Rect bounds) {
+		}
 	}
 
 	/**
@@ -291,6 +307,8 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	Adapter adapter;
 	Layout layout;
 	ArrayList<MenuItemLayout> itemLayouts = new ArrayList<>();
+
+	SelectionListener selectionListener;
 
 	public FlyoutMenuView(Context context) {
 		super(context);
@@ -584,11 +602,35 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 				return true;
 
 			case MotionEvent.ACTION_UP:
+				MenuItem item = findMenuItemUnderPosition(event.getX(), event.getY());
+				if (selectionListener != null) {
+					if (item != null) {
+						selectionListener.onItemSelected(this, item);
+					} else {
+						selectionListener.onDismissWithoutSelection(this);
+					}
+				}
+
 				animateMenuOpenChange(false);
 				return true;
 		}
 
 		return super.onTouchEvent(event);
+	}
+
+	@Nullable
+	MenuItem findMenuItemUnderPosition(float x, float y) {
+		float menuX = x - menuOpenRect.left;
+		float menuY = y - menuOpenRect.top;
+
+		for (MenuItemLayout menuItemLayout : itemLayouts) {
+			if (menuX >= menuItemLayout.frame.left && menuX <= menuItemLayout.frame.right &&
+					menuY >= menuItemLayout.frame.top && menuY <= menuItemLayout.frame.bottom) {
+				return menuItemLayout.item;
+			}
+		}
+
+		return null;
 	}
 
 	void animateMenuOpenChange(boolean open) {
@@ -744,6 +786,22 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	 */
 	public boolean isHorizontalMenuAnchorOutside() {
 		return horizontalMenuAnchorOutside;
+	}
+
+	/**
+	 * @return get the SelectionListener instance
+	 */
+	public SelectionListener getSelectionListener() {
+		return selectionListener;
+	}
+
+	/**
+	 * Set a listener to be notified when items in the menu are selected
+	 *
+	 * @param selectionListener listener to be notified on item selection
+	 */
+	public void setSelectionListener(SelectionListener selectionListener) {
+		this.selectionListener = selectionListener;
 	}
 
 	/**

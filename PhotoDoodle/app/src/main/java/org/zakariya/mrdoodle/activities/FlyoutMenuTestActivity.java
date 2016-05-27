@@ -4,11 +4,14 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 import org.zakariya.mrdoodle.R;
 import org.zakariya.mrdoodle.util.BusProvider;
@@ -24,7 +27,9 @@ import butterknife.ButterKnife;
 /**
  * Created by shamyl on 5/20/16.
  */
-public class FlyoutMenuTestActivity extends BaseActivity {
+public class FlyoutMenuTestActivity extends BaseActivity implements FlyoutMenuView.SelectionListener {
+
+	private static final String TAG = FlyoutMenuTestActivity.class.getSimpleName();
 
 	@Bind(R.id.toolbar)
 	Toolbar toolbar;
@@ -52,10 +57,11 @@ public class FlyoutMenuTestActivity extends BaseActivity {
 		Random rng = new Random();
 		List<TestMenuItem> items = new ArrayList<>();
 		for (int i = 0; i < 19; i++) {
-			items.add(new TestMenuItem(rng));
+			items.add(new TestMenuItem(i, rng));
 		}
 
 		flyoutMenu.setAdapter(new FlyoutMenuView.ArrayAdapter<TestMenuItem>(items));
+		flyoutMenu.setSelectionListener(this);
 	}
 
 	@Override
@@ -64,21 +70,38 @@ public class FlyoutMenuTestActivity extends BaseActivity {
 		super.onDestroy();
 	}
 
-	private static final class TestMenuItem implements FlyoutMenuView.MenuItem {
+	@Override
+	public void onItemSelected(FlyoutMenuView flyoutMenuView, FlyoutMenuView.MenuItem item) {
+		Log.i(TAG, "onItemSelected: selected: " + item.getId());
+
+		int color = ((TestMenuItem) item).color;
+		Drawable d = flyoutMenuView.getButtonDrawable();
+		Drawable wd = DrawableCompat.wrap(d);
+		DrawableCompat.setTint(wd, color);
+		flyoutMenuView.setButtonDrawable(wd);
+	}
+
+	@Override
+	public void onDismissWithoutSelection(FlyoutMenuView flyoutMenuView) {
+		Log.i(TAG, "onDismissWithoutSelection: nothing was selected");
+	}
+
+	private static final class TestMenuItem extends FlyoutMenuView.MenuItem {
 
 		@ColorInt
 		int color;
 
 		Paint paint;
 
-		public TestMenuItem(Random r) {
+		public TestMenuItem(int id, Random r) {
+			super(id);
+
 			color = Color.rgb(128 + r.nextInt(128), 128 + r.nextInt(128), 128 + r.nextInt(128));
 			paint = new Paint();
 			paint.setAntiAlias(true);
 			paint.setColor(color);
 		}
 
-		@Override
 		public void onDraw(Canvas canvas, Rect bounds) {
 			canvas.drawRect(bounds, paint);
 		}

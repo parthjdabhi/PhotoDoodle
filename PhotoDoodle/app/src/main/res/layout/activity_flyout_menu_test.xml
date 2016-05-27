@@ -16,14 +16,14 @@
 		android:id="@+id/flyoutMenu"
 		android:layout_width="64dp"
 		android:layout_height="64dp"
-		android:layout_centerVertical="true"
-		android:layout_centerHorizontal="true"
-		app:menuColor="#00FFFF"
+		android:layout_margin="16dp"
+		app:menuColor="#ffffff"
 	    app:horizontalMenuAnchor="1"
 	    app:horizontalMenuAnchorOutside="false"
 	    app:verticalMenuAnchor="0"
 	    app:verticalMenuAnchorOutside="true"
 	    app:buttonSrc="@drawable/icon_tab_draw"
-		/>
+		android:layout_alignParentBottom="true"
+		android:layout_alignParentStart="true"/>
 
 </RelativeLayout>

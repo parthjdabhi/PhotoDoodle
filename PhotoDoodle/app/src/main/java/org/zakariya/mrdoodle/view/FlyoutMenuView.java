@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -391,30 +392,42 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 	void drawButton(Canvas canvas, float alpha) {
 
+		// scale button down as it fades out
+		if (alpha < 1) {
+			Matrix m = new Matrix();
+			m.preTranslate(-buttonCenter.x, -buttonCenter.y);
+			m.postScale(alpha, alpha);
+			m.postTranslate(buttonCenter.x, buttonCenter.y);
+			canvas.concat(m);
+		}
+
+		paint.setAlpha((int) ((alpha * alpha * alpha) * 255));
+		canvas.drawBitmap(buttonShadowBitmap, buttonCenter.x - buttonShadowBitmap.getWidth() / 2, buttonCenter.y - buttonShadowBitmap.getHeight() / 2 + buttonShadowOffset, paint);
+
 		int scaledAlpha = (int) (alpha * 255);
-		if (scaledAlpha >= 1) {
-			paint.setAlpha((int) ((alpha * alpha * alpha) * 255));
-			canvas.drawBitmap(buttonShadowBitmap, buttonCenter.x - buttonShadowBitmap.getWidth() / 2, buttonCenter.y - buttonShadowBitmap.getHeight() / 2 + buttonShadowOffset, paint);
+		paint.setAlpha(scaledAlpha);
+		canvas.drawOval(buttonFillOval, paint);
 
-			paint.setAlpha(scaledAlpha);
-			canvas.drawOval(buttonFillOval, paint);
+		if (buttonDrawable != null) {
+			buttonDrawable.setAlpha(scaledAlpha);
 
-			if (buttonDrawable != null) {
-				buttonDrawable.setAlpha(scaledAlpha);
+			// scale the radius to fit drawable inside circle
+			float innerRadius = buttonRadius / 1.41421356237f;
+			buttonDrawable.setBounds(
+					(int) (buttonCenter.x - innerRadius),
+					(int) (buttonCenter.y - innerRadius),
+					(int) (buttonCenter.x + innerRadius),
+					(int) (buttonCenter.y + innerRadius));
 
-				float innerRadius = buttonRadius / 1.41421356237f;
-				buttonDrawable.setBounds(
-						(int) (buttonCenter.x - innerRadius),
-						(int) (buttonCenter.y - innerRadius),
-						(int) (buttonCenter.x + innerRadius),
-						(int) (buttonCenter.y + innerRadius));
-				buttonDrawable.draw(canvas);
-			}
+			buttonDrawable.draw(canvas);
 		}
 
 	}
 
 	void drawMenu(Canvas canvas, float alpha) {
+
+		// TODO: Be smarter about how shadow is animated in - you can see it filling spac where the background hasn't reached. Probably want to divide the alpha into 0.8/0.2 where the shadow fades in during the 0.2
+
 		drawMenuShadow(canvas, paint, menuOpenRect, menuShadowBitmap, menuShadowRadius, menuShadowInset, 0, menuShadowOffset, alpha * alpha * alpha);
 
 		// set clip to the menu shape

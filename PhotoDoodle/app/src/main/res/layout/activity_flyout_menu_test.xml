@@ -23,6 +23,7 @@
 	    app:horizontalMenuAnchorOutside="false"
 	    app:verticalMenuAnchor="0"
 	    app:verticalMenuAnchorOutside="true"
+	    app:buttonSrc="@drawable/icon_tab_draw"
 		/>
 
 </RelativeLayout>

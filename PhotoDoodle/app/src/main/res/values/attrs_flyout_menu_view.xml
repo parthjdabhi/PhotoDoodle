@@ -9,5 +9,6 @@
 		<attr name="verticalMenuAnchor" format="float"/>
 		<attr name="verticalMenuAnchorOutside" format="boolean"/>
 		<attr name="menuAnchorOutsideMargin" format="dimension"/>
+		<attr name="buttonSrc" format="reference"/>
 	</declare-styleable>
 </resources>

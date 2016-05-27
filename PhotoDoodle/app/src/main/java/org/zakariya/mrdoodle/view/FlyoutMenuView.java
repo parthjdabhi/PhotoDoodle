@@ -444,14 +444,16 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 	void drawMenu(Canvas canvas, float alpha) {
 
-		// TODO: Be smarter about how shadow is animated in - you can see it filling spac where the background hasn't reached. Probably want to divide the alpha into 0.8/0.2 where the shadow fades in during the 0.2
+		float pinion = 0.5f;
 
-		drawMenuShadow(canvas, paint, menuOpenRect, menuShadowBitmap, menuShadowRadius, menuShadowInset, 0, menuShadowOffset, alpha * alpha * alpha);
+		if (alpha > pinion) {
+			float shadowAlpha = (alpha - pinion) / (1f - pinion);
+			drawMenuShadow(canvas, paint, menuOpenRect, menuShadowBitmap, menuShadowRadius, menuShadowInset, 0, menuShadowOffset, shadowAlpha * shadowAlpha);
+		}
 
 		// set clip to the menu shape
 		canvas.save();
 		canvas.clipPath(menuOpenShapePath);
-
 
 		// add oval clip for reveal animation
 		float radius = (float) buttonRadius + (alpha * (float) (menuOpenRadius - buttonRadius));

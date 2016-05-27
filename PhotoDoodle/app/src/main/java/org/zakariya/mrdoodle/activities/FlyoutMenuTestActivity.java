@@ -11,7 +11,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 
 import org.zakariya.mrdoodle.R;
 import org.zakariya.mrdoodle.util.BusProvider;
@@ -72,18 +71,18 @@ public class FlyoutMenuTestActivity extends BaseActivity implements FlyoutMenuVi
 
 	@Override
 	public void onItemSelected(FlyoutMenuView flyoutMenuView, FlyoutMenuView.MenuItem item) {
-		Log.i(TAG, "onItemSelected: selected: " + item.getId());
+		//Log.i(TAG, "onItemSelected: selected: " + item.getId());
 
 		int color = ((TestMenuItem) item).color;
 		Drawable d = flyoutMenuView.getButtonDrawable();
-		Drawable wd = DrawableCompat.wrap(d);
+		Drawable wd = DrawableCompat.wrap(d).mutate();
 		DrawableCompat.setTint(wd, color);
 		flyoutMenuView.setButtonDrawable(wd);
 	}
 
 	@Override
 	public void onDismissWithoutSelection(FlyoutMenuView flyoutMenuView) {
-		Log.i(TAG, "onDismissWithoutSelection: nothing was selected");
+		//Log.i(TAG, "onDismissWithoutSelection: nothing was selected");
 	}
 
 	private static final class TestMenuItem extends FlyoutMenuView.MenuItem {

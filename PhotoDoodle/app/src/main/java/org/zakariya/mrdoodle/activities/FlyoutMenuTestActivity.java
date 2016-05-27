@@ -80,6 +80,7 @@ public class FlyoutMenuTestActivity extends BaseActivity {
 
 		@Override
 		public void onDraw(Canvas canvas, Rect bounds, float alpha) {
+			paint.setAlpha((int)(alpha * 255));
 			canvas.drawRect(bounds, paint);
 		}
 	}

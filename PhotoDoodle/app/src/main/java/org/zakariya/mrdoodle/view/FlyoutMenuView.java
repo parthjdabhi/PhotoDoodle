@@ -223,10 +223,13 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		int itemAdapterPosition;
 		Rect frame;
 		Rect bounds;
+		float normalizedDistanceFromOrigin;
 	}
 
 
 	private static final String TAG = FlyoutMenuView.class.getSimpleName();
+
+	private static final int ANIMATION_DURATION_MILLIS = 225; // 225 normal
 
 	private static final int MENU_CORNER_RADIUS_DP = 4;
 	private static final int MENU_SHADOW_RADIUS_DP = 24;
@@ -368,11 +371,9 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-
-		// TODO: Add a margin to the placement of the menu for OUTSIDE placements
-
 		// this is cheap to call every frame - only does real work if layout or other matters have been invalidated
 		computeMenuFill();
+		layoutMenuItems();
 
 		final float pinion = 0.25f;
 		if (menuOpenTransition < pinion) {
@@ -391,7 +392,6 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	}
 
 	void drawMenu(Canvas canvas, float alpha) {
-
 		drawMenuShadow(canvas, paint, menuOpenRect, menuShadowBitmap, menuShadowRadius, menuShadowInset, 0, menuShadowOffset, alpha * alpha);
 
 		// set clip to the menu shape
@@ -408,6 +408,18 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		paint.setAlpha(255);
 		canvas.drawOval(menuFillOval, paint);
 		canvas.restore();
+
+		float itemAlphaRange = 0.1f;
+		for (MenuItemLayout menuItemLayout : itemLayouts) {
+			if (alpha > menuItemLayout.normalizedDistanceFromOrigin) {
+				float itemAlpha = Math.min((alpha - menuItemLayout.normalizedDistanceFromOrigin) / itemAlphaRange, 1f);
+
+				canvas.save();
+				canvas.translate(menuOpenRect.left + menuItemLayout.frame.left, menuOpenRect.top + menuItemLayout.frame.top);
+				menuItemLayout.item.onDraw(canvas, menuItemLayout.bounds, itemAlpha);
+				canvas.restore();
+			}
+		}
 	}
 
 
@@ -542,7 +554,7 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 	void animateMenuOpenChange(boolean open) {
 		ValueAnimator a = ValueAnimator.ofFloat(menuOpenTransition, open ? 1 : 0);
-		a.setDuration(225);
+		a.setDuration(ANIMATION_DURATION_MILLIS);
 		a.setInterpolator(new AccelerateDecelerateInterpolator());
 		a.addUpdateListener(this);
 		a.start();
@@ -710,6 +722,13 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 				itemLayout.itemAdapterPosition = i;
 				itemLayout.frame = layout.getLayoutRectForItem(i, itemWidth, itemHeight, itemMargin);
 				itemLayout.bounds = new Rect(0, 0, itemWidth, itemHeight);
+
+				float cx = menuOpenRect.left + itemLayout.frame.centerX();
+				float cy = menuOpenRect.top + itemLayout.frame.centerY();
+				float distance = distToOrigin(cx, cy);
+				itemLayout.normalizedDistanceFromOrigin = distance / menuOpenRadius;
+
+				itemLayouts.add(itemLayout);
 			}
 
 			invalidateMenuFill();

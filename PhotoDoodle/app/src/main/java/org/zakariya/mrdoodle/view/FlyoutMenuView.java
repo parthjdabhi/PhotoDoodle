@@ -91,6 +91,10 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		}
 	}
 
+	public interface ButtonRenderer {
+		void onDraw(Canvas canvas, RectF buttonBounds, @ColorInt int buttonColor, float alpha);
+	}
+
 	/**
 	 * Base interface for items to be added to the FlyoutMenuView
 	 */
@@ -112,7 +116,7 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		 * @param canvas the canvas to draw with
 		 * @param bounds the bounds of this item in its coordinate space, where the origin (top,left) is 0,0
 		 */
-		void onDraw(Canvas canvas, Rect bounds) {
+		public void onDraw(Canvas canvas, Rect bounds) {
 		}
 	}
 
@@ -309,6 +313,7 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	ArrayList<MenuItemLayout> itemLayouts = new ArrayList<>();
 
 	SelectionListener selectionListener;
+	ButtonRenderer buttonRenderer;
 
 	public FlyoutMenuView(Context context) {
 		super(context);
@@ -424,22 +429,27 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 		int scaledAlpha = (int) (alpha * 255);
 		paint.setAlpha(scaledAlpha);
-		canvas.drawOval(buttonFillOval, paint);
-
 		if (buttonDrawable != null) {
-			buttonDrawable.setAlpha(scaledAlpha);
+			canvas.drawOval(buttonFillOval, paint);
 
-			// scale the radius to fit drawable inside circle
-			float innerRadius = buttonRadius / 1.41421356237f;
-			buttonDrawable.setBounds(
-					(int) (buttonCenter.x - innerRadius),
-					(int) (buttonCenter.y - innerRadius),
-					(int) (buttonCenter.x + innerRadius),
-					(int) (buttonCenter.y + innerRadius));
+			if (buttonDrawable != null) {
+				buttonDrawable.setAlpha(scaledAlpha);
 
-			buttonDrawable.draw(canvas);
+				// scale the radius to fit drawable inside circle
+				float innerRadius = buttonRadius / 1.41421356237f;
+				buttonDrawable.setBounds(
+						(int) (buttonCenter.x - innerRadius),
+						(int) (buttonCenter.y - innerRadius),
+						(int) (buttonCenter.x + innerRadius),
+						(int) (buttonCenter.y + innerRadius));
+
+				buttonDrawable.draw(canvas);
+			}
+		} else if (buttonRenderer != null){
+			buttonRenderer.onDraw(canvas, buttonFillOval, getMenuBackgroundColor(), alpha);
+		} else {
+			canvas.drawOval(buttonFillOval, paint);
 		}
-
 	}
 
 	void drawMenu(Canvas canvas, float alpha) {
@@ -656,6 +666,15 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		return buttonDrawable;
 	}
 
+	public ButtonRenderer getButtonRenderer() {
+		return buttonRenderer;
+	}
+
+	public void setButtonRenderer(ButtonRenderer buttonRenderer) {
+		this.buttonRenderer = buttonRenderer;
+		this.buttonDrawable = null;
+	}
+
 	/**
 	 * Set the drawable drawn by the button
 	 *
@@ -663,6 +682,7 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	 */
 	public void setButtonDrawable(Drawable buttonDrawable) {
 		this.buttonDrawable = buttonDrawable;
+		this.buttonRenderer = null;
 		invalidate();
 	}
 

@@ -13,7 +13,7 @@
 		/>
 
 	<org.zakariya.mrdoodle.view.FlyoutMenuView
-		android:id="@+id/flyoutMenu"
+		android:id="@+id/toolSelectorFlyoutMenu"
 		android:layout_width="64dp"
 		android:layout_height="64dp"
 		app:menuColor="#ffffff"
@@ -22,10 +22,21 @@
 	    app:verticalMenuAnchor="1"
 	    app:verticalMenuAnchorOutside="true"
 	    app:buttonSrc="@drawable/icon_tab_draw"
-	    android:layout_marginTop="16dp"
-	    android:layout_marginBottom="16dp"
+		android:layout_alignTop="@+id/paletteFlyoutMenu"
+		android:layout_toStartOf="@+id/paletteFlyoutMenu"/>
+
+	<org.zakariya.mrdoodle.view.FlyoutMenuView
+		android:id="@+id/paletteFlyoutMenu"
+		android:layout_width="64dp"
+		android:layout_height="64dp"
+		app:menuColor="#ffffff"
+		app:horizontalMenuAnchor="0.5"
+		app:horizontalMenuAnchorOutside="false"
+		app:verticalMenuAnchor="1"
+		app:verticalMenuAnchorOutside="true"
 		android:layout_marginLeft="16dp"
 		android:layout_marginRight="16dp"
+		android:layout_marginTop="16dp"
 		android:layout_below="@+id/toolbar"
 		android:layout_alignParentEnd="true"/>
 

@@ -1,3 +1,19 @@
+#FlyoutMenuView
+
+FlyoutMenuTestActivity
+	- Persistance of selection state no worky
+	
+FlyoutMenuView
+	- selected menu item highlight needs to be outset by half of margin
+	
+Elevation:
+	- need to figure out how to emulate elevation
+		- blur radius as function of elevation
+		- vertical offset as function of elevation
+		
+	Can be achieved by adding a FAB or something and setting elevation on it for comparisons
+
+
 #Currently
 
 DoodleActivity popup doesn't show if you tap it, tap outside, and tap again on toolbar

@@ -36,6 +36,7 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 	public interface SelectionListener {
 		void onItemSelected(FlyoutMenuView flyoutMenuView, MenuItem item);
+
 		void onDismissWithoutSelection(FlyoutMenuView flyoutMenuView);
 	}
 
@@ -116,7 +117,7 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		 * @param canvas the canvas to draw with
 		 * @param bounds the bounds of this item in its coordinate space, where the origin (top,left) is 0,0
 		 */
-		public void onDraw(Canvas canvas, Rect bounds) {
+		public void onDraw(Canvas canvas, RectF bounds) {
 		}
 	}
 
@@ -218,6 +219,7 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		MenuItem getItem(int position);
 	}
 
+	@SuppressWarnings("unused")
 	public static class ArrayAdapter<T> implements Adapter {
 
 		private List<T> items;
@@ -244,8 +246,8 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	private static class MenuItemLayout {
 		MenuItem item;
 		int itemAdapterPosition;
-		Rect frame;
-		Rect bounds;
+		RectF frame;
+		RectF bounds;
 		float normalizedDistanceFromOrigin;
 	}
 
@@ -254,14 +256,10 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 	private static final int ANIMATION_DURATION_MILLIS = 225; // 225 normal
 
+	private static final int DEFAULT_BUTTON_ELEVATION_DP = 4;
+	private static final int DEFAULT_MENU_ELEVATION_DP = 8;
+
 	private static final int MENU_CORNER_RADIUS_DP = 4;
-	private static final int MENU_SHADOW_RADIUS_DP = 24;
-	private static final int MENU_SHADOW_INSET_DP = 16;
-	private static final int MENU_SHADOW_OFFSET_DP = 8;
-
-	private static final int BUTTON_SHADOW_RADIUS_DP = 12;
-	private static final int BUTTON_SHADOW_OFFSET_DP = 5;
-
 	private static final int DEFAULT_ITEM_SIZE_DP = 48;
 	private static final int DEFAULT_ITEM_MARGIN_DP = 8;
 
@@ -278,7 +276,19 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	Path menuOpenShapePath;
 	Path menuFillOvalPath = new Path();
 	float menuBackgroundCornerRadius;
+
+	@ColorInt
+	int buttonBackgroundColor = 0xFFFFFFFF;
+
+	@ColorInt
 	int menuBackgroundColor = 0xFFFFFFFF;
+
+	@ColorInt
+	int selectedItemBackgroundColor = 0x33000000;
+
+	float buttonElevation;
+	float menuElevation;
+
 	float menuOpenTransition; // 0 is closed, 1 is menuOpen
 	RectF menuOpenRect;
 	RectF menuFillOval = new RectF();
@@ -287,17 +297,13 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	RectF buttonFillOval = new RectF();
 	int buttonRadius;
 
+	Drawable buttonDrawable;
+	Bitmap menuShadowBitmap;
+	Bitmap buttonShadowBitmap;
 	int menuShadowRadius;
 	int menuShadowInset;
-	int menuShadowOffset;
-	int buttonShadowRadius;
-	Bitmap menuShadowBitmap;
 	Rect menuShadowSrcRect = new Rect();
 	Rect menuShadowDstRect = new Rect();
-
-	Drawable buttonDrawable;
-	Bitmap buttonShadowBitmap;
-	int buttonShadowOffset;
 
 	float horizontalMenuAnchor = 0.5f;
 	float verticalMenuAnchor = 0.5f;
@@ -311,6 +317,7 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	Adapter adapter;
 	Layout layout;
 	ArrayList<MenuItemLayout> itemLayouts = new ArrayList<>();
+	MenuItem selectedMenuItem;
 
 	SelectionListener selectionListener;
 	ButtonRenderer buttonRenderer;
@@ -338,7 +345,9 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		final TypedArray a = getContext().obtainStyledAttributes(
 				attrs, R.styleable.FlyoutMenuView, defStyle, 0);
 
-		setMenuBackgroundColor(a.getColor(R.styleable.FlyoutMenuView_menuColor, menuBackgroundColor));
+		setButtonBackgroundColor(a.getColor(R.styleable.FlyoutMenuView_buttonBackgroundColor, buttonBackgroundColor));
+		setMenuBackgroundColor(a.getColor(R.styleable.FlyoutMenuView_menuBackgroundColor, menuBackgroundColor));
+		setSelectedItemBackgroundColor(a.getColor(R.styleable.FlyoutMenuView_selectedItemBackgroundColor, selectedItemBackgroundColor));
 		setItemWidth(a.getDimensionPixelSize(R.styleable.FlyoutMenuView_itemWidth, (int) dp2px(DEFAULT_ITEM_SIZE_DP)));
 		setItemHeight(a.getDimensionPixelSize(R.styleable.FlyoutMenuView_itemHeight, (int) dp2px(DEFAULT_ITEM_SIZE_DP)));
 		setItemMargin(a.getDimensionPixelSize(R.styleable.FlyoutMenuView_itemMargin, (int) dp2px(DEFAULT_ITEM_MARGIN_DP)));
@@ -351,16 +360,12 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 		buttonDrawable = a.getDrawable(R.styleable.FlyoutMenuView_buttonSrc);
 
+		setButtonElevation(a.getDimensionPixelSize(R.styleable.FlyoutMenuView_buttonElevation, (int)dp2px(DEFAULT_BUTTON_ELEVATION_DP)));
+		setMenuElevation(a.getDimensionPixelSize(R.styleable.FlyoutMenuView_menuElevation, (int)dp2px(DEFAULT_MENU_ELEVATION_DP)));
+
 		a.recycle();
 
 		menuBackgroundCornerRadius = dp2px(MENU_CORNER_RADIUS_DP);
-		menuShadowRadius = (int) dp2px(MENU_SHADOW_RADIUS_DP);
-		menuShadowInset = (int) dp2px(MENU_SHADOW_INSET_DP);
-		menuShadowOffset = (int) dp2px(MENU_SHADOW_OFFSET_DP);
-		menuShadowBitmap = createMenuShadowBitmap(SHADOW_COLOR, menuShadowRadius);
-
-		buttonShadowRadius = (int) dp2px(BUTTON_SHADOW_RADIUS_DP);
-		buttonShadowOffset = (int) dp2px(BUTTON_SHADOW_OFFSET_DP);
 	}
 
 
@@ -395,7 +400,6 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
 		updateLayoutInfo();
-		buttonShadowBitmap = createButtonShadowBitmap(SHADOW_COLOR, buttonRadius, buttonShadowRadius);
 		invalidate();
 	}
 
@@ -424,31 +428,38 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 			canvas.concat(m);
 		}
 
-		paint.setAlpha((int) ((alpha * alpha * alpha) * 255));
-		canvas.drawBitmap(buttonShadowBitmap, buttonCenter.x - buttonShadowBitmap.getWidth() / 2, buttonCenter.y - buttonShadowBitmap.getHeight() / 2 + buttonShadowOffset, paint);
+		if (buttonElevation > 0) {
+			if (buttonShadowBitmap == null) {
+				buttonShadowBitmap = createButtonShadowBitmap();
+			}
+
+			paint.setAlpha((int) ((alpha * alpha * alpha) * 255));
+			float buttonShadowOffset = buttonElevation / 2;
+			canvas.drawBitmap(buttonShadowBitmap, buttonCenter.x - buttonShadowBitmap.getWidth() / 2, buttonCenter.y - buttonShadowBitmap.getHeight() / 2 + buttonShadowOffset, paint);
+		}
 
 		int scaledAlpha = (int) (alpha * 255);
 		paint.setAlpha(scaledAlpha);
+
+		if (buttonRenderer == null) {
+			paint.setColor(buttonBackgroundColor);
+			canvas.drawOval(buttonFillOval, paint);
+		}
+
 		if (buttonDrawable != null) {
-			canvas.drawOval(buttonFillOval, paint);
+			buttonDrawable.setAlpha(scaledAlpha);
 
-			if (buttonDrawable != null) {
-				buttonDrawable.setAlpha(scaledAlpha);
+			// scale the radius to fit drawable inside circle
+			float innerRadius = buttonRadius / 1.41421356237f;
+			buttonDrawable.setBounds(
+					(int) (buttonCenter.x - innerRadius),
+					(int) (buttonCenter.y - innerRadius),
+					(int) (buttonCenter.x + innerRadius),
+					(int) (buttonCenter.y + innerRadius));
 
-				// scale the radius to fit drawable inside circle
-				float innerRadius = buttonRadius / 1.41421356237f;
-				buttonDrawable.setBounds(
-						(int) (buttonCenter.x - innerRadius),
-						(int) (buttonCenter.y - innerRadius),
-						(int) (buttonCenter.x + innerRadius),
-						(int) (buttonCenter.y + innerRadius));
-
-				buttonDrawable.draw(canvas);
-			}
-		} else if (buttonRenderer != null){
-			buttonRenderer.onDraw(canvas, buttonFillOval, getMenuBackgroundColor(), alpha);
-		} else {
-			canvas.drawOval(buttonFillOval, paint);
+			buttonDrawable.draw(canvas);
+		} else if (buttonRenderer != null) {
+			buttonRenderer.onDraw(canvas, buttonFillOval, buttonBackgroundColor, alpha);
 		}
 	}
 
@@ -456,8 +467,12 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 		float pinion = 0.5f;
 
-		if (alpha > pinion) {
+		if (menuElevation > 0 && alpha > pinion) {
+			if (menuShadowBitmap == null) {
+				menuShadowBitmap = createMenuShadowBitmap();
+			}
 			float shadowAlpha = (alpha - pinion) / (1f - pinion);
+			int menuShadowOffset = (int)(menuElevation / 2);
 			drawMenuShadow(canvas, paint, menuOpenRect, menuShadowBitmap, menuShadowRadius, menuShadowInset, 0, menuShadowOffset, shadowAlpha * shadowAlpha);
 		}
 
@@ -478,12 +493,19 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 		// fill menu background
 		paint.setAlpha(255);
+		paint.setColor(menuBackgroundColor);
 		canvas.drawRect(menuOpenRect, paint);
 
 		// draw menu items - note: clip path is still active
 		for (MenuItemLayout menuItemLayout : itemLayouts) {
 			canvas.save();
 			canvas.translate(menuOpenRect.left + menuItemLayout.frame.left, menuOpenRect.top + menuItemLayout.frame.top);
+
+			if (menuItemLayout.item == selectedMenuItem) {
+				paint.setColor(selectedItemBackgroundColor);
+				canvas.drawRoundRect(menuItemLayout.bounds, menuBackgroundCornerRadius, menuBackgroundCornerRadius, paint);
+			}
+
 			menuItemLayout.item.onDraw(canvas, menuItemLayout.bounds);
 			canvas.restore();
 		}
@@ -615,12 +637,11 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 
 			case MotionEvent.ACTION_UP:
 				MenuItem item = findMenuItemUnderPosition(event.getX(), event.getY());
-				if (selectionListener != null) {
-					if (item != null) {
-						selectionListener.onItemSelected(this, item);
-					} else {
-						selectionListener.onDismissWithoutSelection(this);
-					}
+
+				if (item != null) {
+					setSelectedMenuItem(item);
+				} else if (selectionListener != null) {
+					selectionListener.onDismissWithoutSelection(this);
 				}
 
 				animateMenuOpenChange(false);
@@ -760,10 +781,41 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	 * @param menuBackgroundColor the argb color of the background of the menu
 	 */
 	public void setMenuBackgroundColor(@ColorInt int menuBackgroundColor) {
-		this.menuBackgroundColor = menuBackgroundColor;
-		paint.setColor(this.menuBackgroundColor);
+		this.menuBackgroundColor = ColorUtils.setAlphaComponent(menuBackgroundColor, 255);
 		invalidate();
 	}
+
+	/**
+	 * @return Get the background fill color for the button
+	 */
+	public int getButtonBackgroundColor() {
+		return buttonBackgroundColor;
+	}
+
+	/**
+	 * Set the background fill color for the button
+	 * @param buttonBackgroundColor the argb color for the background of the button
+	 */
+	public void setButtonBackgroundColor(int buttonBackgroundColor) {
+		this.buttonBackgroundColor = ColorUtils.setAlphaComponent(buttonBackgroundColor,255);
+		invalidate();
+	}
+
+	/**
+	 * @return the color used to highlight the selected menu item
+	 */
+	public int getSelectedItemBackgroundColor() {
+		return selectedItemBackgroundColor;
+	}
+
+	/**
+	 * @param selectedItemBackgroundColor the argb color used to highlight selection
+	 */
+	public void setSelectedItemBackgroundColor(int selectedItemBackgroundColor) {
+		this.selectedItemBackgroundColor = selectedItemBackgroundColor;
+		invalidate();
+	}
+
 
 	/**
 	 * @return the horizontal anchor point of the menu.
@@ -859,11 +911,80 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 	/**
 	 * Set the margin in pixels around the button used when verticalMenuAnchorOutside or horizontalMenuAnchorOutside are true.
 	 *
-	 * @param menuAnchorOutsideMargin
+	 * @param menuAnchorOutsideMargin margin in pixels around the button used to outset position of menu if verticalMenuAnchorOutside or horizontalMenuAnchorOutside are true
 	 */
 	public void setMenuAnchorOutsideMargin(int menuAnchorOutsideMargin) {
 		this.menuAnchorOutsideMargin = menuAnchorOutsideMargin;
 		invalidateMenuFill();
+	}
+
+
+	public float getButtonElevation() {
+		return buttonElevation;
+	}
+
+	/**
+	 * Set the button element's elevation in pixels
+	 * @param buttonElevation the button element's elevation in pixels. Set to zero to disable elevation shadow.
+	 */
+	public void setButtonElevation(float buttonElevation) {
+		this.buttonElevation = buttonElevation;
+		buttonShadowBitmap = null; // invalidate
+	}
+
+	public float getMenuElevation() {
+		return menuElevation;
+	}
+
+	/**
+	 * Set the menu element's elevation in pixels
+	 * @param menuElevation the menu element's elevation in pixels. Set to zero to disable elevation shadow.
+	 */
+	public void setMenuElevation(float menuElevation) {
+		this.menuElevation = menuElevation;
+		menuShadowBitmap = null; // invalidate
+	}
+
+	/**
+	 * @return get the currently selected menu item, or null if none is selected
+	 */
+	@Nullable
+	public MenuItem getSelectedMenuItem() {
+		return selectedMenuItem;
+	}
+
+	/**
+	 * Set the current menu item selection. Triggers notification of SelectionListener, if one assigned
+	 * @param selectedMenuItem MenuItem to make the current selection
+	 */
+	public void setSelectedMenuItem(@Nullable MenuItem selectedMenuItem) {
+		this.selectedMenuItem = selectedMenuItem;
+		invalidate();
+
+		if (selectionListener != null && selectedMenuItem != null) {
+			selectionListener.onItemSelected(this, selectedMenuItem);
+		}
+	}
+
+	/**
+	 * Set the current selection to the menu item at a given adapter position
+	 * @param adapterPosition adapter position of menu item to make the current selection
+	 */
+	public void setSelectedMenuItemByAdapterPosition(int adapterPosition) {
+		setSelectedMenuItem(adapter.getItem(adapterPosition));
+	}
+
+	/**
+	 * Set the current selection to the menu item with a given ID
+	 * @param menuItemId id of the menu item to make the current selection
+	 */
+	public void setSelectedMenuItemById(int menuItemId) {
+		for (MenuItemLayout menuItemLayout : itemLayouts) {
+			if (menuItemLayout.item.getId() == menuItemId) {
+				setSelectedMenuItem(menuItemLayout.item);
+				return;
+			}
+		}
 	}
 
 	void updateLayoutInfo() {
@@ -877,18 +998,19 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 				buttonCenter.x + buttonRadius,
 				buttonCenter.y + buttonRadius);
 
-
 		invalidateMenuFill();
 	}
 
-	Bitmap createMenuShadowBitmap(@ColorInt int color, int shadowRadiusPx) {
-		int size = 2 * shadowRadiusPx + 1;
+	Bitmap createMenuShadowBitmap() {
+		menuShadowRadius = (int)menuElevation * 2;
+		menuShadowInset = menuShadowRadius/2;
+		int size = 2 * menuShadowRadius + 1;
 		Bitmap shadowBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
 		shadowBitmap.eraseColor(0x0); // clear
 
 		Paint paint = new Paint();
 		paint.setAntiAlias(true);
-		paint.setShader(new RadialGradient(shadowRadiusPx + 1, shadowRadiusPx + 1, shadowRadiusPx, color, ColorUtils.setAlphaComponent(color, 0), Shader.TileMode.CLAMP));
+		paint.setShader(new RadialGradient(menuShadowRadius + 1, menuShadowRadius + 1, menuShadowRadius, SHADOW_COLOR, ColorUtils.setAlphaComponent(SHADOW_COLOR, 0), Shader.TileMode.CLAMP));
 
 		Canvas canvas = new Canvas(shadowBitmap);
 		canvas.drawRect(0, 0, size, size, paint);
@@ -896,13 +1018,14 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 		return shadowBitmap;
 	}
 
-	Bitmap createButtonShadowBitmap(@ColorInt int color, int buttonRadius, int shadowRadius) {
+	Bitmap createButtonShadowBitmap() {
+		int shadowRadius = (int)buttonElevation;
 		int radius = buttonRadius + shadowRadius / 2;
 		int size = radius * 2;
 		Bitmap shadowBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
 		shadowBitmap.eraseColor(0x0);
 
-		int colors[] = {color, ColorUtils.setAlphaComponent(color, 0)};
+		int colors[] = {SHADOW_COLOR, ColorUtils.setAlphaComponent(SHADOW_COLOR, 0)};
 		float stops[] = {(float) (buttonRadius - (shadowRadius / 2)) / (float) radius, 1f};
 		Paint paint = new Paint();
 		paint.setAntiAlias(true);
@@ -938,8 +1061,8 @@ public class FlyoutMenuView extends View implements ValueAnimator.AnimatorUpdate
 				MenuItemLayout itemLayout = new MenuItemLayout();
 				itemLayout.item = adapter.getItem(i);
 				itemLayout.itemAdapterPosition = i;
-				itemLayout.frame = layout.getLayoutRectForItem(i, itemWidth, itemHeight, itemMargin);
-				itemLayout.bounds = new Rect(0, 0, itemWidth, itemHeight);
+				itemLayout.frame = new RectF(layout.getLayoutRectForItem(i, itemWidth, itemHeight, itemMargin));
+				itemLayout.bounds = new RectF(0, 0, itemWidth, itemHeight);
 
 				float cx = menuOpenRect.left + itemLayout.frame.centerX();
 				float cy = menuOpenRect.top + itemLayout.frame.centerY();

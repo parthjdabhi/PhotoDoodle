@@ -2,7 +2,6 @@ package org.zakariya.mrdoodle.activities;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -24,6 +23,8 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import icepick.Icepick;
+import icepick.State;
 
 /**
  * Created by shamyl on 5/20/16.
@@ -38,21 +39,30 @@ public class FlyoutMenuTestActivity extends BaseActivity implements FlyoutMenuVi
 	@Bind(R.id.paletteFlyoutMenu)
 	FlyoutMenuView paletteFlyoutMenu;
 	PaletteButtonRenderer paletteButtonRenderer;
-	@ColorInt int palette[] = {
+	@ColorInt
+	int palette[] = {
 			0xFF000000, 0xFF666666, 0xFF999999, 0xFFAAAAAA, 0xFFFFFFFF
 	};
 
 	@Bind(R.id.toolSelectorFlyoutMenu)
 	FlyoutMenuView toolSelectorFlyoutMenu;
 
-	@DrawableRes int toolIcons[] = {
+	@DrawableRes
+	int toolIcons[] = {
 			R.drawable.icon_popup_pencil, R.drawable.icon_popup_brush,
 			R.drawable.icon_popup_small_eraser, R.drawable.icon_popup_big_eraser
 	};
 
+	@State
+	int paletteSelectionId;
+
+	@State
+	int toolSelectionId;
+
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Icepick.restoreInstanceState(this, savedInstanceState);
 
 		setContentView(R.layout.activity_flyout_menu_test);
 		ButterKnife.bind(this);
@@ -90,7 +100,7 @@ public class FlyoutMenuTestActivity extends BaseActivity implements FlyoutMenuVi
 		toolSelectorFlyoutMenu.setLayout(new FlyoutMenuView.GridLayout(2, FlyoutMenuView.GridLayout.UNSPECIFIED));
 
 		List<ToolMenuItem> toolMenuItems = new ArrayList<>();
-		for (int i = 0; i < toolIcons.length; i++ ) {
+		for (int i = 0; i < toolIcons.length; i++) {
 
 			Drawable drawable;
 			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
@@ -104,6 +114,15 @@ public class FlyoutMenuTestActivity extends BaseActivity implements FlyoutMenuVi
 
 		toolSelectorFlyoutMenu.setAdapter(new FlyoutMenuView.ArrayAdapter<ToolMenuItem>(toolMenuItems));
 		toolSelectorFlyoutMenu.setSelectionListener(this);
+
+		if (savedInstanceState != null) {
+			// we know icepick will have loaded our saved instance state
+			paletteFlyoutMenu.setSelectedMenuItemById(paletteSelectionId);
+			toolSelectorFlyoutMenu.setSelectedMenuItemById(toolSelectionId);
+		} else {
+			paletteFlyoutMenu.setSelectedMenuItemByAdapterPosition(0);
+			toolSelectorFlyoutMenu.setSelectedMenuItemByAdapterPosition(0);
+		}
 	}
 
 	@Override
@@ -113,13 +132,21 @@ public class FlyoutMenuTestActivity extends BaseActivity implements FlyoutMenuVi
 	}
 
 	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		Icepick.saveInstanceState(this, outState);
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
 	public void onItemSelected(FlyoutMenuView flyoutMenuView, FlyoutMenuView.MenuItem item) {
 		//Log.i(TAG, "onItemSelected: selected: " + item.getId());
 
 		if (flyoutMenuView == paletteFlyoutMenu) {
+			paletteSelectionId = item.getId();
 			int color = ((PaletteMenuItem) item).color;
 			paletteButtonRenderer.setCurrentColor(color);
 		} else {
+			toolSelectionId = item.getId();
 			ToolMenuItem toolMenuItem = (ToolMenuItem) item;
 			Drawable icon = toolMenuItem.iconDrawable;
 			Drawable wd = DrawableCompat.wrap(icon).mutate();
@@ -186,9 +213,9 @@ public class FlyoutMenuTestActivity extends BaseActivity implements FlyoutMenuVi
 		}
 
 		@Override
-		public void onDraw(Canvas canvas, Rect bounds) {
+		public void onDraw(Canvas canvas, RectF bounds) {
 			iconDrawable.setAlpha(255);
-			iconDrawable.setBounds(bounds.left, bounds.top, bounds.right, bounds.bottom);
+			iconDrawable.setBounds((int) bounds.left, (int) bounds.top, (int) bounds.right, (int) bounds.bottom);
 			iconDrawable.draw(canvas);
 		}
 	}
@@ -210,7 +237,7 @@ public class FlyoutMenuTestActivity extends BaseActivity implements FlyoutMenuVi
 		}
 
 		@Override
-		public void onDraw(Canvas canvas, Rect bounds) {
+		public void onDraw(Canvas canvas, RectF bounds) {
 			ovalBounds.set(bounds);
 
 			paint.setStyle(Paint.Style.FILL);

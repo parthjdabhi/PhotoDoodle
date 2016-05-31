@@ -12,31 +12,72 @@
 	    android:layout_width="match_parent"
 		/>
 
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/fab0"
+		android:layout_width="@dimen/fab_size"
+		android:layout_height="@dimen/fab_size"
+		app:elevation="4dp"
+		android:layout_marginLeft="@dimen/fab_margin"
+		android:layout_marginTop="@dimen/fab_margin"
+		android:layout_alignTop="@+id/paletteFlyoutMenu"
+		android:layout_alignParentStart="true"/>
+
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/fab1"
+		android:layout_width="@dimen/fab_size"
+		android:layout_height="@dimen/fab_size"
+		app:elevation="8dp"
+		android:layout_marginLeft="@dimen/fab_margin"
+		android:layout_marginTop="@dimen/fab_margin"
+		android:layout_below="@+id/fab0"
+		android:layout_alignParentStart="true"
+		/>
+
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/fab2"
+		android:layout_width="@dimen/fab_size"
+		android:layout_height="@dimen/fab_size"
+		app:elevation="16dp"
+		android:layout_marginLeft="@dimen/fab_margin"
+		android:layout_marginTop="@dimen/fab_margin"
+		android:layout_below="@+id/fab1"
+		android:layout_alignParentStart="true"
+		/>
+
+
 	<org.zakariya.mrdoodle.view.FlyoutMenuView
 		android:id="@+id/toolSelectorFlyoutMenu"
-		android:layout_width="64dp"
-		android:layout_height="64dp"
-		app:menuColor="#ffffff"
+		android:layout_width="@dimen/fab_size"
+		android:layout_height="@dimen/fab_size"
+		app:menuBackgroundColor="#ffffff"
+		app:buttonBackgroundColor="#ffffffff"
+		app:selectedItemBackgroundColor="#440000FF"
 	    app:horizontalMenuAnchor="0"
 	    app:horizontalMenuAnchorOutside="false"
 	    app:verticalMenuAnchor="1"
 	    app:verticalMenuAnchorOutside="true"
 	    app:buttonSrc="@drawable/icon_tab_draw"
+	    app:buttonElevation="4dp"
+	    app:menuElevation="16dp"
+		android:layout_marginLeft="@dimen/fab_margin"
+		android:layout_marginRight="@dimen/fab_margin"
 		android:layout_alignTop="@+id/paletteFlyoutMenu"
 		android:layout_toStartOf="@+id/paletteFlyoutMenu"/>
 
 	<org.zakariya.mrdoodle.view.FlyoutMenuView
 		android:id="@+id/paletteFlyoutMenu"
-		android:layout_width="64dp"
-		android:layout_height="64dp"
-		app:menuColor="#ffffff"
+		android:layout_width="@dimen/fab_size"
+		android:layout_height="@dimen/fab_size"
+		android:layout_margin="@dimen/fab_margin"
+		app:menuBackgroundColor="#ffffff"
+		app:buttonBackgroundColor="#ffffffff"
+		app:selectedItemBackgroundColor="#4400FFFF"
 		app:horizontalMenuAnchor="0.5"
 		app:horizontalMenuAnchorOutside="false"
 		app:verticalMenuAnchor="1"
 		app:verticalMenuAnchorOutside="true"
-		android:layout_marginLeft="16dp"
-		android:layout_marginRight="16dp"
-		android:layout_marginTop="16dp"
+		app:buttonElevation="4dp"
+		app:menuElevation="16dp"
 		android:layout_below="@+id/toolbar"
 		android:layout_alignParentEnd="true"/>
 
